@@ -1,26 +1,22 @@
-(define (compile s env)
-  (if (pair? s)
-      (cond ((special-form? s) => (lambda (fn) (fn s env)))
-            (else (compile-funcall s env)))
-    (compile-literal s env)))
+(define (alpha? c)
+  (or (and (char<=? #\a c) (char<=? c #\z))
+      (and (char<=? #\A c) (char<=? c #\Z))))
 
-(define (compile-literal s env)
-  (cond ((number? s) (number->string s))
-        ((symbol? s) (compile-symbol s env))
-        ((string? s) (compile-string s))
-        ((char? s)   (compile-char s))
-        ((null? s)   "LISP.nil")
-        ((eq? s #t)  "LISP.t")
-        ((eq? s #f)  "LISP.nil")
-        (else (error #`"compile-literal: [,s]"))))
+(define (num? c)
+  (and (char<=? #\0 c) (char<=? c #\9)))
 
-(define (compile-symbol sym env)
-  (define (local-var? sym env)
-    (member sym env))
-  (string-append (if (local-var? sym env)
-                     ""
-                   "LISP.")
-                 (symbol->js-string sym)))
+(define (alnum? c)
+  (or (alpha? c) (num? c)))
+
+(define (expand-args args env)
+  (string-join (map (lambda (x) (compile x env))
+                    args)
+               ", "))
+
+(define (expand-body body env)
+  (if (null? body)
+      "LISP.nil"
+    (expand-args body env)))
 
 (define (symbol->js-string sym)
   (define (char->js-str c)
@@ -41,14 +37,13 @@
   (apply string-append (map char->js-str
                             (string->list (symbol->string sym)))))
 
-(define (compile-string str)
-  #`"\",(escape-string str)\"")
-
-(define (escape-string s)
-  (apply string-append (map escape-char (string->list s))))
-
-(define (compile-char char)
-  #`"\",(escape-char char)\"")
+(define (compile-symbol sym env)
+  (define (local-var? sym env)
+    (member sym env))
+  (string-append (if (local-var? sym env)
+                     ""
+                   "LISP.")
+                 (symbol->js-string sym)))
 
 (define (escape-char c)
   (case c
@@ -57,6 +52,25 @@
     ((#\newline) "\\n")
     ((#\")       "\\\"")
     (else (string c))))
+
+(define (compile-char char)
+  #`"\",(escape-char char)\"")
+
+(define (escape-string s)
+  (apply string-append (map escape-char (string->list s))))
+
+(define (compile-string str)
+  #`"\",(escape-string str)\"")
+
+(define (compile-literal s env)
+  (cond ((number? s) (number->string s))
+        ((symbol? s) (compile-symbol s env))
+        ((string? s) (compile-string s))
+        ((char? s)   (compile-char s))
+        ((null? s)   "LISP.nil")
+        ((eq? s #t)  "LISP.t")
+        ((eq? s #f)  "LISP.nil")
+        (else (error #`"compile-literal: [,s]"))))
 
 (define (compile-funcall s env)
   (let ((fn (car s))
@@ -98,16 +112,6 @@
                      (expand-body bodies newenv)
                      ");})"))))
 
-(define (expand-body body env)
-  (if (null? body)
-      "LISP.nil"
-    (expand-args body env)))
-
-(define (expand-args args env)
-  (string-join (map (lambda (x) (compile x env))
-                    args)
-               ", "))
-
 (define (compile-define s env)
   (let ((name (cadr s))
         (body (cddr s)))
@@ -128,15 +132,11 @@
   (cond ((assoc (car s) *special-forms*) => cdr)
         (else #f)))
 
-(define (alnum? c)
-  (or (alpha? c) (num? c)))
-
-(define (alpha? c)
-  (or (and (char<=? #\a c) (char<=? c #\z))
-      (and (char<=? #\A c) (char<=? c #\Z))))
-
-(define (num? c)
-  (and (char<=? #\0 c) (char<=? c #\9)))
+(define (compile s env)
+  (if (pair? s)
+      (cond ((special-form? s) => (lambda (fn) (fn s env)))
+            (else (compile-funcall s env)))
+    (compile-literal s env)))
 
 (define (main args)
   (let ((ss (port->sexp-list (current-input-port))))
