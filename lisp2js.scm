@@ -26,7 +26,7 @@
   (define (char->js-str c)
     (if (js-sym-char? c)
         (string c)
-      (string-append "_"
+      (string-append "$"
                      (integer->hex-string (char->integer c) 2))))
   (define (js-sym-char? c)
     (or (alnum? c)

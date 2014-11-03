@@ -18,7 +18,7 @@ LISP = {
   },
 
   // +
-  _2b: function() {
+  $2b: function() {
     if (arguments.length == 0)
       return 0;
     var result = arguments[0];
@@ -27,7 +27,7 @@ LISP = {
     return result;
   },
   // *
-  _2a: function() {
+  $2a: function() {
     if (arguments.length == 0)
       return 1;
     var result = arguments[0];
