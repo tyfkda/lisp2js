@@ -77,19 +77,16 @@
     (let1 newenv (extend-env env params)
       (string-append "(function("
                      (expand-args params newenv)
-                     "){"
+                     "){return ("
                      (expand-body bodies newenv)
-                     "})"))))
+                     ");})"))))
 
 (define (expand-body body env)
-  (cond ((null? body) "return LISP.nil")
-        ((single? body) (string-append "return "
-                                       (compile (car body) env)))
-        (else (string-append (string-join (map (lambda (s) (compile s env))
-                                               (butlast body))
-                                          "; ")
-                             "; return "
-                             (compile (car (last-pair body)) env)))))
+  (if (null? body)
+      "LISP.nil"
+    (string-join (map (lambda (s) (compile s env))
+                      body)
+                 ", ")))
 
 (define (compile-define s env)
   (let ((name (cadr s))
@@ -111,10 +108,6 @@
   (cond ((assoc (car s) *special-forms*) => cdr)
         (else #f)))
 
-(define (single? ls)
-  (and (not (null? ls))
-       (null? (cdr ls))))
-
 (define (alnum? c)
   (or (alpha? c) (num? c)))
 
@@ -124,12 +117,6 @@
 
 (define (num? c)
   (and (char<=? #\0 c) (char<=? c #\9)))
-
-(define (butlast ls)
-  (cond ((null? ls) '())
-        ((single? ls) '())
-        (else (let1 reversed (reverse ls)
-                (reverse! (cdr reversed))))))
 
 (define (main args)
   (let ((ss (port->sexp-list (current-input-port))))
