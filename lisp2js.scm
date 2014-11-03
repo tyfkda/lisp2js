@@ -24,12 +24,13 @@
 
 (define (symbol->js-string sym)
   (define (char->js-str c)
-    (if (sym-char? c)
+    (if (js-sym-char? c)
         (string c)
       (string-append "_"
                      (integer->hex-string (char->integer c) 2))))
-  (define (sym-char? c)
-    (alnum? c))
+  (define (js-sym-char? c)
+    (or (alnum? c)
+        (eq? c #\_)))
   (define (integer->hex-string x keta)
     (let* ((s (number->string x 16))
            (l (string-length s)))
