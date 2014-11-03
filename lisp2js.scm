@@ -41,7 +41,17 @@
                             (string->list (symbol->string sym)))))
 
 (define (compile-string str)
-  #`"\",str\"")
+  #`"\",(escape-string str)\"")
+
+(define (escape-string s)
+  (define (escape c)
+    (case c
+      ((#\\)       "\\\\")
+      ((#\tab)     "\\t")
+      ((#\newline) "\\n")
+      ((#\")       "\\\"")
+      (else (string c))))
+  (apply string-append (map escape (string->list s))))
 
 (define (compile-char char)
   #`"\",char\"")
