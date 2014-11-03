@@ -32,6 +32,7 @@ function run_raw() {
 # Test cases.
 
 run integer 123 '123'
+run string abc '"abc"'
 run quote 123 '(quote 123)'
 run cons '(1 . 2)' '(cons 1 2)'
 run car 1 "(car '(1 . 2))"

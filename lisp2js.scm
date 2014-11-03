@@ -7,6 +7,7 @@
 (define (compile-literal s env)
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
+        ((string? s) (compile-string s))
         ((null? s)   "LISP.nil")
         (else (error #`"compile-literal: [,s]"))))
 
@@ -35,6 +36,9 @@
         s)))
   (apply string-append (map char->js-str
                             (string->list (symbol->string sym)))))
+
+(define (compile-string str)
+  #`"\",str\"")
 
 (define (compile-funcall s env)
   (let ((fn (car s))
