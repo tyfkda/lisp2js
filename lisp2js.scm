@@ -54,13 +54,13 @@
     (else (string c))))
 
 (define (compile-char char)
-  #`"\",(escape-char char)\"")
+  #"\"~(escape-char char)\"")
 
 (define (escape-string s)
   (apply string-append (map escape-char (string->list s))))
 
 (define (compile-string str)
-  #`"\",(escape-string str)\"")
+  #"\"~(escape-string str)\"")
 
 (define (compile-literal s env)
   (cond ((number? s) (number->string s))
@@ -70,7 +70,7 @@
         ((null? s)   "LISP.nil")
         ((eq? s #t)  "LISP.t")
         ((eq? s #f)  "LISP.nil")
-        (else (error #`"compile-literal: [,s]"))))
+        (else (error #"compile-literal: [~s]"))))
 
 (define (compile-funcall s env)
   (let ((fn (car s))
