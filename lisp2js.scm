@@ -72,4 +72,5 @@
   (let ((ss (port->sexp-list (current-input-port))))
     (dolist (s ss)
       (display (compile s))
-      (display ";\n"))))
+      (display ";\n"))
+    0))
