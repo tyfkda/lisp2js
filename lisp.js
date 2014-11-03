@@ -9,6 +9,29 @@ LISP = {
   cons: function(car, cdr) {
     return new LISP.Cons(car, cdr);
   },
+
+  // +
+  _2b: function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    for (var i = 1; i < arguments.length; ++i)
+      result += arguments[i];
+    return result;
+  },
+  // *
+  _2a: function() {
+    if (arguments.length == 0)
+      return 1;
+    var result = arguments[0];
+    for (var i = 1; i < arguments.length; ++i)
+      result *= arguments[i];
+    return result;
+  },
+
+  print: function(x) {
+    console.log(x);
+  },
 };
 
 LISP.Cons.prototype = {
@@ -29,6 +52,3 @@ LISP.Cons.prototype = {
     return ss.join("");
   },
 };
-
-var s = LISP.cons(1, LISP.cons(2, 3));
-console.log(s.toString());
