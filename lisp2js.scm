@@ -53,9 +53,6 @@
     ((#\")       "\\\"")
     (else (string c))))
 
-(define (compile-char char)
-  #"\"~(escape-char char)\"")
-
 (define (escape-string s)
   (apply string-append (map escape-char (string->list s))))
 
@@ -66,7 +63,6 @@
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
         ((string? s) (compile-string s))
-        ((char? s)   (compile-char s))
         ((null? s)   "LISP.nil")
         ((eq? s #t)  "LISP.t")
         ((eq? s #f)  "LISP.nil")
