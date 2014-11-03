@@ -37,16 +37,17 @@
                             (string->list (symbol->string sym)))))
 
 (define (compile-funcall s env)
-  (define (expand-args args)
-    (string-join (map (lambda (x) (compile x env))
-                      args)
-                 ", "))
   (let ((fn (car s))
         (args (cdr s)))
     (string-append (compile fn env)
                    "("
-                   (expand-args args)
+                   (expand-args args env)
                    ")")))
+
+(define (expand-args args env)
+  (string-join (map (lambda (x) (compile x env))
+                    args)
+               ", "))
 
 (define (compile-quote s env)
   (let ((x (cadr s)))
@@ -54,13 +55,40 @@
         (compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
       (compile-literal x env))))
 
+(define (compile-lambda s env)
+  (define (extend-env env params)
+    (append params env))
+  (let ((params (cadr s))
+        (bodies (cddr s)))
+    (let1 newenv (extend-env env params)
+      (string-append "(function("
+                     (expand-args params newenv)
+                     "){"
+                     (expand-body bodies newenv)
+                     "})"))))
+
+(define (expand-body body env)
+  (cond ((null? body) "return false")
+        ((single? body) (string-append "return "
+                                       (compile (car body) env)))
+        (else (string-append (string-join (map (lambda (s) (compile s env))
+                                               (butlast body))
+                                          "; ")
+                             "; return "
+                             (compile (car (last-pair body)) env)))))
+
 (define *special-forms*
   `((quote . ,compile-quote)
+    (lambda . ,compile-lambda)
     ))
 
 (define (special-form? s)
   (cond ((assoc (car s) *special-forms*) => cdr)
         (else #f)))
+
+(define (single? ls)
+  (and (not (null? ls))
+       (null? (cdr ls))))
 
 (define (alnum? c)
   (or (alpha? c) (num? c)))
@@ -71,6 +99,12 @@
 
 (define (num? c)
   (and (char<=? #\0 c) (char<=? c #\9)))
+
+(define (butlast ls)
+  (cond ((null? ls) '())
+        ((single? ls) '())
+        (else (let1 reversed (reverse ls)
+                (reverse! (cdr reversed))))))
 
 (define (main args)
   (let ((ss (port->sexp-list (current-input-port))))
