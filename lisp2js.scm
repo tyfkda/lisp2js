@@ -43,10 +43,14 @@
 (define (compile-string str)
   #"\"~(escape-string str)\"")
 
+(define (compile-regexp regex)
+  #"/~(regexp->string regex)/")
+
 (define (compile-literal s env)
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
         ((string? s) (compile-string s))
+        ((regexp? s) (compile-regexp s))
         ((null? s)   "LISP.nil")
         ((eq? s #t)  "LISP.t")
         ((eq? s #f)  "LISP.nil")
