@@ -40,6 +40,7 @@ run if-true 2 "(if 1 2 3)"
 run if-false 3 "(if nil 2 3)"
 run if-false2 nil "(if nil 2)"
 run lambda 2222 '((lambda (x) (+ x x)) 1111)'
+run nested-lambda 3 '(((lambda (x) (lambda (y) (+ x y))) 1) 2)'
 run_raw define 123 "(define x 123)
                     (print x)"
 run_raw define-lambda 2222 "(define (double x) (+ x x))
