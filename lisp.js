@@ -9,6 +9,12 @@ LISP = {
   cons: function(car, cdr) {
     return new LISP.Cons(car, cdr);
   },
+  car: function(s) {
+    return s.car;
+  },
+  cdr: function(s) {
+    return s.cdr;
+  },
 
   // +
   _2b: function() {

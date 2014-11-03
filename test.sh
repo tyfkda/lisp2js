@@ -30,6 +30,8 @@ function run() {
 run integer 123 '123'
 run quote 123 '(quote 123)'
 run cons '(1 . 2)' '(cons 1 2)'
+run car 1 "(car '(1 . 2))"
+run cdr 2 "(cdr '(1 . 2))"
 run lambda 2222 '((lambda (x) (+ x x)) 1111)'
 run + 6 '(+ 1 2 3)'
 
