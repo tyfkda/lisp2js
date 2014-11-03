@@ -44,11 +44,6 @@
                    (expand-args args env)
                    ")")))
 
-(define (expand-args args env)
-  (string-join (map (lambda (x) (compile x env))
-                    args)
-               ", "))
-
 (define (compile-quote s env)
   (let ((x (cadr s)))
     (if (pair? x)
@@ -84,9 +79,12 @@
 (define (expand-body body env)
   (if (null? body)
       "LISP.nil"
-    (string-join (map (lambda (s) (compile s env))
-                      body)
-                 ", ")))
+    (expand-args body env)))
+
+(define (expand-args args env)
+  (string-join (map (lambda (x) (compile x env))
+                    args)
+               ", "))
 
 (define (compile-define s env)
   (let ((name (cadr s))
