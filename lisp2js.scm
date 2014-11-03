@@ -109,11 +109,26 @@
                      " = "
                      (compile (car body) env)))))
 
+(define *macro-table* (make-hash-table))
+(define (compile-defmacro s env)
+  (let ((name (cadr s))
+        (params (caddr s))
+        (body (cdddr s)))
+    (hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
+                                              (interaction-environment)))
+    "LISP.nil"))
+(define (macro? symbol)
+  (hash-table-exists? *macro-table* symbol))
+(define (expand-macro s)
+  (apply (hash-table-get *macro-table* (car s))
+         (cdr s)))
+
 (define *special-forms*
   (list (cons 'quote compile-quote)
         (cons 'if  compile-if)
         (cons 'lambda compile-lambda)
         (cons 'define  compile-define)
+        (cons 'defmacro  compile-defmacro)
         ))
 
 (define (special-form? s)
@@ -123,6 +138,7 @@
 (define (compile s env)
   (if (pair? s)
       (cond ((special-form? s) => (lambda (fn) (fn s env)))
+            ((macro? (car s)) (compile (expand-macro s) env))
             (else (compile-funcall s env)))
     (compile-literal s env)))
 
