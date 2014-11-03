@@ -104,11 +104,11 @@
                      (compile (car body) env)))))
 
 (define *special-forms*
-  `((quote . ,compile-quote)
-    (if . ,compile-if)
-    (lambda . ,compile-lambda)
-    (define . ,compile-define)
-    ))
+  (list (cons 'quote compile-quote)
+        (cons 'if  compile-if)
+        (cons 'lambda compile-lambda)
+        (cons 'define  compile-define)
+        ))
 
 (define (special-form? s)
   (cond ((assoc (car s) *special-forms*) => cdr)
