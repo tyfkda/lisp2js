@@ -45,17 +45,18 @@
   #`"\",(escape-string str)\"")
 
 (define (escape-string s)
-  (define (escape c)
-    (case c
-      ((#\\)       "\\\\")
-      ((#\tab)     "\\t")
-      ((#\newline) "\\n")
-      ((#\")       "\\\"")
-      (else (string c))))
-  (apply string-append (map escape (string->list s))))
+  (apply string-append (map escape-char (string->list s))))
 
 (define (compile-char char)
-  #`"\",char\"")
+  #`"\",(escape-char char)\"")
+
+(define (escape-char c)
+  (case c
+    ((#\\)       "\\\\")
+    ((#\tab)     "\\t")
+    ((#\newline) "\\n")
+    ((#\")       "\\\"")
+    (else (string c))))
 
 (define (compile-funcall s env)
   (let ((fn (car s))
