@@ -46,15 +46,15 @@
                  (symbol->js-string sym)))
 
 (define (escape-char c)
-  (case c
-    ((#\\)       "\\\\")
-    ((#\tab)     "\\t")
-    ((#\newline) "\\n")
-    ((#\")       "\\\"")
-    (else (string c))))
+  (cond ((string=? c "\\") "\\\\")
+        ((string=? c "\t") "\\t")
+        ((string=? c "\n") "\\n")
+        ((string=? c "\"") "\\\"")
+        (else c)))
 
 (define (escape-string s)
-  (apply string-append (map escape-char (string->list s))))
+  (regexp-replace-all #/[\\\t\n"]/ s
+                      (lambda (m) (escape-char (m)))))
 
 (define (compile-string str)
   #"\"~(escape-string str)\"")
