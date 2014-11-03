@@ -1,18 +1,22 @@
-(define (compile s)
+(define (compile s env)
   (if (pair? s)
-      (cond ((special-form? s) => (lambda (fn) (fn s)))
-            (else (compile-funcall s)))
-    (compile-literal s)))
+      (cond ((special-form? s) => (lambda (fn) (fn s env)))
+            (else (compile-funcall s env)))
+    (compile-literal s env)))
 
-(define (compile-literal s)
+(define (compile-literal s env)
   (cond ((number? s) (number->string s))
-        ((symbol? s) (compile-symbol s))
+        ((symbol? s) (compile-symbol s env))
         ((null? s)   "false")
         (else (error #`"compile-literal: [,s]"))))
 
-(define (compile-symbol s)
-  (string-append "LISP."
-                 (symbol->js-string s)))
+(define (compile-symbol sym env)
+  (define (local-var? sym env)
+    (member sym env))
+  (string-append (if (local-var? sym env)
+                     ""
+                   "LISP.")
+                 (symbol->js-string sym)))
 
 (define (symbol->js-string sym)
   (define (char->js-str c)
@@ -32,23 +36,23 @@
   (apply string-append (map char->js-str
                             (string->list (symbol->string sym)))))
 
-(define (compile-funcall s)
+(define (compile-funcall s env)
   (define (expand-args args)
-    (string-join (map (lambda (x) (compile x))
+    (string-join (map (lambda (x) (compile x env))
                       args)
                  ", "))
   (let ((fn (car s))
         (args (cdr s)))
-    (string-append (compile fn)
+    (string-append (compile fn env)
                    "("
                    (expand-args args)
                    ")")))
 
-(define (compile-quote s)
+(define (compile-quote s env)
   (let ((x (cadr s)))
     (if (pair? x)
-        (compile `(cons (quote ,(car x)) (quote ,(cdr x))))
-      (compile-literal x))))
+        (compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
+      (compile-literal x env))))
 
 (define *special-forms*
   `((quote . ,compile-quote)
@@ -71,6 +75,6 @@
 (define (main args)
   (let ((ss (port->sexp-list (current-input-port))))
     (dolist (s ss)
-      (display (compile s))
+      (display (compile s '()))
       (display ";\n"))
     0))
