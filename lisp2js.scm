@@ -11,14 +11,13 @@
 (define (symbol->js-string sym)
   (define (escape-char c)
     (string-append "$"
-                   (integer->hex-string (char->integer c) 2)))
-  (define (integer->hex-string x keta)
-    (let* ((s (number->string x 16))
-           (l (string-length s)))
-      (if (< l keta)
-          (let1 zeros (make-string (- keta l) #\0)
-            (string-append zeros s))
-        s)))
+                   (integer->hex-string (char->integer c) "00")))
+  (define (integer->hex-string x padding)
+    (let* ((s (string-append padding
+                             (number->string x 16)))
+           (sl (string-length s))
+           (pl (string-length padding)))
+      (substring s (- sl pl) sl)))
   (regexp-replace-all #/[^0-9A-Za-z_]/ (symbol->string sym)
                       (lambda (m) (escape-char (string-ref (m) 0)))))
 
