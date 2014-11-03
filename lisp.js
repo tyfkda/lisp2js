@@ -36,7 +36,10 @@ LISP = {
   },
 
   print: function(x) {
-    console.log(x.toString());
+    if (x === LISP.nil)
+      console.log("nil");
+    else
+      console.log(x.toString());
   },
 };
 
