@@ -10,8 +10,12 @@ function error_exit() {
 }
 
 function run() {
+  run_raw "$1" "$2" "(print $3)"
+}
+
+function run_raw() {
   echo -n "Testing $1 ... "
-  echo "(print $3)" | gosh lisp2js.scm > compiled-result.js
+  echo "$3" | gosh lisp2js.scm > compiled-result.js
   result=$(cat lisp.js compiled-result.js | node)
   code=$?
   if [ $code -ne 0 ]; then
@@ -33,6 +37,10 @@ run cons '(1 . 2)' '(cons 1 2)'
 run car 1 "(car '(1 . 2))"
 run cdr 2 "(cdr '(1 . 2))"
 run lambda 2222 '((lambda (x) (+ x x)) 1111)'
+run_raw define 123 "(define x 123)
+                    (print x)"
+run_raw define-lambda 2222 "(define (double x) (+ x x))
+                            (print (double 1111))"
 run + 6 '(+ 1 2 3)'
 
 ################################################################

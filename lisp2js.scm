@@ -77,9 +77,19 @@
                              "; return "
                              (compile (car (last-pair body)) env)))))
 
+(define (compile-define s env)
+  (let ((name (cadr s))
+        (body (cddr s)))
+    (if (pair? name)
+        (compile-define `(define ,(car name) (lambda ,(cdr name) ,@body)) env)
+      (string-append (compile-symbol name env)
+                     " = "
+                     (compile (car body) env)))))
+
 (define *special-forms*
   `((quote . ,compile-quote)
     (lambda . ,compile-lambda)
+    (define . ,compile-define)
     ))
 
 (define (special-form? s)
