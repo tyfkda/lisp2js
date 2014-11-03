@@ -34,6 +34,8 @@ function run_raw() {
 run integer 123 '123'
 run string abc '"abc"'
 run char a '#\a'
+run t "t" 't'
+run nil "nil" 'nil'
 run quote 123 '(quote 123)'
 run cons '(1 . 2)' '(cons 1 2)'
 run car 1 "(car '(1 . 2))"

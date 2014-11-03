@@ -10,6 +10,8 @@
         ((string? s) (compile-string s))
         ((char? s)   (compile-char s))
         ((null? s)   "LISP.nil")
+        ((eq? s #t)  "LISP.t")
+        ((eq? s #f)  "LISP.nil")
         (else (error #`"compile-literal: [,s]"))))
 
 (define (compile-symbol sym env)

@@ -1,5 +1,6 @@
 LISP = {
   nil: null,
+  t: true,
 
   Cons: function(car, cdr) {
     this.car = car;
@@ -36,10 +37,17 @@ LISP = {
   },
 
   print: function(x) {
-    if (x === LISP.nil)
+    switch (x) {
+    case LISP.nil:
       console.log("nil");
-    else
+      break;
+    case LISP.t:
+      console.log("t");
+      break;
+    default:
       console.log(x.toString());
+      break;
+    }
   },
 };
 
