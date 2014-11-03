@@ -7,7 +7,7 @@
 (define (compile-literal s env)
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
-        ((null? s)   "false")
+        ((null? s)   "LISP.nil")
         (else (error #`"compile-literal: [,s]"))))
 
 (define (compile-symbol sym env)
@@ -66,7 +66,7 @@
                    ") : ("
                    (if (not (null? else?))
                        (compile (car else?) env)
-                     "false")
+                     "LISP.nil")
                    "))")))
 
 (define (compile-lambda s env)
@@ -82,7 +82,7 @@
                      "})"))))
 
 (define (expand-body body env)
-  (cond ((null? body) "return false")
+  (cond ((null? body) "return LISP.nil")
         ((single? body) (string-append "return "
                                        (compile (car body) env)))
         (else (string-append (string-join (map (lambda (s) (compile s env))

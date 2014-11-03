@@ -1,5 +1,5 @@
 LISP = {
-  nil: false,
+  nil: null,
 
   Cons: function(car, cdr) {
     this.car = car;
