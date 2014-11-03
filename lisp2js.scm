@@ -6,9 +6,13 @@
 
 (define (compile-literal s)
   (cond ((number? s) (number->string s))
-        ((symbol? s) (symbol->string s))
+        ((symbol? s) (compile-symbol s))
         ((null? s)   "false")
         (else (error #`"compile-literal: [,s]"))))
+
+(define (compile-symbol s)
+  (string-append "LISP."
+                 (symbol->string s)))
 
 (define (compile-funcall s)
   (define (expand-args args)
