@@ -36,6 +36,9 @@ run quote 123 '(quote 123)'
 run cons '(1 . 2)' '(cons 1 2)'
 run car 1 "(car '(1 . 2))"
 run cdr 2 "(cdr '(1 . 2))"
+run if-true 2 "(if 1 2 3)"
+run if-false 3 "(if nil 2 3)"
+run if-false2 false "(if nil 2)"
 run lambda 2222 '((lambda (x) (+ x x)) 1111)'
 run_raw define 123 "(define x 123)
                     (print x)"

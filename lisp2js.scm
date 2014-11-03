@@ -55,6 +55,20 @@
         (compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
       (compile-literal x env))))
 
+(define (compile-if s env)
+  (let ((p (cadr s))
+        (then-node (caddr s))
+        (else? (cdddr s)))
+    (string-append "(("
+                   (compile p env)
+                   ") !== LISP.nil ? ("
+                   (compile then-node env)
+                   ") : ("
+                   (if (not (null? else?))
+                       (compile (car else?) env)
+                     "false")
+                   "))")))
+
 (define (compile-lambda s env)
   (define (extend-env env params)
     (append params env))
@@ -88,6 +102,7 @@
 
 (define *special-forms*
   `((quote . ,compile-quote)
+    (if . ,compile-if)
     (lambda . ,compile-lambda)
     (define . ,compile-define)
     ))
