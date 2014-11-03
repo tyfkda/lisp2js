@@ -8,6 +8,7 @@
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
         ((string? s) (compile-string s))
+        ((char? s)   (compile-char s))
         ((null? s)   "LISP.nil")
         (else (error #`"compile-literal: [,s]"))))
 
@@ -39,6 +40,9 @@
 
 (define (compile-string str)
   #`"\",str\"")
+
+(define (compile-char char)
+  #`"\",char\"")
 
 (define (compile-funcall s env)
   (let ((fn (car s))
