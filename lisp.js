@@ -30,7 +30,7 @@ LISP = {
   },
 
   print: function(x) {
-    console.log(x);
+    console.log(x.toString());
   },
 };
 
