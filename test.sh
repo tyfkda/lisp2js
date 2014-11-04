@@ -33,7 +33,6 @@ function run_raw() {
 
 run integer 123 '123'
 run string abc '"abc"'
-run char a '#\a'
 run t "t" 't'
 run nil "nil" 'nil'
 run quote 123 '(quote 123)'

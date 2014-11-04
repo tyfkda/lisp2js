@@ -1,13 +1,3 @@
-(define (alpha? c)
-  (or (and (char<=? #\a c) (char<=? c #\z))
-      (and (char<=? #\A c) (char<=? c #\Z))))
-
-(define (num? c)
-  (and (char<=? #\0 c) (char<=? c #\9)))
-
-(define (alnum? c)
-  (or (alpha? c) (num? c)))
-
 (define (expand-args args env)
   (string-join (map (lambda (x) (compile x env))
                     args)
@@ -19,23 +9,17 @@
     (expand-args body env)))
 
 (define (symbol->js-string sym)
-  (define (char->js-str c)
-    (if (js-sym-char? c)
-        (string c)
-      (string-append "$"
-                     (integer->hex-string (char->integer c) 2))))
-  (define (js-sym-char? c)
-    (or (alnum? c)
-        (eq? c #\_)))
-  (define (integer->hex-string x keta)
-    (let* ((s (number->string x 16))
-           (l (string-length s)))
-      (if (< l keta)
-          (let1 zeros (make-string (- keta l) #\0)
-            (string-append zeros s))
-        s)))
-  (apply string-append (map char->js-str
-                            (string->list (symbol->string sym)))))
+  (define (escape-char c)
+    (string-append "$"
+                   (integer->hex-string (char->integer c) "00")))
+  (define (integer->hex-string x padding)
+    (let* ((s (string-append padding
+                             (number->string x 16)))
+           (sl (string-length s))
+           (pl (string-length padding)))
+      (substring s (- sl pl) sl)))
+  (regexp-replace-all #/[^0-9A-Za-z_]/ (symbol->string sym)
+                      (lambda (m) (escape-char (string-ref (m) 0)))))
 
 (define (compile-symbol sym env)
   (define (local-var? sym env)
@@ -46,18 +30,15 @@
                  (symbol->js-string sym)))
 
 (define (escape-char c)
-  (case c
-    ((#\\)       "\\\\")
-    ((#\tab)     "\\t")
-    ((#\newline) "\\n")
-    ((#\")       "\\\"")
-    (else (string c))))
-
-(define (compile-char char)
-  #"\"~(escape-char char)\"")
+  (cond ((string=? c "\\") "\\\\")
+        ((string=? c "\t") "\\t")
+        ((string=? c "\n") "\\n")
+        ((string=? c "\"") "\\\"")
+        (else c)))
 
 (define (escape-string s)
-  (apply string-append (map escape-char (string->list s))))
+  (regexp-replace-all #/[\\\t\n"]/ s
+                      (lambda (m) (escape-char (m)))))
 
 (define (compile-string str)
   #"\"~(escape-string str)\"")
@@ -66,7 +47,6 @@
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
         ((string? s) (compile-string s))
-        ((char? s)   (compile-char s))
         ((null? s)   "LISP.nil")
         ((eq? s #t)  "LISP.t")
         ((eq? s #f)  "LISP.nil")
