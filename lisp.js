@@ -7,6 +7,9 @@ var LISP = {
   Symbol: function(name) {
     this.name = name;
   },
+  "symbol->string": function(x) {
+    return x.toString();
+  },
 
   $$symbolTable: {},  // key(string) => Symbol object
   intern: function(name) {
@@ -15,7 +18,7 @@ var LISP = {
     return LISP.$$symbolTable[name] = new LISP.Symbol(name);
   },
   "symbol?": function(x) {
-    return x instanceof LISP.Symbol ? LISP.t : LISP.nil;
+    return LISP._jsBoolToS(x instanceof LISP.Symbol);
   },
 
   "eq?": function(x, y) {
@@ -37,6 +40,16 @@ var LISP = {
     return s.cdr;
   },
 
+  list: function() {
+    var result = LISP.nil;
+    for (var i = arguments.length; --i >= 0; )
+      result = LISP.cons(arguments[i], result);
+    return result;
+  },
+  "pair?": function(x) {
+    return LISP._jsBoolToS(x instanceof LISP.Cons);
+  },
+
   "+": function() {
     if (arguments.length == 0)
       return 0;
@@ -52,6 +65,12 @@ var LISP = {
     for (var i = 1; i < arguments.length; ++i)
       result *= arguments[i];
     return result;
+  },
+  "number?": function(x) {
+    return LISP._jsBoolToS(typeof x === 'number');
+  },
+  "number->string": function(x) {
+    return x + '';
   },
 
   print: function(x) {
@@ -69,6 +88,17 @@ var LISP = {
         console.log(x.toString());
       break;
     }
+  },
+
+  // Hash table.
+  "make-hash-table": function() {
+    return {};
+  },
+  "hash-table-exists?": function(hash, x) {
+    return x in hash ? LISP.t : LISP.nil;
+  },
+  "hash-table-get": function(hash, x) {
+    return hash[x];
   },
 };
 
