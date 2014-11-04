@@ -1,4 +1,9 @@
-LISP = {
+var LISP = {
+  nil: null,
+  t: true,
+
+  _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil;  },
+
   Symbol: function(name) {
     this.name = name;
   },
@@ -13,8 +18,9 @@ LISP = {
     return x instanceof LISP.Symbol ? LISP.t : LISP.nil;
   },
 
-  nil: null,
-  t: true,
+  eq$3f: function(x, y) {
+    return LISP._jsBoolToS(x === y);
+  },
 
   Cons: function(car, cdr) {
     this.car = car;
