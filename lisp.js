@@ -3,6 +3,9 @@ var LISP = {
   t: true,
 
   _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil;  },
+  _getRestArgs: function(args, start) {
+    return Array.prototype.slice.call(args, start).toList();
+  },
 
   Symbol: function(name) {
     this.name = name;
@@ -125,4 +128,12 @@ LISP.Cons.prototype = {
     ss.push(")");
     return ss.join("");
   },
+};
+
+// Convert JS array into Lisp list.
+Array.prototype.toList = function() {
+  var result = LISP.nil;
+  for (var i = this.length; --i >= 0; )
+    result = LISP.cons(this[i], result);
+  return result;
 };

@@ -112,12 +112,29 @@
 (define (compile-lambda s env)
   (define (extend-env env params)
     (append params env))
-  (let ((params (cadr s))
-        (bodies (cddr s)))
-    (let1 newenv (extend-env env params)
+  (let* ((raw-params (cadr s))
+         (params (if (proper-list? raw-params)
+                            raw-params
+                          (reverse! (reverse raw-params))))  ; Remove dotted part.
+         (rest (if (pair? raw-params)
+                   (cdr (last-pair raw-params))
+                 raw-params))
+         (bodies (cddr s)))
+    (let1 newenv (extend-env env (if (null? rest)
+                                     params
+                                   (append (list rest)
+                                           params)))
       (string-append "(function("
                      (expand-args params newenv)
-                     "){return ("
+                     "){"
+                     (if (null? rest)
+                         ""
+                       (string-append "var "
+                                      (symbol->string rest)
+                                      " = LISP._getRestArgs(arguments, "
+                                      (number->string (length params))
+                                      "); "))
+                     "return ("
                      (expand-body bodies newenv)
                      ");})"))))
 
