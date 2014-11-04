@@ -116,12 +116,20 @@
         (body (cdddr s)))
     (hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
                                               (interaction-environment)))
-    "LISP.nil"))
+    #"//~name"))
 (define (macro? symbol)
   (hash-table-exists? *macro-table* symbol))
-(define (expand-macro s)
-  (apply (hash-table-get *macro-table* (car s))
-         (cdr s)))
+(define (macroexpand-1 s)
+  (let ((f (and (pair? s)
+                (hash-table-get *macro-table* (car s) #f))))
+    (if f
+        (apply f (cdr s))
+      s)))
+(define (macroexpand exp)
+  (let ((expanded (macroexpand-1 exp)))
+    (if (equal? expanded exp)
+        exp
+      (macroexpand expanded))))
 
 (define *special-forms*
   (list (cons 'quote compile-quote)
@@ -137,9 +145,9 @@
 
 (define (compile s env)
   (if (pair? s)
-      (cond ((special-form? s) => (lambda (fn) (fn s env)))
-            ((macro? (car s)) (compile (expand-macro s) env))
-            (else (compile-funcall s env)))
+      (cond ((macro? (car s)) (compile (macroexpand s) env))
+            ((special-form? s) => (lambda (fn) (fn s env)))
+            (else (compile-funcall (macroexpand s) env)))
     (compile-literal s env)))
 
 (define (main args)
