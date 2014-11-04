@@ -1,4 +1,18 @@
 LISP = {
+  Symbol: function(name) {
+    this.name = name;
+  },
+
+  $$symbolTable: {},  // key(string) => Symbol object
+  intern: function(name) {
+    if (name in LISP.$$symbolTable)
+      return LISP.$$symbolTable[name];
+    return LISP.$$symbolTable[name] = new LISP.Symbol(name);
+  },
+  symbol$3f: function(x) {  // symbol?
+    return x instanceof LISP.Symbol ? LISP.t : LISP.nil;
+  },
+
   nil: null,
   t: true,
 
@@ -45,9 +59,18 @@ LISP = {
       console.log("t");
       break;
     default:
-      console.log(x.toString());
+      if (typeof x == 'string')
+        console.log('"' + x + '"');
+      else
+        console.log(x.toString());
       break;
     }
+  },
+};
+
+LISP.Symbol.prototype = {
+  toString: function() {
+    return this.name;
   },
 };
 

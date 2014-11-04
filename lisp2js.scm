@@ -64,7 +64,11 @@
   (let ((x (cadr s)))
     (if (pair? x)
         (compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
-      (compile-literal x env))))
+      (if (symbol? x)
+          (string-append "LISP.intern(\""
+                         (symbol->js-string x)
+                         "\")")
+        (compile-literal x env)))))
 
 (define (compile-if s env)
   (let ((p (cadr s))

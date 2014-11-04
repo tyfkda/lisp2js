@@ -32,7 +32,8 @@ function run_raw() {
 # Test cases.
 
 run integer 123 '123'
-run string abc '"abc"'
+run symbol abc '(quote abc)'
+run string '"abc"' '"abc"'
 run t "t" 't'
 run nil "nil" 'nil'
 run quote 123 '(quote 123)'
