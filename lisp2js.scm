@@ -8,7 +8,18 @@
       "LISP.nil"
     (expand-args body env)))
 
-(define (symbol->js-string sym)
+(define (escape-char c)
+  (cond ((string=? c "\\") "\\\\")
+        ((string=? c "\t") "\\t")
+        ((string=? c "\n") "\\n")
+        ((string=? c "\"") "\\\"")
+        (else c)))
+
+(define (escape-string s)
+  (regexp-replace-all #/[\\\t\n"]/ s
+                      (lambda (m) (escape-char (m)))))
+
+(define (escape-symbol sym)
   (define (escape-char c)
     (string-append "$"
                    (integer->hex-string (char->integer c) "00")))
@@ -24,21 +35,12 @@
 (define (compile-symbol sym env)
   (define (local-var? sym env)
     (member sym env))
-  (string-append (if (local-var? sym env)
-                     ""
-                   "LISP.")
-                 (symbol->js-string sym)))
-
-(define (escape-char c)
-  (cond ((string=? c "\\") "\\\\")
-        ((string=? c "\t") "\\t")
-        ((string=? c "\n") "\\n")
-        ((string=? c "\"") "\\\"")
-        (else c)))
-
-(define (escape-string s)
-  (regexp-replace-all #/[\\\t\n"]/ s
-                      (lambda (m) (escape-char (m)))))
+  (if (local-var? sym env)
+      (escape-symbol sym)
+    (let ((s (symbol->string sym)))
+      (if (rxmatch #/^[0-9A-Za-z_]*$/ s)
+          #"LISP.~s"
+        #"LISP[\"~(escape-string s)\"]"))))
 
 (define (compile-string str)
   #"\"~(escape-string str)\"")
@@ -70,7 +72,7 @@
         (compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
       (if (symbol? x)
           (string-append "LISP.intern(\""
-                         (symbol->js-string x)
+                         (escape-string (symbol->string x))
                          "\")")
         (compile-literal x env)))))
 

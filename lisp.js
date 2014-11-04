@@ -14,11 +14,11 @@ var LISP = {
       return LISP.$$symbolTable[name];
     return LISP.$$symbolTable[name] = new LISP.Symbol(name);
   },
-  symbol$3f: function(x) {  // symbol?
+  "symbol?": function(x) {
     return x instanceof LISP.Symbol ? LISP.t : LISP.nil;
   },
 
-  eq$3f: function(x, y) {
+  "eq?": function(x, y) {
     return LISP._jsBoolToS(x === y);
   },
 
@@ -37,8 +37,7 @@ var LISP = {
     return s.cdr;
   },
 
-  // +
-  $2b: function() {
+  "+": function() {
     if (arguments.length == 0)
       return 0;
     var result = arguments[0];
@@ -46,8 +45,7 @@ var LISP = {
       result += arguments[i];
     return result;
   },
-  // *
-  $2a: function() {
+  "*": function() {
     if (arguments.length == 0)
       return 1;
     var result = arguments[0];
