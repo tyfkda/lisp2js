@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+gosh lisp2js.scm > compiled-result.js
+cat lisp.js compiled-result.js | node
+rm compiled-result.js
