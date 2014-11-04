@@ -1,18 +1,18 @@
 ;; Currently body expression in `defmacro` is evaluated in base Lisp
 ;; environment, so we don't have to have basic functions in our environment.
-(defmacro let (pairs body)
+(defmacro let (pairs . body)
   `((lambda ,(map car pairs)
-      ,body)
+      ,@body)
     ,@(map cadr pairs)))
 
-(defmacro cond body
-  (if (null? body)
+(defmacro cond clauses
+  (if (null? clauses)
       '()
-    (if (eq? (caar body) 'else)
-        `(begin ,@(cdar body))
-      `(if ,(caar body)
-           (begin ,@(cdar body))
-         (cond ,@(cdr body))))))
+    (if (eq? (caar clauses) 'else)
+        `(begin ,@(cdar clauses))
+      `(if ,(caar clauses)
+           (begin ,@(cdar clauses))
+         (cond ,@(cdr clauses))))))
 
 ;;
 (define (null? x)

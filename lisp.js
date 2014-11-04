@@ -91,6 +91,7 @@ var LISP = {
         console.log(x.toString());
       break;
     }
+    return x;
   },
 
   // Hash table.
