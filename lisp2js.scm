@@ -39,14 +39,21 @@
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
       (if (rxmatch #/^[0-9A-Za-z_]*$/ s)
-          #"LISP.~s"
-        #"LISP[\"~(escape-string s)\"]"))))
+          (string-append "LISP."
+                         s)
+        (string-append "LISP[\""
+                       (escape-string s)
+                       "\"]")))))
 
 (define (compile-string str)
-  #"\"~(escape-string str)\"")
+  (string-append "\""
+                 (escape-string str)
+                 "\""))
 
 (define (compile-regexp regex)
-  #"/~(regexp->string regex)/")
+  (string-append "/"
+                 (regexp->string regex)
+                 "/"))
 
 (define (compile-literal s env)
   (cond ((number? s) (number->string s))
@@ -56,7 +63,7 @@
         ((null? s)   "LISP.nil")
         ((eq? s #t)  "LISP.t")
         ((eq? s #f)  "LISP.nil")
-        (else (error #"compile-literal: [~s]"))))
+        (else (error (string-append "compile-literal: [" s "]")))))
 
 (define (compile-funcall s env)
   (let ((fn (car s))
@@ -118,7 +125,7 @@
         (body (cdddr s)))
     (hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
                                               (interaction-environment)))
-    #"//~name"))
+    (string-append "//" (symbol->string name))))
 (define (macro? symbol)
   (hash-table-exists? *macro-table* symbol))
 (define (macroexpand-1 s)
