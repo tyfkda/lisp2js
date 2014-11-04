@@ -97,6 +97,14 @@
                      "LISP.nil")
                    "))")))
 
+(define (compile-begin s env)
+  (case (length (cdr s))
+    ((0) "LISP.nil")
+    ((1) (compile (cadr s) env))
+    (else (string-append "("
+                         (expand-body (cdr s) env)
+                         ")"))))
+
 (define (compile-lambda s env)
   (define (extend-env env params)
     (append params env))
@@ -143,6 +151,7 @@
 (define *special-forms*
   (list (cons 'quote compile-quote)
         (cons 'if  compile-if)
+        (cons 'begin  compile-begin)
         (cons 'lambda compile-lambda)
         (cons 'define  compile-define)
         (cons 'defmacro  compile-defmacro)
