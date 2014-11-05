@@ -74,7 +74,7 @@
                    ")")))
 
 (define (compile-quote s env)
-  (let ((x (cadr s)))
+  (let ((x (car s)))
     (if (pair? x)
         ;(compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
         (compile (list 'cons
@@ -88,9 +88,9 @@
         (compile-literal x env)))))
 
 (define (compile-if s env)
-  (let ((p (cadr s))
-        (then-node (caddr s))
-        (else? (cdddr s)))
+  (let ((p (car s))
+        (then-node (cadr s))
+        (else? (cddr s)))
     (string-append "(("
                    (compile p env)
                    ") !== LISP.nil ? ("
@@ -102,31 +102,31 @@
                    "))")))
 
 (define (compile-set! s env)
-  (let ((sym (cadr s))
-        (val (caddr s)))
+  (let ((sym (car s))
+        (val (cadr s)))
     (string-append (compile sym env)
                    " = "
                    (compile val env))))
 
 (define (compile-begin s env)
-  (case (length (cdr s))
+  (case (length s)
     ((0) "LISP.nil")
-    ((1) (compile (cadr s) env))
+    ((1) (compile (car s) env))
     (else (string-append "("
-                         (expand-body (cdr s) env)
+                         (expand-body s env)
                          ")"))))
 
 (define (compile-lambda s env)
   (define (extend-env env params)
     (append params env))
-  (let* ((raw-params (cadr s))
+  (let* ((raw-params (car s))
          (params (if (proper-list? raw-params)
                      raw-params
                    (reverse! (reverse raw-params))))  ; Remove dotted part.
          (rest (if (pair? raw-params)
                    (cdr (last-pair raw-params))
                  raw-params))
-         (bodies (cddr s)))
+         (bodies (cdr s)))
     (let1 newenv (extend-env env (if (null? rest)
                                      params
                                    (append (list rest)
@@ -146,11 +146,11 @@
                      ");})"))))
 
 (define (compile-define s env)
-  (let ((name (cadr s))
-        (body (cddr s)))
+  (let ((name (car s))
+        (body (cdr s)))
     (if (pair? name)
         ;(compile-define `(define ,(car name) (lambda ,(cdr name) ,@body)) env)
-        (compile-define (list 'define (car name)
+        (compile-define (list (car name)
                               (list* 'lambda (cdr name) body))
                         env)
       (string-append (compile-symbol name env)
@@ -159,9 +159,9 @@
 
 (define *macro-table* (make-hash-table))
 (define (compile-defmacro s env)
-  (let ((name (cadr s))
-        (params (caddr s))
-        (body (cdddr s)))
+  (let ((name (car s))
+        (params (cadr s))
+        (body (cddr s)))
     ;(hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
     ;                                          (interaction-environment)))
     (hash-table-put! *macro-table* name (eval (list* 'lambda params body)
@@ -198,7 +198,7 @@
 (define (compile s env)
   (if (pair? s)
       (cond ((macro? (car s)) (compile (macroexpand s) env))
-            ((special-form? s) => (lambda (fn) (fn s env)))
+            ((special-form? s) => (lambda (fn) (fn (cdr s) env)))
             (else (compile-funcall (macroexpand s) env)))
     (compile-literal s env)))
 
