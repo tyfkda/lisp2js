@@ -48,13 +48,15 @@
          'nil))))
 
 ;;
-(define (null? x)
-  (eq? x nil))
+(define (null? x)  (eq? x nil))
+(define (not x)    (eq? x nil))
 
 (define (caar x)  (car (car x)))
 (define (cadr x)  (car (cdr x)))
 (define (cdar x)  (cdr (car x)))
 (define (cddr x)  (cdr (cdr x)))
+(define (caddr x)  (car (cddr x)))
+(define (cdddr x)  (cdr (cddr x)))
 
 (define (equal? x y)
   (if (eq? x y)
