@@ -76,6 +76,16 @@ var LISP = {
     return x + '';
   },
 
+  // String.
+  "string-append": function() {
+    var argumentsArray = [];
+    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
+    return argumentsArray.join('');
+  },
+  "string-join": function(list, separator) {
+    return list.toArray().join(separator);
+  },
+
   print: function(x) {
     switch (x) {
     case LISP.nil:
@@ -86,12 +96,16 @@ var LISP = {
       break;
     default:
       if (typeof x == 'string')
-        console.log('"' + x + '"');
+        console.log(x);
       else
         console.log(x.toString());
       break;
     }
     return x;
+  },
+
+  apply: function(fn, params) {
+    return fn.apply(null, params);
   },
 
   // Hash table.
@@ -102,7 +116,19 @@ var LISP = {
     return x in hash ? LISP.t : LISP.nil;
   },
   "hash-table-get": function(hash, x) {
-    return hash[x];
+    if (x in hash)
+      return hash[x];
+    return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil;
+  },
+
+  // Regexp.
+  rxmatch: function(re, str) {
+    return re.exec(str);
+  },
+  "regexp-replace-all": function(re, str, fn) {
+    if (!re.global)
+      re = eval(re.toString() + 'g')
+    return str.replace(re, fn);
   },
 };
 
@@ -128,6 +154,12 @@ LISP.Cons.prototype = {
     }
     ss.push(")");
     return ss.join("");
+  },
+  toArray: function() {
+    var result = [];
+    for (var p = this; p instanceof LISP.Cons; p = p.cdr)
+      result.push(p.car);
+    return result;
   },
 };
 

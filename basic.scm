@@ -32,6 +32,14 @@
 (define (cdar x)  (cdr (car x)))
 (define (cddr x)  (cdr (cdr x)))
 
+(define (equal? x y)
+  (if (eq? x y)
+      t
+    (and (pair? x)
+         (pair? y)
+         (equal? (car x) (car y))
+         (equal? (cdr x) (cdr y)))))
+
 (define (member x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)
