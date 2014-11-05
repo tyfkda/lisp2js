@@ -5,6 +5,18 @@
       ,@body)
     ,@(map cadr pairs)))
 
+(defmacro let1 (var val . body)
+  `((lambda (,var)
+      ,@body)
+    ,val))
+
+(defmacro let* (pairs . body)
+  (if (null? pairs)
+      `(begin ,@body)
+    `(let1 ,(caar pairs) ,(cadar pairs)
+       (let* ,(cdr pairs)
+         ,@body))))
+
 (defmacro cond clauses
   (if (null? clauses)
       '()
