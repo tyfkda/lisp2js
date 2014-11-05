@@ -109,12 +109,11 @@
                    (compile val env))))
 
 (define (compile-begin s env)
-  (case (length s)
-    ((0) "LISP.nil")
-    ((1) (compile (car s) env))
-    (else (string-append "("
-                         (expand-body s env)
-                         ")"))))
+  (cond ((null? s) "LISP.nil")
+        ((null? (cdr s)) (compile (car s) env))
+        (else (string-append "("
+                             (expand-body s env)
+                             ")"))))
 
 (define (compile-lambda s env)
   (define (extend-env env params)
