@@ -47,7 +47,7 @@
 
 (define (assoc x ls)
   (if (null? ls) #f
-    (if (eq? x (caar ls)) (cdar ls)
+    (if (eq? x (caar ls)) (car ls)
       (assoc x (cdr ls)))))
 
 (define (map f ls)
