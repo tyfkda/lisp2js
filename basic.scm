@@ -20,11 +20,23 @@
 (defmacro cond clauses
   (if (null? clauses)
       '()
-    (if (eq? (caar clauses) 'else)
-        `(begin ,@(cdar clauses))
-      `(if ,(caar clauses)
-           (begin ,@(cdar clauses))
-         (cond ,@(cdr clauses))))))
+    (let ((clause (car clauses))
+          (rest (cdr clauses)))
+      (if (eq? (car clause) 'else)
+          `(begin ,@(cdr clause))
+        (if (null? (cdr clause))  ; cond ((foo))
+            (let ((g (gensym)))
+              `(let ((,g ,(car clause)))
+                 (if ,g ,g
+                   (cond ,@rest))))
+          (if (eq? (cadr clause) '=>)  ; cond ((foo) => bar)
+              (let ((g (gensym)))
+                `(let ((,g ,(car clause)))
+                   (if ,g (,(caddr clause) ,g)
+                     (cond ,@rest))))
+            `(if ,(car clause)  ; otherwise
+                 (begin ,@(cdr clause))
+               (cond ,@rest))))))))
 
 (defmacro and args
   (if (null? args)
