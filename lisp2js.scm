@@ -96,9 +96,9 @@
                    ") !== LISP.nil ? ("
                    (compile then-node env)
                    ") : ("
-                   (if (not (null? else?))
-                       (compile (car else?) env)
-                     "LISP.nil")
+                   (if (null? else?)
+                       "LISP.nil"
+                     (compile (car else?) env))
                    "))")))
 
 (define (compile-begin s env)
