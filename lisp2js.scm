@@ -114,8 +114,8 @@
     (append params env))
   (let* ((raw-params (cadr s))
          (params (if (proper-list? raw-params)
-                            raw-params
-                          (reverse! (reverse raw-params))))  ; Remove dotted part.
+                     raw-params
+                   (reverse! (reverse raw-params))))  ; Remove dotted part.
          (rest (if (pair? raw-params)
                    (cdr (last-pair raw-params))
                  raw-params))
