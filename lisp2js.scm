@@ -101,6 +101,13 @@
                      (compile (car else?) env))
                    "))")))
 
+(define (compile-set! s env)
+  (let ((sym (cadr s))
+        (val (caddr s)))
+    (string-append (compile sym env)
+                   " = "
+                   (compile val env))))
+
 (define (compile-begin s env)
   (case (length (cdr s))
     ((0) "LISP.nil")
@@ -178,6 +185,7 @@
   (list (cons 'quote compile-quote)
         (cons 'if  compile-if)
         (cons 'begin  compile-begin)
+        (cons 'set! compile-set!)
         (cons 'lambda compile-lambda)
         (cons 'define  compile-define)
         (cons 'defmacro  compile-defmacro)
