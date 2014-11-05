@@ -98,7 +98,13 @@ var LISP = {
     return x;
   },
 
-  apply: function(fn, params) {
+  apply: function(fn) {
+    var params = [];
+    if (arguments.length > 1) {
+      for (var i = 1; i < arguments.length - 1; ++i)
+        params.push(arguments[i]);
+      params = params.concat(arguments[arguments.length - 1].toArray());
+    }
     return fn.apply(null, params);
   },
 
