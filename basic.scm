@@ -78,6 +78,22 @@
 (define (list . args)
   args)
 
+(define (length ls)
+  (let loop ((ls ls)
+             (acc 0))
+    (if (pair? ls)
+        (loop (cdr ls) (+ acc 1))
+      acc)))
+
+(define (last-pair ls)
+  (if (pair? (cdr ls))
+      (last-pair (cdr ls))
+    ls))
+
+(define (proper-list? ls)
+  (and (pair? ls)
+       (null? (cdr (last-pair ls)))))
+
 (define (member x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)
@@ -93,3 +109,9 @@
       '()
     (cons (f (car ls))
           (map f (cdr ls)))))
+
+(define (append ls . rest)
+  (cond ((null? rest) ls)
+        ((null? ls)   (apply append rest))
+        (else (cons (car ls)
+                    (apply append (cdr ls) rest)))))
