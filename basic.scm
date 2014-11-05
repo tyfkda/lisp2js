@@ -14,6 +14,15 @@
            (begin ,@(cdar clauses))
          (cond ,@(cdr clauses))))))
 
+(defmacro and args
+  (if (null? args)
+      't  ; (and) = true
+    (if (null? (cdr args))
+        (car args)
+      `(if ,(car args)
+           (and ,@(cdr args))
+         'nil))))
+
 ;;
 (define (null? x)
   (eq? x nil))
