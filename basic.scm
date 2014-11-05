@@ -66,6 +66,9 @@
          (equal? (car x) (car y))
          (equal? (cdr x) (cdr y)))))
 
+(define (list . args)
+  args)
+
 (define (member x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)

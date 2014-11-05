@@ -43,12 +43,6 @@ var LISP = {
     return s.cdr;
   },
 
-  list: function() {
-    var result = LISP.nil;
-    for (var i = arguments.length; --i >= 0; )
-      result = LISP.cons(arguments[i], result);
-    return result;
-  },
   "pair?": function(x) {
     return LISP._jsBoolToS(x instanceof LISP.Cons);
   },
