@@ -21,6 +21,10 @@ LISP = {
   "symbol->string": function(x) {
     return x.toString();
   },
+  __gensymIndex: 0,
+  gensym: function() {
+    return "__" + (++LISP.__gensymIndex);
+  },
 
   $$symbolTable: {},  // key(string) => Symbol object
   intern: function(name) {
@@ -93,6 +97,16 @@ LISP = {
       result *= arguments[i];
     return result;
   },
+  "-": function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return -result;
+    for (var i = 1; i < arguments.length; ++i)
+      result -= arguments[i];
+    return result;
+  },
   "number?": function(x) {
     return LISP._jsBoolToS(typeof x === 'number');
   },
@@ -113,6 +127,19 @@ LISP = {
     if (list === LISP.nil)
       return '';
     return list.toArray().join(separator);
+  },
+  "string-length": function(str) {
+    return str.length;
+  },
+  "string-ref": function(str, index) {
+    return str[index];
+  },
+  substring: function(str, start, end) {
+    return str.slice(start, end);
+  },
+
+  "char->integer": function(char, index) {
+    return char.charCodeAt(index);
   },
 
   makeString: function(x) {
@@ -165,7 +192,11 @@ LISP = {
   "regexp-replace-all": function(re, str, fn) {
     if (!re.global)
       re = eval(re.toString() + 'g')
-    return str.replace(re, fn);
+    return str.replace(re, function (match) {
+      return fn(function() {  // TODO: handle arguments.
+        return match[0];
+      });
+    });
   },
 };
 
