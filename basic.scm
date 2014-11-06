@@ -75,9 +75,6 @@
          (equal? (car x) (car y))
          (equal? (cdr x) (cdr y)))))
 
-(define (list . args)
-  args)
-
 (define (length ls)
   (let loop ((ls ls)
              (acc 0))

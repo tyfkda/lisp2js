@@ -15,6 +15,8 @@ SReader.prototype.read = function() {
     return this.proceed(), this.readList(RegExp.rightContext);
   if (m = this.str.match(/^\s*;[^\n]*\n?/))  // Line comment.
     return this.proceed(), this.read();
+  if (m = this.str.match(/^\s*'/))  // quote.
+    return this.proceed(), this.readQuote();
   return undefined;
 };
 
@@ -39,6 +41,10 @@ SReader.prototype.readList = function() {
     // Error
     return undefined;
   }
+};
+
+SReader.prototype.readQuote = function() {
+  return LISP.list(LISP.intern('quote'), this.read());
 };
 
 LISP["read-from-string"] = function(str) {
