@@ -35,6 +35,7 @@ run string abc '"abc"'
 run t 't' 't'
 run nil 'nil' 'nil'
 run quote 123 '(quote 123)'
+run quote '(1 nil 3)' '(quote (1 () 3))'
 run cons '(1 . 2)' '(cons 1 2)'
 run car 1 "(car '(1 . 2))"
 run cdr 2 "(cdr '(1 . 2))"

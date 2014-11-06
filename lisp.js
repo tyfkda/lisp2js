@@ -112,21 +112,17 @@ LISP = {
     return list.toArray().join(separator);
   },
 
+  makeString: function(x) {
+    if (x === LISP.nil)
+      return 'nil';
+    if (x === LISP.t)
+      return 't';
+    if (typeof x == 'string')
+      return x;
+    return x.toString();
+  },
   print: function(x) {
-    switch (x) {
-    case LISP.nil:
-      console.log("nil");
-      break;
-    case LISP.t:
-      console.log("t");
-      break;
-    default:
-      if (typeof x == 'string')
-        console.log(x);
-      else
-        console.log(x.toString());
-      break;
-    }
+    console.log(LISP.makeString(x));
     return x;
   },
 
@@ -180,12 +176,12 @@ LISP.Cons.prototype = {
     var p;
     for (p = this; p instanceof LISP.Cons; p = p.cdr) {
       ss.push(separator);
-      ss.push(p.car.toString());
+      ss.push(LISP.makeString(p.car));
       separator = " ";
     }
     if (p !== LISP.nil) {
       ss.push(" . ");
-      ss.push(p.toString());
+      ss.push(LISP.makeString(p));
     }
     ss.push(")");
     return ss.join("");

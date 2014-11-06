@@ -112,21 +112,17 @@ LISP = {
     return list.toArray().join(separator);
   },
 
+  makeString: function(x) {
+    if (x === LISP.nil)
+      return 'nil';
+    if (x === LISP.t)
+      return 't';
+    if (typeof x == 'string')
+      return x;
+    return x.toString();
+  },
   print: function(x) {
-    switch (x) {
-    case LISP.nil:
-      console.log("nil");
-      break;
-    case LISP.t:
-      console.log("t");
-      break;
-    default:
-      if (typeof x == 'string')
-        console.log(x);
-      else
-        console.log(x.toString());
-      break;
-    }
+    console.log(LISP.makeString(x));
     return x;
   },
 
@@ -180,12 +176,12 @@ LISP.Cons.prototype = {
     var p;
     for (p = this; p instanceof LISP.Cons; p = p.cdr) {
       ss.push(separator);
-      ss.push(p.car.toString());
+      ss.push(LISP.makeString(p.car));
       separator = " ";
     }
     if (p !== LISP.nil) {
       ss.push(" . ");
-      ss.push(p.toString());
+      ss.push(LISP.makeString(p));
     }
     ss.push(")");
     return ss.join("");
@@ -280,10 +276,10 @@ LISP.cdar = (function(x){return (LISP.cdr(LISP.car(x)));});
 LISP.cddr = (function(x){return (LISP.cdr(LISP.cdr(x)));});
 LISP.caddr = (function(x){return (LISP.car(LISP.cddr(x)));});
 LISP.cdddr = (function(x){return (LISP.cdr(LISP.cddr(x)));});
-LISP["equal?"] = (function(x, y){return (((LISP["eq?"](x, y)) !== LISP.nil ? (LISP.t) : (((LISP["pair?"](x)) !== LISP.nil ? (((LISP["pair?"](y)) !== LISP.nil ? (((LISP["equal?"](LISP.car(x), LISP.car(y))) !== LISP.nil ? (LISP["equal?"](LISP.cdr(x), LISP.cdr(y))) : (LISP.intern("nil")))) : (LISP.intern("nil")))) : (LISP.intern("nil"))))));});
+LISP["equal?"] = (function(x, y){return (((LISP["eq?"](x, y)) !== LISP.nil ? (LISP.t) : (((LISP["pair?"](x)) !== LISP.nil ? (((LISP["pair?"](y)) !== LISP.nil ? (((LISP["equal?"](LISP.car(x), LISP.car(y))) !== LISP.nil ? (LISP["equal?"](LISP.cdr(x), LISP.cdr(y))) : (LISP.nil))) : (LISP.nil))) : (LISP.nil)))));});
 LISP.length = (function(ls){return ((function(loop){return (loop = (function(ls, acc){return (((LISP["pair?"](ls)) !== LISP.nil ? (loop(LISP.cdr(ls), LISP["+"](acc, 1))) : (acc)));}), loop(ls, 0));})(LISP.nil));});
 LISP["last-pair"] = (function(ls){return (((LISP["pair?"](LISP.cdr(ls))) !== LISP.nil ? (LISP["last-pair"](LISP.cdr(ls))) : (ls)));});
-LISP["proper-list?"] = (function(ls){return (((LISP["pair?"](ls)) !== LISP.nil ? (LISP["null?"](LISP.cdr(LISP["last-pair"](ls)))) : (LISP.intern("nil"))));});
+LISP["proper-list?"] = (function(ls){return (((LISP["pair?"](ls)) !== LISP.nil ? (LISP["null?"](LISP.cdr(LISP["last-pair"](ls)))) : (LISP.nil)));});
 LISP.member = (function(x, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP.nil) : (((LISP["eq?"](x, LISP.car(ls))) !== LISP.nil ? (ls) : (LISP.member(x, LISP.cdr(ls)))))));});
 LISP.assoc = (function(x, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP.nil) : (((LISP["eq?"](x, LISP.caar(ls))) !== LISP.nil ? (LISP.car(ls)) : (LISP.assoc(x, LISP.cdr(ls)))))));});
 LISP.map = (function(f, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP.nil) : (LISP.cons(f(LISP.car(ls)), LISP.map(f, LISP.cdr(ls))))));});
@@ -309,7 +305,7 @@ LISP["compile-define"] = (function(s, env){return ((function(name, body){return 
 LISP["*macro-table*"] = LISP["make-hash-table"]();
 LISP["compile-defmacro"] = (function(s, env){return ((function(name, params, body){return (LISP["hash-table-put!"](LISP["*macro-table*"], name, LISP.eval(LISP["list*"](LISP.intern("lambda"), params, body), LISP["interaction-environment"]())), LISP["string-append"]("//", LISP["symbol->string"](name)));})(LISP.car(s), LISP.cadr(s), LISP.cddr(s)));});
 LISP["macro?"] = (function(symbol){return (LISP["hash-table-exists?"](LISP["*macro-table*"], symbol));});
-LISP["macroexpand-1"] = (function(s){return ((function(f){return (((f) !== LISP.nil ? (LISP.apply(f, LISP.cdr(s))) : (s)));})(((LISP["pair?"](s)) !== LISP.nil ? (LISP["hash-table-get"](LISP["*macro-table*"], LISP.car(s), LISP.nil)) : (LISP.intern("nil")))));});
+LISP["macroexpand-1"] = (function(s){return ((function(f){return (((f) !== LISP.nil ? (LISP.apply(f, LISP.cdr(s))) : (s)));})(((LISP["pair?"](s)) !== LISP.nil ? (LISP["hash-table-get"](LISP["*macro-table*"], LISP.car(s), LISP.nil)) : (LISP.nil))));});
 LISP.macroexpand = (function(exp){return ((function(expanded){return (((LISP["equal?"](expanded, exp)) !== LISP.nil ? (exp) : (LISP.macroexpand(expanded))));})(LISP["macroexpand-1"](exp)));});
 LISP["*special-forms*"] = LISP.list(LISP.cons(LISP.intern("quote"), LISP["compile-quote"]), LISP.cons(LISP.intern("if"), LISP["compile-if"]), LISP.cons(LISP.intern("begin"), LISP["compile-begin"]), LISP.cons(LISP.intern("set!"), LISP["compile-set!"]), LISP.cons(LISP.intern("lambda"), LISP["compile-lambda"]), LISP.cons(LISP.intern("define"), LISP["compile-define"]), LISP.cons(LISP.intern("defmacro"), LISP["compile-defmacro"]));
 LISP["special-form?"] = (function(s){return ((function(G41){return (((G41) !== LISP.nil ? (LISP.cdr(G41)) : (LISP.nil)));})(LISP.assoc(LISP.car(s), LISP["*special-forms*"])));});
