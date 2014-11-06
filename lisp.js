@@ -1,10 +1,14 @@
-var LISP = {
+LISP = {
   nil: null,
   t: true,
 
   _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil;  },
   _getRestArgs: function(args, start) {
     return Array.prototype.slice.call(args, start).toList();
+  },
+
+  jseval: function(str) {
+    return eval(str);
   },
 
   Symbol: function(name) {
@@ -87,6 +91,9 @@ var LISP = {
   },
 
   // String.
+  "string?": function(x) {
+    return LISP._jsBoolToS(typeof x === 'string');
+  },
   "string-append": function() {
     var argumentsArray = [];
     argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
@@ -138,6 +145,9 @@ var LISP = {
   },
 
   // Regexp.
+  "regexp?": function(x) {
+    return LISP._jsBoolToS(x instanceof RegExp);
+  },
   rxmatch: function(re, str) {
     return re.exec(str);
   },
@@ -186,3 +196,5 @@ Array.prototype.toList = function() {
     result = LISP.cons(this[i], result);
   return result;
 };
+
+module.exports = LISP;
