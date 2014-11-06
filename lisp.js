@@ -52,6 +52,16 @@ var LISP = {
   "pair?": function(x) {
     return LISP._jsBoolToS(x instanceof LISP.Cons);
   },
+  "reverse!": function(x) {
+    var rev = LISP.nil;
+    for (var ls = x; !LISP['eq?'](ls, LISP.nil); ) {
+      var d = ls.cdr;
+      ls.cdr = rev;
+      rev = ls;
+      ls = d;
+    }
+    return rev;
+  },
 
   "+": function() {
     if (arguments.length == 0)

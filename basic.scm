@@ -124,15 +124,6 @@
       (loop (cdr ls)
             (cons (car ls) acc)))))
 
-(define (reverse! ls)
-  (let loop ((ls ls)
-             (rev nil))
-    (if (null? ls)
-        rev
-      (let ((d (cdr ls)))
-        (set-cdr! ls rev)
-        (loop d ls)))))
-
 (define (list* . args)
   (if (null? args)
       nil
