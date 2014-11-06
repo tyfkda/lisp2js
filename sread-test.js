@@ -35,6 +35,8 @@ function main() {
   test('line comment', 123, reads(';comment\n123'));
   test('symbol', LISP.intern('symbol'), reads('symbol'));
   test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), reads("'abc"));
+  test('string', 'abc', reads('"abc"'));
+  test('complex string', 'foo bar\nbaz', reads('"foo bar\nbaz"'));
 
   print("\033[1;32mTEST ALL SUCCEEDED!\033[0;39m")
 }

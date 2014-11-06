@@ -18,6 +18,8 @@ LISP.SReader.prototype = {
       return this.proceed(), this.read();
     if (m = this.str.match(/^\s*'/))  // quote.
       return this.proceed(), this.readQuote();
+    if (m = this.str.match(/^\s*"([^"]*)"/))  // string.
+      return this.proceed(), m[1];
     return undefined;
   },
 
