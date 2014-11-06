@@ -9,6 +9,8 @@ SReader.prototype.read = function() {
   var m;
   if (m = this.str.match(/^\s*([0-9]+)/))  // Number.
     return this.proceed(), parseInt(m[1]);
+  if (m = this.str.match(/^\s*([0-9A-Za-z_\-+*/%!?~^&]+)/))  // Symbol.
+    return this.proceed(), LISP.intern(m[1]);
   if (m = this.str.match(/^\s*\(/))  // Left paren '('.
     return this.proceed(), this.readList(RegExp.rightContext);
   if (m = this.str.match(/^\s*;[^\n]*\n?/))  // Line comment.
