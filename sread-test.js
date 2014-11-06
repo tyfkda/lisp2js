@@ -38,6 +38,10 @@ function main() {
   test('string', 'abc', reads('"abc"'));
   test('complex string', 'foo bar\nbaz', reads('"foo bar\nbaz"'));
 
+  test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), reads("`abc"));
+  test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), reads(",abc"));
+  test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), reads(",@abc"));
+
   print("\033[1;32mTEST ALL SUCCEEDED!\033[0;39m")
 }
 

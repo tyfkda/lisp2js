@@ -20,6 +20,10 @@ LISP.SReader.prototype = {
       return this.proceed(), this.readQuote();
     if (m = this.str.match(/^\s*"([^"]*)"/))  // string.
       return this.proceed(), m[1];
+    if (m = this.str.match(/^\s*`/))  // quasiquote.
+      return this.proceed(), this.readQuasiQuote();
+    if (m = this.str.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
+      return this.proceed(), this.readUnquote(m[1]);
     return undefined;
   },
 
@@ -49,6 +53,15 @@ LISP.SReader.prototype = {
 
   readQuote: function() {
     return LISP.list(LISP.intern('quote'), this.read());
+  },
+
+  readQuasiQuote: function() {
+    return LISP.list(LISP.intern('quasiquote'), this.read());
+  },
+
+  readUnquote: function(splicing) {
+    var keyword = splicing === '@' ? 'unquote-splicing' : 'unquote';
+    return LISP.list(LISP.intern(keyword), this.read());
   },
 };
 
