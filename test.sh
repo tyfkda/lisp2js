@@ -62,4 +62,4 @@ run_raw defmacro nil "(defmacro nil! (x) (list 'define x 'nil))
 ################################################################
 # All tests succeeded.
 
-echo -n -e "\033[1;32mVM-TEST ALL SUCCEEDED!\033[0;39m\n"
+echo -n -e "\033[1;32mTEST ALL SUCCEEDED!\033[0;39m\n"
