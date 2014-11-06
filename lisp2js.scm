@@ -1,5 +1,5 @@
 (define (expand-args args env)
-  (string-join (map (lambda (x) (compile x env))
+  (string-join (map (lambda (x) (compile* x env))
                     args)
                ", "))
 
@@ -68,7 +68,7 @@
 (define (compile-funcall s env)
   (let ((fn (car s))
         (args (cdr s)))
-    (string-append (compile fn env)
+    (string-append (compile* fn env)
                    "("
                    (expand-args args env)
                    ")")))
@@ -77,10 +77,10 @@
   (let ((x (car s)))
     (if (pair? x)
         ;(compile `(cons (quote ,(car x)) (quote ,(cdr x))) env)
-        (compile (list 'cons
-                       (list 'quote (car x))
-                       (list 'quote (cdr x)))
-                 env)
+        (compile* (list 'cons
+                             (list 'quote (car x))
+                             (list 'quote (cdr x)))
+                       env)
       (if (symbol? x)
           (string-append "LISP.intern(\""
                          (escape-string (symbol->string x))
@@ -92,25 +92,25 @@
         (then-node (cadr s))
         (else? (cddr s)))
     (string-append "(("
-                   (compile p env)
+                   (compile* p env)
                    ") !== LISP.nil ? ("
-                   (compile then-node env)
+                   (compile* then-node env)
                    ") : ("
                    (if (null? else?)
                        "LISP.nil"
-                     (compile (car else?) env))
+                     (compile* (car else?) env))
                    "))")))
 
 (define (compile-set! s env)
   (let ((sym (car s))
         (val (cadr s)))
-    (string-append (compile sym env)
+    (string-append (compile* sym env)
                    " = "
-                   (compile val env))))
+                   (compile* val env))))
 
 (define (compile-begin s env)
   (cond ((null? s) "LISP.nil")
-        ((null? (cdr s)) (compile (car s) env))
+        ((null? (cdr s)) (compile* (car s) env))
         (else (string-append "("
                              (expand-body s env)
                              ")"))))
@@ -154,7 +154,7 @@
                         env)
       (string-append (compile-symbol name env)
                      " = "
-                     (compile (car body) env)))))
+                     (compile* (car body) env)))))
 
 (define *macro-table* (make-hash-table))
 (define (compile-defmacro s env)
@@ -194,16 +194,19 @@
   (cond ((assoc (car s) *special-forms*) => cdr)
         (else #f)))
 
-(define (compile s env)
+(define (compile* s env)
   (if (pair? s)
-      (cond ((macro? (car s)) (compile (macroexpand s) env))
+      (cond ((macro? (car s)) (compile* (macroexpand s) env))
             ((special-form? s) => (lambda (fn) (fn (cdr s) env)))
             (else (compile-funcall (macroexpand s) env)))
     (compile-literal s env)))
 
+(define (compile s)
+  (compile* s '()))
+
 (define (main args)
   (let ((ss (port->sexp-list (current-input-port))))
     (dolist (s ss)
-      (display (compile s '()))
+      (display (compile s))
       (display ";\n")))
   0)
