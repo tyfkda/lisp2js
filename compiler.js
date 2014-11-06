@@ -13,6 +13,7 @@ LISP = {
   eval: function(exp) {
     return eval(LISP.compile(exp));
   },
+  "interaction-environment": function() { return LISP.nil; },
 
   Symbol: function(name) {
     this.name = name;
@@ -147,6 +148,9 @@ LISP = {
     if (x in hash)
       return hash[x];
     return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil;
+  },
+  "hash-table-put!": function(hash, x, value) {
+    return hash[x] = value;
   },
 
   // Regexp.
