@@ -7,10 +7,12 @@ function SReader(str) {
 
 SReader.prototype.read = function() {
   var m;
-  if (m = this.str.match(/^\s*([0-9]+)/))
+  if (m = this.str.match(/^\s*([0-9]+)/))  // Number.
     return this.proceed(), parseInt(m[1]);
-  if (m = this.str.match(/^\s*\(/))
+  if (m = this.str.match(/^\s*\(/))  // Left paren '('.
     return this.proceed(), this.readList(RegExp.rightContext);
+  if (m = this.str.match(/^\s*;[^\n]*\n?/))  // Line comment.
+    return this.proceed(), this.read();
   return undefined;
 };
 

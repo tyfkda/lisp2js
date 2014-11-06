@@ -32,6 +32,7 @@ function main() {
   test('nil', LISP.nil, reads('()'));
   test('single element list', LISP.cons(1, LISP.nil), reads('(1)'));
   test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), reads('(1 2 3)'));
+  test('line comment', 123, reads(';comment\n123'));
 
   print("\033[1;32mTEST ALL SUCCEEDED!\033[0;39m")
 }
