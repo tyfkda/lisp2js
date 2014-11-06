@@ -1,6 +1,6 @@
-;; Currently body expression in `defmacro` is evaluated in base Lisp
+;; Currently body expression in `define-macro` is evaluated in base Lisp
 ;; environment, so we don't have to have basic functions in our environment.
-(defmacro let (pairs . body)
+(define-macro let (pairs . body)
   (if (symbol? pairs)  ; named-let
       (let ((name pairs)
             (pairs (car body))
@@ -14,19 +14,19 @@
         ,@body)
       ,@(map cadr pairs))))
 
-(defmacro let1 (var val . body)
+(define-macro let1 (var val . body)
   `((lambda (,var)
       ,@body)
     ,val))
 
-(defmacro let* (pairs . body)
+(define-macro let* (pairs . body)
   (if (null? pairs)
       `(begin ,@body)
     `(let1 ,(caar pairs) ,(cadar pairs)
        (let* ,(cdr pairs)
          ,@body))))
 
-(defmacro cond clauses
+(define-macro cond clauses
   (if (null? clauses)
       '()
     (let ((clause (car clauses))
@@ -47,7 +47,7 @@
                  (begin ,@(cdr clause))
                (cond ,@rest))))))))
 
-(defmacro and args
+(define-macro and args
   (if (null? args)
       't  ; (and) = true
     (if (null? (cdr args))

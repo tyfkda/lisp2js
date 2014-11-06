@@ -187,7 +187,7 @@
         (cons 'set! compile-set!)
         (cons 'lambda compile-lambda)
         (cons 'define  compile-define)
-        (cons 'defmacro  compile-defmacro)
+        (cons 'define-macro  compile-defmacro)
         ))
 
 (define (special-form? s)
