@@ -165,7 +165,7 @@
     ;                                          (interaction-environment)))
     (hash-table-put! *macro-table* name (eval (list* 'lambda params body)
                                               (interaction-environment)))
-    (string-append "//" (symbol->string name))))
+    (string-append "/*" (symbol->string name) "*/")))
 (define (macro? symbol)
   (hash-table-exists? *macro-table* symbol))
 (define (macroexpand-1 s)
