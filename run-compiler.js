@@ -20,8 +20,7 @@
       if (!s)
         break;
 
-      var compiled = LISP.compile(s);
-      LISP.jseval(compiled);
+      LISP.eval(s);
     }
   });
 })();
