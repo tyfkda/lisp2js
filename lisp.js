@@ -110,6 +110,8 @@ LISP = {
     return argumentsArray.join('');
   },
   "string-join": function(list, separator) {
+    if (list === LISP.nil)
+      return '';
     return list.toArray().join(separator);
   },
 
