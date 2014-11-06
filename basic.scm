@@ -54,7 +54,7 @@
         (car args)
       `(if ,(car args)
            (and ,@(cdr args))
-         'nil))))
+         nil))))
 
 ;;
 (define (null? x)  (eq? x nil))
