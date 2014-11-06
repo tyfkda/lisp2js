@@ -1,11 +1,11 @@
 if (typeof LISP === 'undefined')
   LISP = {};
 
-function SReader(str) {
+LISP.SReader = function(str) {
   this.str = str;
 }
 
-SReader.prototype.read = function() {
+LISP.SReader.prototype.read = function() {
   var m;
   if (m = this.str.match(/^\s*([0-9]+)/))  // Number.
     return this.proceed(), parseInt(m[1]);
@@ -20,11 +20,11 @@ SReader.prototype.read = function() {
   return undefined;
 };
 
-SReader.prototype.proceed = function(value) {
+LISP.SReader.prototype.proceed = function(value) {
   this.str = RegExp.rightContext;
 };
 
-SReader.prototype.readList = function() {
+LISP.SReader.prototype.readList = function() {
   var result = LISP.nil;
   var m;
   for (;;) {
@@ -39,16 +39,17 @@ SReader.prototype.readList = function() {
       return LISP['reverse!'](result);
     }
     // Error
-    return undefined;
+    console.error('Read failed: ' + this.str);
+    return process.exit(1);
   }
 };
 
-SReader.prototype.readQuote = function() {
+LISP.SReader.prototype.readQuote = function() {
   return LISP.list(LISP.intern('quote'), this.read());
 };
 
 LISP["read-from-string"] = function(str) {
-  var reader = new SReader(str);
+  var reader = new LISP.SReader(str);
   return reader.read();
 };
 
