@@ -42,6 +42,12 @@ var LISP = {
   cdr: function(s) {
     return s.cdr;
   },
+  "set-car!": function(s, x) {
+    return (s.car = x);
+  },
+  "set-cdr!": function(s, x) {
+    return (s.cdr = x);
+  },
 
   "pair?": function(x) {
     return LISP._jsBoolToS(x instanceof LISP.Cons);

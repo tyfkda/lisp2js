@@ -115,3 +115,32 @@
         ((null? ls)   (apply append rest))
         (else (cons (car ls)
                     (apply append (cdr ls) rest)))))
+
+(define (reverse ls)
+  (let loop ((ls ls)
+             (acc '()))
+    (if (null? ls)
+        acc
+      (loop (cdr ls)
+            (cons (car ls) acc)))))
+
+(define (reverse! ls)
+  (let loop ((ls ls)
+             (rev nil))
+    (if (null? ls)
+        rev
+      (let ((d (cdr ls)))
+        (set-cdr! ls rev)
+        (loop d ls)))))
+
+(define (list* . args)
+  (if (null? args)
+      nil
+    (if (null? (cdr args))
+        (car args)
+      (let loop ((p args)
+                 (q (cdr args)))
+        (if (null? (cdr q))
+            (begin (set-cdr! p (car q))
+                   args)
+          (loop q (cdr q)))))))
