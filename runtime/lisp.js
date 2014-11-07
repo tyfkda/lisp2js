@@ -177,7 +177,10 @@ LISP = {
     if (arguments.length > 1) {
       for (var i = 1; i < arguments.length - 1; ++i)
         params.push(arguments[i]);
-      params = params.concat(arguments[arguments.length - 1].toArray());
+      // Last argument for `apply` is expected as list (or nil).
+      var last = arguments[arguments.length - 1];
+      if (last !== LISP.nil)
+        params = params.concat(last.toArray());
     }
     return fn.apply(null, params);
   },
