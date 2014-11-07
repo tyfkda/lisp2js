@@ -11,6 +11,8 @@ LISP = {
   },
   "*run-on-js*": true,  // LISP.t
 
+  "*macro-table*": {},
+
   jseval: function(str) {
     return eval(str);
   },

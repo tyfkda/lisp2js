@@ -156,7 +156,6 @@
                      " = "
                      (compile* (car body) env)))))
 
-(define *macro-table* (make-hash-table))
 (define (register-macro name func)
   (hash-table-put! *macro-table* name func))
 (define (compile-defmacro s env)
