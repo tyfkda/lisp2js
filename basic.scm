@@ -26,6 +26,10 @@
        (let* ,(cdr pairs)
          ,@body))))
 
+(define-macro (when pred . body)
+  `(if ,pred
+       (begin ,@body)))
+
 (define-macro (cond . clauses)
   (if (null? clauses)
       '()
@@ -56,6 +60,12 @@
            (and ,@(cdr args))
          nil))))
 
+(define-macro (or . args)
+  (and (not (null? args))
+       (let ((g (gensym)))
+         `(let1 ,g ,(car args)
+            (if ,g ,g (or ,@(cdr args)))))))
+
 ;;
 (define (null? x)  (eq? x nil))
 (define (not x)    (eq? x nil))
@@ -64,6 +74,7 @@
 (define (cadr x)  (car (cdr x)))
 (define (cdar x)  (cdr (car x)))
 (define (cddr x)  (cdr (cdr x)))
+(define (cadar x)  (cadr (car x)))
 (define (caddr x)  (car (cddr x)))
 (define (cdddr x)  (cdr (cddr x)))
 
