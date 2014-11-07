@@ -56,7 +56,7 @@ run_raw define-lambda 2222 "(define (double x) (+ x x))
 run + 6 '(+ 1 2 3)'
 
 # Macros.
-run_raw defmacro nil "(define-macro nil! (x) (list 'define x 'nil))
+run_raw defmacro nil "(define-macro (nil! x) (list 'define x 'nil))
                       (nil! xyz)
                       (print xyz)"
 
