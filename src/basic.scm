@@ -66,9 +66,10 @@
 
 (define-macro (or . args)
   (and (not (null? args))
-       (let ((g (gensym)))
+       (let1 g (gensym)
          `(let1 ,g ,(car args)
-            (if ,g ,g (or ,@(cdr args)))))))
+            (if ,g ,g
+              (or ,@(cdr args)))))))
 
 ;;
 (define (null? x)  (eq? x nil))
