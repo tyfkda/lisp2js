@@ -20,7 +20,7 @@
                       (lambda (m) (escape-char (m)))))
 
 (define (escape-symbol sym)
-  (define (escape-char c)
+  (define (escape-sym-char c)
     (string-append "$"
                    (integer->hex-string (char->integer c) "00")))
   (define (integer->hex-string x padding)
@@ -30,7 +30,7 @@
            (pl (string-length padding)))
       (substring s (- sl pl) sl)))
   (regexp-replace-all #/[^0-9A-Za-z_]/ (symbol->string sym)
-                      (lambda (m) (escape-char (string-ref (m) 0)))))
+                      (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
 (define (compile-symbol sym env)
   (define (local-var? sym env)
