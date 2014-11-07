@@ -21,7 +21,7 @@ function run_raw() {
     error_exit "exit status is not 0 [$code]"
   fi
   if [ "$result" != "$2" ]; then
-    error_exit "$2 expected, but got '$result'"
+    error_exit "'$2' expected, but got '$result'"
   fi
   echo ok
 }
