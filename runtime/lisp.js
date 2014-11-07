@@ -90,8 +90,8 @@ LISP = {
   "number?": function(x) {
     return LISP._jsBoolToS(typeof x === 'number');
   },
-  "number->string": function(x) {
-    return x + '';
+  "number->string": function(x, n) {
+    return x.toString(n);
   },
   "+": function() {
     if (arguments.length == 0)
