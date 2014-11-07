@@ -6,6 +6,7 @@ LISP = {
   _getRestArgs: function(args, start) {
     return Array.prototype.slice.call(args, start).toList();
   },
+  "gauche-version": function() { return LISP.nil; },
 
   jseval: function(str) {
     return eval(str);
@@ -336,6 +337,7 @@ LISP.map = (function(f, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP.ni
 LISP.append = (function(ls){var rest = LISP._getRestArgs(arguments, 1); return (((LISP["null?"](rest)) !== LISP.nil ? (ls) : (((LISP["null?"](ls)) !== LISP.nil ? (LISP.apply(LISP.append, rest)) : (LISP.cons(LISP.car(ls), LISP.apply(LISP.append, LISP.cdr(ls), rest)))))));});
 LISP.reverse = (function(ls){return ((function(loop){return (loop = (function(ls, acc){return (((LISP["null?"](ls)) !== LISP.nil ? (acc) : (loop(LISP.cdr(ls), LISP.cons(LISP.car(ls), acc)))));}), loop(ls, LISP.nil));})(LISP.nil));});
 LISP["list*"] = (function(){var args = LISP._getRestArgs(arguments, 0); return (((LISP["null?"](args)) !== LISP.nil ? (LISP.nil) : (((LISP["null?"](LISP.cdr(args))) !== LISP.nil ? (LISP.car(args)) : ((function(loop){return (loop = (function(p, q){return (((LISP["null?"](LISP.cdr(q))) !== LISP.nil ? ((LISP["set-cdr!"](p, LISP.car(q)), args)) : (loop(q, LISP.cdr(q)))));}), loop(args, LISP.cdr(args)));})(LISP.nil))))));});
+LISP["*run-on-gosh*"] = LISP["gauche-version"]();
 LISP["expand-args"] = (function(args, env){return (LISP["string-join"](LISP.map((function(x){return (LISP["compile*"](x, env));}), args), ", "));});
 LISP["expand-body"] = (function(body, env){return (((LISP["null?"](body)) !== LISP.nil ? ("LISP.nil") : (LISP["expand-args"](body, env))));});
 LISP["escape-char"] = (function(c){return (((LISP["string=?"](c, "\\")) !== LISP.nil ? ("\\\\") : (((LISP["string=?"](c, "\t")) !== LISP.nil ? ("\\t") : (((LISP["string=?"](c, "\n")) !== LISP.nil ? ("\\n") : (((LISP["string=?"](c, "\"")) !== LISP.nil ? ("\\\"") : (c)))))))));});
@@ -353,7 +355,8 @@ LISP["compile-begin"] = (function(s, env){return (((LISP["null?"](s)) !== LISP.n
 LISP["compile-lambda"] = (function(s, env){return (LISP["extend-env"] = (function(env, params){return (LISP.append(params, env));}), (function(raw$2dparams){return ((function(params){return ((function(rest){return ((function(bodies){return ((function(newenv){return (LISP["string-append"]("(function(", LISP["expand-args"](params, newenv), "){", ((LISP["null?"](rest)) !== LISP.nil ? ("") : (LISP["string-append"]("var ", LISP["symbol->string"](rest), " = LISP._getRestArgs(arguments, ", LISP["number->string"](LISP.length(params)), "); "))), "return (", LISP["expand-body"](bodies, newenv), ");})"));})(LISP["extend-env"](env, ((LISP["null?"](rest)) !== LISP.nil ? (params) : (LISP.append(LISP.list(rest), params))))));})(LISP.cdr(s)));})(((LISP["pair?"](raw$2dparams)) !== LISP.nil ? (LISP.cdr(LISP["last-pair"](raw$2dparams))) : (raw$2dparams))));})(((LISP["proper-list?"](raw$2dparams)) !== LISP.nil ? (raw$2dparams) : (LISP["reverse!"](LISP.reverse(raw$2dparams))))));})(LISP.car(s)));});
 LISP["compile-define"] = (function(s, env){return ((function(name, body){return (((LISP["pair?"](name)) !== LISP.nil ? (LISP["compile-define"](LISP.list(LISP.car(name), LISP["list*"](LISP.intern("lambda"), LISP.cdr(name), body)), env)) : (LISP["string-append"](LISP["compile-symbol"](name, env), " = ", LISP["compile*"](LISP.car(body), env)))));})(LISP.car(s), LISP.cdr(s)));});
 LISP["*macro-table*"] = LISP["make-hash-table"]();
-LISP["compile-defmacro"] = (function(s, env){return ((function(name, params, body){return (LISP["hash-table-put!"](LISP["*macro-table*"], name, LISP.eval(LISP["list*"](LISP.intern("lambda"), params, body), LISP["interaction-environment"]())), LISP["string-append"]("/*", LISP["symbol->string"](name), "*/"));})(LISP.car(s), LISP.cadr(s), LISP.cddr(s)));});
+LISP["register-macro"] = (function(name, func){return (LISP["hash-table-put!"](LISP["*macro-table*"], name, func));});
+LISP["compile-defmacro"] = (function(s, env){return ((function(name, params, body){return ((function(exp){return (((LISP["*run-on-gosh*"]) !== LISP.nil ? ((LISP["hash-table-put!"](LISP["*macro-table*"], name, LISP.eval(exp, LISP["interaction-environment"]())), LISP["string-append"]("/*", LISP["symbol->string"](name), "*/"))) : ((function(compiled){return (LISP["register-macro"](name, LISP.jseval(compiled)), LISP["string-append"]("LISP['register-macro'](", compiled, ")"));})(LISP.compile(exp)))));})(LISP["list*"](LISP.intern("lambda"), params, body)));})(LISP.car(s), LISP.cadr(s), LISP.cddr(s)));});
 LISP["macro?"] = (function(symbol){return (LISP["hash-table-exists?"](LISP["*macro-table*"], symbol));});
 LISP["macroexpand-1"] = (function(s){return ((function(f){return (((f) !== LISP.nil ? (LISP.apply(f, LISP.cdr(s))) : (s)));})(((LISP["pair?"](s)) !== LISP.nil ? (LISP["hash-table-get"](LISP["*macro-table*"], LISP.car(s), LISP.nil)) : (LISP.nil))));});
 LISP.macroexpand = (function(exp){return ((function(expanded){return (((LISP["equal?"](expanded, exp)) !== LISP.nil ? (exp) : (LISP.macroexpand(expanded))));})(LISP["macroexpand-1"](exp)));});

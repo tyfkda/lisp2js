@@ -1,3 +1,5 @@
+(define *run-on-gosh* (gauche-version))
+
 (define (expand-args args env)
   (string-join (map (lambda (x) (compile* x env))
                     args)
@@ -157,15 +159,25 @@
                      (compile* (car body) env)))))
 
 (define *macro-table* (make-hash-table))
+(define (register-macro name func)
+  (hash-table-put! *macro-table* name func))
 (define (compile-defmacro s env)
   (let ((name (car s))
         (params (cadr s))
         (body (cddr s)))
     ;(hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
     ;                                          (interaction-environment)))
-    (hash-table-put! *macro-table* name (eval (list* 'lambda params body)
-                                              (interaction-environment)))
-    (string-append "/*" (symbol->string name) "*/")))
+    (let ((exp (list* 'lambda params body)))
+      (if *run-on-gosh*
+          (begin (hash-table-put! *macro-table* name (eval exp
+                                                           (interaction-environment)))
+                 (string-append "/*" (symbol->string name) "*/"))
+        (let ((compiled (compile exp)))
+          (register-macro name (jseval compiled))
+          (string-append "LISP['register-macro']("
+                         compiled
+                         ")"))))))
+
 (define (macro? symbol)
   (hash-table-exists? *macro-table* symbol))
 (define (macroexpand-1 s)

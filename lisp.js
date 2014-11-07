@@ -6,6 +6,7 @@ LISP = {
   _getRestArgs: function(args, start) {
     return Array.prototype.slice.call(args, start).toList();
   },
+  "gauche-version": function() { return LISP.nil; },
 
   jseval: function(str) {
     return eval(str);
