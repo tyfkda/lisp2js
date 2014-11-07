@@ -134,6 +134,9 @@ LISP = {
   "string?": function(x) {
     return LISP._jsBoolToS(typeof x === 'string');
   },
+  "string=?": function(x, y) {
+    return LISP._jsBoolToS(x === y);
+  },
   "string-append": function() {
     var argumentsArray = [];
     argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
@@ -218,6 +221,10 @@ LISP = {
         return match[0];
       });
     });
+  },
+  "regexp->string": function(x) {
+    var s = x.toString();
+    return s.slice(1, s.length - 1);
   },
 };
 
