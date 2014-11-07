@@ -5,9 +5,14 @@ function print(value) {
 function equals(x, y) {
   if (LISP['eq?'](x, y))
     return true;
-  return (x instanceof LISP.Cons && y instanceof LISP.Cons &&
-          equals(LISP.car(x), LISP.car(y)) &&
-          equals(LISP.cdr(x), LISP.cdr(y)));
+  if (x instanceof LISP.Cons && y instanceof LISP.Cons &&
+      equals(LISP.car(x), LISP.car(y)) &&
+      equals(LISP.cdr(x), LISP.cdr(y)))
+    return true;
+  if (x instanceof RegExp && y instanceof RegExp &&
+      x.toString() === y.toString())
+    return true;
+  return false;
 }
 
 function test(title, expected, result) {
@@ -45,6 +50,8 @@ function main() {
   test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), reads("`abc"));
   test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), reads(",abc"));
   test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), reads(",@abc"));
+
+  test('regexp', /abc/, reads("#/abc/"));
 
   print("\033[1;32mTEST ALL SUCCEEDED!\033[0;39m")
 }

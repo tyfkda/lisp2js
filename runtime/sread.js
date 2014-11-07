@@ -24,6 +24,8 @@ LISP.SReader.prototype = {
       return this.proceed(), this.readQuasiQuote();
     if (m = this.str.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
       return this.proceed(), this.readUnquote(m[1]);
+    if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
+      return this.proceed(), new RegExp(m[1]);
     return undefined;
   },
 
