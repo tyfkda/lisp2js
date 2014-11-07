@@ -1,23 +1,27 @@
+(if *run-on-gosh*
+    nil
+  (define-macro (quasiquote x)
+    (bq-completely-process x)))
+
 ;; Currently body expression in `define-macro` is evaluated in base Lisp
 ;; environment, so we don't have to have basic functions in our environment.
 (define-macro (let pairs . body)
   (if (symbol? pairs)  ; named-let
-      (let ((name pairs)
-            (pairs (car body))
-            (body (cdr body)))
-        `((lambda (,name)
-            (set! ,name (lambda ,(map car pairs)
-                          ,@body))
-            (,name ,@(map cadr pairs)))
-          nil))
+      ((lambda (name pairs body)
+         `((lambda (,name)
+             (set! ,name (lambda ,(map car pairs)
+                           ,@body))
+             (,name ,@(map cadr pairs)))
+           nil))
+       pairs (car body) (cdr body))
     `((lambda ,(map car pairs)
         ,@body)
       ,@(map cadr pairs))))
 
-(define-macro (let1 var val . body)
-  `((lambda (,var)
+(define-macro (let1 name value . body)
+  `((lambda (,name)
       ,@body)
-    ,val))
+    ,value))
 
 (define-macro (let* pairs . body)
   (if (null? pairs)
@@ -108,7 +112,7 @@
         (else (member x (cdr ls)))))
 
 (define (assoc x ls)
-  (if (null? ls) #f
+  (if (null? ls) nil
     (if (eq? x (caar ls)) (car ls)
       (assoc x (cdr ls)))))
 

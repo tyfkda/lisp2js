@@ -35,14 +35,23 @@
     });
   } else {
     var fs = require('fs');
-    var fileName = process.argv[2];
-    fs.readFile(fileName, 'utf-8', function(error, text) {
-      if (error) {
-        console.error('File open error [' + fileName + ']: ' + error);
-        process.exit(1);
+    var loop = function(index) {
+      if (index >= process.argv.length) {
+        process.exit(0);
+        return;
       }
+      var fileName = process.argv[index];
+      fs.readFile(fileName, 'utf-8', function(error, text) {
+        if (error) {
+          console.error('File open error [' + fileName + ']: ' + error);
+          process.exit(1);
+        }
 
-      process.exit(runCodes(text) ? 0 : 1);
-    });
+        if (!runCodes(text))
+          process.exit(1);
+        loop(index + 1);
+      });
+    };
+    loop(2);
   }
 })();

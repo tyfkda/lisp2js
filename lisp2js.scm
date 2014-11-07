@@ -171,7 +171,7 @@
       (if *run-on-gosh*
           (begin (hash-table-put! *macro-table* name (eval exp
                                                            (interaction-environment)))
-                 (string-append "/*" (symbol->string name) "*/"))
+                 (string-append "/*" (symbol->string name) "*/ LISP.nil"))
         (let ((compiled (compile exp)))
           (register-macro name (jseval compiled))
           (string-append "LISP['register-macro']("
