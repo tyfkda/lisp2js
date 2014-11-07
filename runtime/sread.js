@@ -82,7 +82,11 @@ LISP.SReader.prototype = {
 
   unescape: function(str) {
     return str.replace(/\\./g, function(match) {
-      return match[1];
+      switch (match[1]) {
+      case 't':  return '\t';
+      case 'n':  return '\n';
+      default:  return match[1];
+      }
     });
   },
 };
