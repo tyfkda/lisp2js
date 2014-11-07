@@ -6,15 +6,6 @@
  */
 
 (function() {
-  // Get called script node.
-  var getMyScriptTag = function (e) {
-    if (e.id == '_firebugConsole')
-      return getMyScriptTag(document.body);
-    if (e.nodeName.toLowerCase() == 'script')
-      return e;
-    return getMyScriptTag(e.lastChild);
-  };
-
   // Run Lisp codes.
   var runCodes = function(codes) {
     var reader = new LISP.SReader(codes);
@@ -26,7 +17,8 @@
     }
   };
 
-  var scriptTag = getMyScriptTag(document);
-  var codes = scriptTag.innerHTML;
+  var scriptTags = document.getElementsByTagName('script');
+  var myScriptTag = scriptTags[scriptTags.length - 1];
+  var codes = myScriptTag.text;
   runCodes(codes);
 })();

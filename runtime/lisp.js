@@ -6,6 +6,9 @@ LISP = {
   _getRestArgs: function(args, start) {
     return Array.prototype.slice.call(args, start).toList();
   },
+  _output: function(str) {
+    console.log(str);
+  },
   "*run-on-js*": true,  // LISP.t
 
   jseval: function(str) {
@@ -165,7 +168,7 @@ LISP = {
     return x.toString();
   },
   print: function(x) {
-    console.log(LISP.makeString(x));
+    LISP._output(LISP.makeString(x));
     return x;
   },
 
