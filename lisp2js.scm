@@ -120,31 +120,31 @@
 (define (compile-lambda s env)
   (define (extend-env env params)
     (append params env))
-  (let* ((raw-params (car s))
-         (params (if (proper-list? raw-params)
-                     raw-params
-                   (reverse! (reverse raw-params))))  ; Remove dotted part.
-         (rest (if (pair? raw-params)
-                   (cdr (last-pair raw-params))
-                 raw-params))
-         (bodies (cdr s)))
-    (let1 newenv (extend-env env (if (null? rest)
-                                     params
-                                   (append (list rest)
-                                           params)))
-      (string-append "(function("
-                     (expand-args params newenv)
-                     "){"
-                     (if (null? rest)
-                         ""
-                       (string-append "var "
-                                      (symbol->string rest)
-                                      " = LISP._getRestArgs(arguments, "
-                                      (number->string (length params))
-                                      "); "))
-                     "return ("
-                     (expand-body bodies newenv)
-                     ");})"))))
+  (let ((raw-params (car s))
+        (bodies (cdr s)))
+    (let ((params (if (proper-list? raw-params)
+                      raw-params
+                    (reverse! (reverse raw-params))))  ; Remove dotted part.
+          (rest (if (pair? raw-params)
+                    (cdr (last-pair raw-params))
+                  raw-params)))
+      (let1 newenv (extend-env env (if (null? rest)
+                                       params
+                                     (append (list rest)
+                                             params)))
+        (string-append "(function("
+                       (expand-args params newenv)
+                       "){"
+                       (if (null? rest)
+                           ""
+                         (string-append "var "
+                                        (symbol->string rest)
+                                        " = LISP._getRestArgs(arguments, "
+                                        (number->string (length params))
+                                        "); "))
+                       "return ("
+                       (expand-body bodies newenv)
+                       ");})")))))
 
 (define (compile-define s env)
   (let ((name (car s))
