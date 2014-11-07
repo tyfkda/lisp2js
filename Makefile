@@ -1,12 +1,13 @@
 all:	jslisp
 
-RUNTIMES=runtime/lisp.js runtime/sread.js
 SRCS=src/basic.scm src/backquote.scm src/lisp2js.scm
 
-jslisp:	jslisp.js
-jslisp.js:	$(RUNTIMES) $(SRCS)
-	cat $(RUNTIMES) > $@
-	cat $(SRCS) | gosh run-goshlisp.scm >> $@
+clean:
+	rm -rf lisp2js.js
+
+jslisp:	lisp2js.js
+lisp2js.js:	$(SRCS)
+	cat $(SRCS) | gosh run-goshlisp.scm > $@
 
 test:	sread-test simple-test
 	echo 'ok'
