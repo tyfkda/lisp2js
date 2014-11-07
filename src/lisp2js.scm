@@ -156,8 +156,6 @@
                      " = "
                      (compile* (car body) env)))))
 
-(define (register-macro name func)
-  (hash-table-put! *macro-table* name func))
 (define (compile-defmacro s env)
   (let ((name (caar s))
         (params (cdar s))

@@ -12,6 +12,9 @@ LISP = {
   "*run-on-js*": true,  // LISP.t
 
   "*macro-table*": {},
+  "register-macro": function(name, func) {
+    LISP['*macro-table*'][name] = func;
+  },
 
   jseval: function(str) {
     return eval(str);
