@@ -15,7 +15,7 @@ function run() {
 
 function run_raw() {
   echo -n "Testing $1 ... "
-  result=$(echo "$3" | ./runlisp)
+  result=$(echo "$3" | ./run-goshlisp)
   code=$?
   if [ $code -ne 0 ]; then
     error_exit "exit status is not 0 [$code]"

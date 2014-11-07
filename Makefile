@@ -1,7 +1,7 @@
-all:	compiler
+all:	jslisp
 
-compiler:	compiler.js
-compiler.js:	lisp.js sread.js basic.scm lisp2js.scm
+jslisp:	jslisp.js
+jslisp.js:	lisp.js sread.js basic.scm lisp2js.scm
 	cat lisp.js sread.js > $@
 	cat basic.scm lisp2js.scm | gosh lisp2js.scm >> $@
 

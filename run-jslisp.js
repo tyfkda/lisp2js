@@ -1,5 +1,5 @@
 (function() {
-  require('./compiler');
+  require('./jslisp');
 
   // Read all input from stdin, and fire callback.
   var readAllFromStdin = function(callback) {
