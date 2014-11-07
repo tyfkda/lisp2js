@@ -40,6 +40,7 @@ function main() {
   test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), reads("'abc"));
   test('string', 'abc', reads('"abc"'));
   test('complex string', 'foo bar\nbaz', reads('"foo bar\nbaz"'));
+  test('double quote in string', '"', reads('"\\""'));
 
   test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), reads("`abc"));
   test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), reads(",abc"));
