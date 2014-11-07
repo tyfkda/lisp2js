@@ -293,6 +293,7 @@ LISP.SReader.prototype = {
         var last = this.read();
         if (last !== undefined) {
           if (m = this.str.match(/^\s*\)/)) {  // Close paren.
+            this.proceed();
             var reversed = LISP['reverse!'](result);
             result.cdr = last;
             return reversed;

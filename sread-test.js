@@ -33,6 +33,7 @@ function main() {
   test('single element list', LISP.cons(1, LISP.nil), reads('(1)'));
   test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), reads('(1 2 3)'));
   test('dotted pair', LISP.cons(1, LISP.cons(2, 3)), reads('(1 2 . 3)'));
+  test('dotted pair2', LISP.list(1, LISP.cons(2, 3), 4), reads('(1 (2 . 3) 4)'));
 
   test('line comment', 123, reads(';comment\n123'));
   test('symbol', LISP.intern('symbol'), reads('symbol'));
