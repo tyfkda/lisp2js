@@ -27,7 +27,7 @@ LISP = {
   },
   __gensymIndex: 0,
   gensym: function() {
-    return "__" + (++LISP.__gensymIndex);
+    return LISP.intern("__" + (++LISP.__gensymIndex));
   },
 
   $$symbolTable: {},  // key(string) => Symbol object
