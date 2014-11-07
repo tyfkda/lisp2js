@@ -73,7 +73,7 @@ LISP = {
   },
   "reverse!": function(x) {
     var rev = LISP.nil;
-    for (var ls = x; !LISP['eq?'](ls, LISP.nil); ) {
+    for (var ls = x; LISP['pair?'](ls, LISP.nil); ) {
       var d = ls.cdr;
       ls.cdr = rev;
       rev = ls;
@@ -346,7 +346,7 @@ LISP.member = (function(x, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP
 LISP.assoc = (function(x, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP.nil) : (((LISP["eq?"](x, LISP.caar(ls))) !== LISP.nil ? (LISP.car(ls)) : (LISP.assoc(x, LISP.cdr(ls)))))));});
 LISP.map = (function(f, ls){return (((LISP["null?"](ls)) !== LISP.nil ? (LISP.nil) : (LISP.cons(f(LISP.car(ls)), LISP.map(f, LISP.cdr(ls))))));});
 LISP.append = (function(ls){var rest = LISP._getRestArgs(arguments, 1); return (((LISP["null?"](rest)) !== LISP.nil ? (ls) : (((LISP["null?"](ls)) !== LISP.nil ? (LISP.apply(LISP.append, rest)) : (LISP.cons(LISP.car(ls), LISP.apply(LISP.append, LISP.cdr(ls), rest)))))));});
-LISP.reverse = (function(ls){return ((function(loop){return (loop = (function(ls, acc){return (((LISP["null?"](ls)) !== LISP.nil ? (acc) : (loop(LISP.cdr(ls), LISP.cons(LISP.car(ls), acc)))));}), loop(ls, LISP.nil));})(LISP.nil));});
+LISP.reverse = (function(ls){return ((function(loop){return (loop = (function(ls, acc){return (((LISP["pair?"](ls)) !== LISP.nil ? (loop(LISP.cdr(ls), LISP.cons(LISP.car(ls), acc))) : (acc)));}), loop(ls, LISP.nil));})(LISP.nil));});
 LISP["list*"] = (function(){var args = LISP._getRestArgs(arguments, 0); return (((LISP["null?"](args)) !== LISP.nil ? (LISP.nil) : (((LISP["null?"](LISP.cdr(args))) !== LISP.nil ? (LISP.car(args)) : ((function(loop){return (loop = (function(p, q){return (((LISP["null?"](LISP.cdr(q))) !== LISP.nil ? ((LISP["set-cdr!"](p, LISP.car(q)), args)) : (loop(q, LISP.cdr(q)))));}), loop(args, LISP.cdr(args)));})(LISP.nil))))));});
 LISP["*run-on-gosh*"] = LISP["gauche-version"]();
 LISP["expand-args"] = (function(args, env){return (LISP["string-join"](LISP.map((function(x){return (LISP["compile*"](x, env));}), args), ", "));});

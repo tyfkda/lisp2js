@@ -116,10 +116,10 @@
 (define (reverse ls)
   (let loop ((ls ls)
              (acc '()))
-    (if (null? ls)
-        acc
-      (loop (cdr ls)
-            (cons (car ls) acc)))))
+    (if (pair? ls)
+        (loop (cdr ls)
+              (cons (car ls) acc))
+      acc)))
 
 (define (list* . args)
   (if (null? args)
