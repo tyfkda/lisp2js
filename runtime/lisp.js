@@ -220,7 +220,7 @@ LISP = {
       re = eval(re.toString() + 'g')
     return str.replace(re, function (match) {
       return fn(function() {  // TODO: handle arguments.
-        return match[0];
+        return match;
       });
     });
   },
