@@ -82,6 +82,12 @@ LISP = {
     return rev;
   },
 
+  "number?": function(x) {
+    return LISP._jsBoolToS(typeof x === 'number');
+  },
+  "number->string": function(x) {
+    return x + '';
+  },
   "+": function() {
     if (arguments.length == 0)
       return 0;
@@ -108,11 +114,17 @@ LISP = {
       result -= arguments[i];
     return result;
   },
-  "number?": function(x) {
-    return LISP._jsBoolToS(typeof x === 'number');
-  },
-  "number->string": function(x) {
-    return x + '';
+  "<": function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value < target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
   },
 
   // String.
