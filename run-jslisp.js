@@ -16,7 +16,7 @@
   };
 
   // Run codes.
-  var runCodes = function(codes) {
+  var runCodes = function(codes, compile) {
     var reader = new LISP.SReader(codes);
     var s;
     for (;;) {
@@ -24,7 +24,13 @@
       if (!s)
         break;
 
-      LISP.eval(s);
+      if (compile) {
+        var compiled = LISP.compile(s);
+        LISP.print(compiled);
+        LISP.jseval(compiled);  // Evaluate JS, even if compile flag is set.
+      } else {
+        LISP.eval(s);
+      }
     }
     return s === undefined;
   };
@@ -35,19 +41,24 @@
     });
   } else {
     var fs = require('fs');
+    var compileOnly = false;
     var loop = function(index) {
       if (index >= process.argv.length) {
         process.exit(0);
         return;
       }
       var fileName = process.argv[index];
+      if (fileName === '-c') {
+        compileOnly = true;
+        return loop(index + 1);
+      }
       fs.readFile(fileName, 'utf-8', function(error, text) {
         if (error) {
           console.error('File open error [' + fileName + ']: ' + error);
           process.exit(1);
         }
 
-        if (!runCodes(text))
+        if (!runCodes(text, compileOnly))
           process.exit(1);
         loop(index + 1);
       });
