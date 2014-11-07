@@ -1,0 +1,10 @@
+(define *run-on-js* #f)
+
+(include "./lisp2js")  ;; Cannot use `require` to refer `*run-on-js*` in it.
+
+(define (main args)
+  (let ((ss (port->sexp-list (current-input-port))))
+    (dolist (s ss)
+      (display (compile s))
+      (display ";\n")))
+  0)

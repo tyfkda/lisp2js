@@ -1,5 +1,3 @@
-(define *run-on-gosh* (gauche-version))
-
 (define (expand-args args env)
   (string-join (map (lambda (x) (compile* x env))
                     args)
@@ -168,15 +166,15 @@
     ;(hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
     ;                                          (interaction-environment)))
     (let ((exp (list* 'lambda params body)))
-      (if *run-on-gosh*
-          (begin (hash-table-put! *macro-table* name (eval exp
-                                                           (interaction-environment)))
-                 (string-append "/*" (symbol->string name) "*/ LISP.nil"))
-        (let ((compiled (compile exp)))
-          (register-macro name (jseval compiled))
-          (string-append "LISP['register-macro']("
-                         compiled
-                         ")"))))))
+      (if *run-on-js*
+          (let ((compiled (compile exp)))
+            (register-macro name (jseval compiled))
+            (string-append "LISP['register-macro']("
+                           compiled
+                           ")"))
+        (begin (hash-table-put! *macro-table* name (eval exp
+                                                         (interaction-environment)))
+               (string-append "/*" (symbol->string name) "*/ LISP.nil"))))))
 
 (define (macro? symbol)
   (hash-table-exists? *macro-table* symbol))
@@ -215,10 +213,3 @@
 
 (define (compile s)
   (compile* s '()))
-
-(define (main args)
-  (let ((ss (port->sexp-list (current-input-port))))
-    (dolist (s ss)
-      (display (compile s))
-      (display ";\n")))
-  0)

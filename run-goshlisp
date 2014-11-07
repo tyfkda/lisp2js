@@ -2,6 +2,6 @@
 
 set -e
 
-gosh lisp2js.scm > compiled-result.js
+gosh run-goshlisp.scm > compiled-result.js
 cat lisp.js sread.js compiled-result.js | node
 rm compiled-result.js
