@@ -44,5 +44,14 @@
 
 (print (list 'fib30 '= (fib 30)))
     </script>
+
+    <script src="jslisp.js">
+;; Call JavaScript function
+;; `JS` is JavaScript global hash table.
+(define-macro (jscall name . args)
+  (cons (list 'hash-table-get 'JS (symbol->string name))
+         args))
+(jscall alert "Hello, JsLisp!")
+    </script>
   </body>
 </html>

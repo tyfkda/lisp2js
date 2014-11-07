@@ -181,6 +181,8 @@ LISP = {
     }
     return fn.apply(null, params);
   },
+  JS: ((typeof window !== 'undefined') ? window :
+       (typeof GLOBAL !== 'undefined') ? GLOBAL : {}),
 
   // Hash table.
   "make-hash-table": function() {
