@@ -284,9 +284,20 @@ LISP.SReader.prototype = {
         continue;
       }
 
-      if (m = this.str.match(/^\s*\)/)) {
+      if (m = this.str.match(/^\s*\)/)) {  // Close paren.
         this.proceed();
         return LISP['reverse!'](result);
+      }
+      if (m = this.str.match(/^\s*\.\s/)) {  // Dot.
+        this.proceed();
+        var last = this.read();
+        if (last !== undefined) {
+          if (m = this.str.match(/^\s*\)/)) {  // Close paren.
+            var reversed = LISP['reverse!'](result);
+            result.cdr = last;
+            return reversed;
+          }
+        }
       }
       // Error
       console.error('Read failed: ' + this.str);
