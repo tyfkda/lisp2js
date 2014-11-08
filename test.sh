@@ -10,7 +10,7 @@ function error_exit() {
 }
 
 function run() {
-  run_raw "$1" "$2" "(print $3)"
+  run_raw "$1" "$2" "(write $3)"
 }
 
 function run_raw() {
@@ -31,7 +31,7 @@ function run_raw() {
 
 run integer 123 '123'
 run symbol abc '(quote abc)'
-run string abc '"abc"'
+run string '"abc"' '"abc"'
 run t 't' 't'
 run nil 'nil' 'nil'
 run quote 123 '(quote 123)'

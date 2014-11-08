@@ -166,17 +166,26 @@ LISP = {
     return char.charCodeAt(index);
   },
 
-  makeString: function(x) {
+  _escapeCharTable: { '\\': '\\\\', '\t': '\\t', '\n': '\\n' },
+  _inspectString: function(str) {
+    return '"' + str.replace(/[\\\t\n"]/g, function(m) { return LISP._escapeCharTable[m]; }) + '"';
+  },
+
+  makeString: function(x, inspect) {
     if (x === LISP.nil)
       return 'nil';
     if (x === LISP.t)
       return 't';
     if (typeof x == 'string')
-      return x;
-    return x.toString();
+      return inspect ? LISP._inspectString(x) : x;
+    return x.toString(inspect);
   },
   print: function(x) {
     LISP._output(LISP.makeString(x));
+    return x;
+  },
+  write: function(x) {
+    LISP._output(LISP.makeString(x, 10));  // 10 means true, and it is used as radix.
     return x;
   },
 
@@ -240,18 +249,18 @@ LISP.Symbol.prototype = {
 };
 
 LISP.Cons.prototype = {
-  toString: function() {
+  toString: function(inspect) {
     var ss = [];
     var separator = "(";
     var p;
     for (p = this; p instanceof LISP.Cons; p = p.cdr) {
       ss.push(separator);
-      ss.push(LISP.makeString(p.car));
+      ss.push(LISP.makeString(p.car, inspect));
       separator = " ";
     }
     if (p !== LISP.nil) {
       ss.push(" . ");
-      ss.push(LISP.makeString(p));
+      ss.push(LISP.makeString(p, inspect));
     }
     ss.push(")");
     return ss.join("");
