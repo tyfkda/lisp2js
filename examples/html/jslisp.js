@@ -8,7 +8,7 @@
 (function() {
   // Run Lisp codes.
   var runCodes = function(codes) {
-    var reader = new LISP.SReader(codes);
+    var reader = new LISP.Reader(codes);
     for (;;) {
       var s = reader.read();
       if (s === undefined)
