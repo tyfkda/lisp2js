@@ -1,5 +1,5 @@
 // DO NOT EDIT, this file is generated from src/*.scm
-((LISP["*run-on-gosh*"]) !== LISP.nil ? (LISP.nil) : (/*quasiquote*/ LISP.nil));
+((LISP["*run-on-js*"]) !== LISP.nil ? (/*quasiquote*/ LISP.nil) : (LISP.nil));
 /*let*/ LISP.nil;
 /*let1*/ LISP.nil;
 /*let**/ LISP.nil;
