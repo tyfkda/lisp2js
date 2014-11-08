@@ -160,20 +160,8 @@
   (let ((name (caar s))
         (params (cdar s))
         (body (cdr s)))
-    ;(hash-table-put! *macro-table* name (eval `(lambda ,params ,@body)
-    ;                                          (interaction-environment)))
     (let ((exp (list* 'lambda params body)))
-      (if *run-on-js*
-          (let ((compiled (compile exp)))
-            (register-macro name (jseval compiled))
-            (string-append "LISP['register-macro'](LISP.intern(\""
-                           (escape-string (symbol->string name))
-                           "\"), "
-                           compiled
-                           ")"))
-        (begin (hash-table-put! *macro-table* name (eval exp
-                                                         (interaction-environment)))
-               (string-append "/*" (symbol->string name) "*/ LISP.nil"))))))
+      (do-compile-defmacro name exp))))
 
 (define (macro? symbol)
   (hash-table-exists? *macro-table* symbol))

@@ -15,6 +15,15 @@ LISP = {
   "register-macro": function(name, func) {
     LISP['*macro-table*'][name] = func;
   },
+  "do-compile-defmacro": function(name, exp) {
+    var compiled = LISP.compile(exp);
+    LISP['register-macro'](name, compiled);
+    return ("LISP['register-macro'](LISP.intern(\"" +
+            LISP['escape-string'](LISP['symbol->string'](name)) +
+            "\"), " +
+            compiled +
+            ")");
+  },
 
   jseval: function(str) {
     return eval(str);
