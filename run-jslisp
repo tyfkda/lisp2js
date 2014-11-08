@@ -19,7 +19,7 @@
 
   // Run codes.
   var runCodes = function(codes, compile) {
-    var reader = new LISP.SReader(codes);
+    var reader = new LISP.Reader(codes);
     var s;
     for (;;) {
       s = reader.read();

@@ -1,11 +1,11 @@
 if (typeof LISP === 'undefined')
   LISP = {};
 
-LISP.SReader = function(str) {
+LISP.Reader = function(str) {
   this.str = str;
-}
+};
 
-LISP.SReader.prototype = {
+LISP.Reader.prototype = {
   read: function() {
     var m;
     if (m = this.str.match(/^\s*([0-9]+)/))  // Number.
@@ -92,7 +92,7 @@ LISP.SReader.prototype = {
 };
 
 LISP["read-from-string"] = function(str) {
-  var reader = new LISP.SReader(str);
+  var reader = new LISP.Reader(str);
   return reader.read();
 };
 
