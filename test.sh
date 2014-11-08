@@ -1,5 +1,11 @@
 #!/bin/bash
 
+LISP_RUNNER="./run-goshlisp"
+
+if [ $# -eq 1 ]; then
+    LISP_RUNNER=$1
+fi
+
 ################################################################
 # Test framework.
 
@@ -15,7 +21,7 @@ function run() {
 
 function run_raw() {
   echo -n "Testing $1 ... "
-  result=$(echo "$3" | ./run-goshlisp)
+  result=$(echo "$3" | $LISP_RUNNER)
   code=$?
   if [ $code -ne 0 ]; then
     error_exit "exit status is not 0 [$code]"
