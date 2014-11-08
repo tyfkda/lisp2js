@@ -5,6 +5,12 @@
 (define (do-compile-defmacro name exp)
   (register-macro name (eval exp (interaction-environment)))
   (string-append "/*" (symbol->string name) "*/ LISP.nil"))
+(define (macroexpand-1 s)
+  (let ((macrofn (and (pair? s)
+                      (hash-table-get *macro-table* (car s) #f))))
+    (if macrofn
+        (apply macrofn (cdr s))
+      s)))
 
 (include "./src/lisp2js")  ;; Cannot use `require` to refer `*run-on-js*` in it.
 

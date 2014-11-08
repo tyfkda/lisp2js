@@ -163,14 +163,6 @@
     (let ((exp (list* 'lambda params body)))
       (do-compile-defmacro name exp))))
 
-(define (macro? symbol)
-  (hash-table-exists? *macro-table* symbol))
-(define (macroexpand-1 s)
-  (let ((f (and (pair? s)
-                (hash-table-get *macro-table* (car s) #f))))
-    (if f
-        (apply f (cdr s))
-      s)))
 (define (macroexpand exp)
   (let ((expanded (macroexpand-1 exp)))
     (if (equal? expanded exp)
@@ -192,11 +184,13 @@
         (else #f)))
 
 (define (compile* s env)
-  (if (pair? s)
-      (cond ((macro? (car s)) (compile* (macroexpand s) env))
-            ((special-form? s) => (lambda (fn) (fn (cdr s) env)))
-            (else (compile-funcall (macroexpand s) env)))
-    (compile-literal s env)))
+  (let ((expanded (macroexpand s)))
+    (if (eq? expanded s)
+        (if (pair? s)
+            (cond ((special-form? s) => (lambda (fn) (fn (cdr s) env)))
+                  (else (compile-funcall (macroexpand s) env)))
+          (compile-literal s env))
+      (compile* expanded env))))
 
 (define (compile s)
   (compile* s '()))

@@ -24,6 +24,12 @@ LISP = {
             compiled +
             ")");
   },
+  "macroexpand-1": function(s) {
+    if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
+      return s;
+    var macrofn = LISP['*macro-table*'][s.car];
+    return LISP.apply(macrofn, s.cdr);
+  },
 
   jseval: function(str) {
     return eval(str);
