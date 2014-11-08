@@ -27,6 +27,25 @@ function test(title, expected, result) {
   process.exit(1);
 }
 
+function fail(title, exception, code) {
+  process.stdout.write('Testing ' + title + '... ');
+  var errorMessage;
+  try {
+    var result = LISP['read-from-string'](code);
+    errorMessage = 'Failure expected, but succeeded: result=' + result;
+  } catch (exc) {
+    if (exc instanceof exception) {
+      print('ok');
+      return;
+    }
+    errorMessage = 'Unexpected exception: expected ' + exceptin + ' : actual ' + exc;
+  }
+
+  console.error("\033[1;31m[ERROR]\033[0;39m");
+  console.error('  ' + errorMessage);
+  process.exit(1);
+}
+
 function main() {
   /*var LISP =*/ require('./lisp');
   /*var LISP =*/ require('./sread');
@@ -52,6 +71,8 @@ function main() {
   test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), reads(",@abc"));
 
   test('regexp', /abc/, reads("#/abc/"));
+
+  fail('no close paren', LISP.NoCloseParenException, '(1 2 3');
 
   print("\033[1;32mTEST ALL SUCCEEDED!\033[0;39m")
 }

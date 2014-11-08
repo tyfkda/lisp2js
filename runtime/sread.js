@@ -5,6 +5,8 @@ LISP.Reader = function(str) {
   this.str = str;
 };
 
+LISP.NoCloseParenException = function() {};
+
 LISP.Reader.prototype = {
   read: function() {
     var m;
@@ -62,8 +64,7 @@ LISP.Reader.prototype = {
         }
       }
       // Error
-      console.error('Read failed: ' + this.str);
-      return process.exit(1);
+      throw new LISP.NoCloseParenException();
     }
   },
 
