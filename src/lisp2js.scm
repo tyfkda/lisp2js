@@ -148,6 +148,7 @@
   (let ((name (car s))
         (body (cdr s)))
     (if (pair? name)
+        ;; Convert (define (foo args...) ...) => (define foo (lambda (args...) ...))
         ;(compile-define `(define ,(car name) (lambda ,(cdr name) ,@body)) env)
         (compile-define (list (car name)
                               (list* 'lambda (cdr name) body))
