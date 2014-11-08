@@ -22,7 +22,6 @@ LISP = {
   eval: function(exp) {
     return eval(LISP.compile(exp));
   },
-  "interaction-environment": function() { return LISP.nil; },
 
   Symbol: function(name) {
     this.name = name;
