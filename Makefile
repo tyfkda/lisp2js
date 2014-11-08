@@ -7,7 +7,8 @@ clean:
 
 jslisp:	lisp2js.js
 lisp2js.js:	$(SRCS)
-	cat $(SRCS) | gosh run-goshlisp.scm > $@
+	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
+	cat $(SRCS) | gosh run-goshlisp.scm >> $@
 
 test:	sread-test simple-test
 	echo 'ok'
