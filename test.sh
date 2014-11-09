@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LISP_RUNNER="./run-jslisp"
+LISP_RUNNER="./jslisp"
 
 if [ $# -eq 1 ]; then
     LISP_RUNNER=$1

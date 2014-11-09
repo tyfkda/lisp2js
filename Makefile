@@ -9,7 +9,7 @@ clean:
 update-compiler:	lisp2js.js
 lisp2js.js:	$(SRCS)
 	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $(TMPFN)
-	./run-jslisp -c $(SRCS) >> $(TMPFN)
+	./jslisp -c $(SRCS) >> $(TMPFN)
 	mv $(TMPFN) $@
 
 lisp2js-old.js:	$(SRCS)

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 (function() {
-  require('./jslisp');
+  require("./runtime/lisp.js");
+  require("./lisp2js.js");
 
   // Read all input from stdin, and fire callback.
   var readAllFromStdin = function(callback) {
