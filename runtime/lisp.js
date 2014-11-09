@@ -38,6 +38,12 @@ LISP = {
     return eval(LISP.compile(exp));
   },
 
+  error: function() {
+    var argumentsArray = [];
+    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
+    throw argumentsArray.join(', ');
+  },
+
   Symbol: function(name) {
     this.name = name;
   },
