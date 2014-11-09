@@ -20,7 +20,7 @@ test:	sread-test simple-test
 	echo 'ok'
 
 sread-test:
-	cd runtime && node sread-test.js
+	cd test && node sread-test.js
 
 simple-test:
 	./test.sh
