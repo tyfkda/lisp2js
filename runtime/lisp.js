@@ -77,9 +77,13 @@ LISP = {
     return new LISP.Cons(car, cdr);
   },
   car: function(s) {
+    if (s == LISP.nil)
+      return s;
     return s.car;
   },
   cdr: function(s) {
+    if (s == LISP.nil)
+      return s;
     return s.cdr;
   },
   "set-car!": function(s, x) {

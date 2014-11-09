@@ -5,16 +5,6 @@
     (set-cdr! ls tail)
     top))
 
-(define (safe-car x)
-  (if (null? x)
-      '()
-    (car x)))
-(define (safe-cdr x)
-  (if (null? x)
-      '()
-    (cdr x)))
-(define (safe-cadr x)  (safe-car (safe-cdr x)))
-
 (define (any f ls)
   (cond ((null? ls) nil)
         ((f (car ls)) t)
@@ -248,7 +238,7 @@
 
 (define (bq-attach-append op item result)
   (cond ((and (null-or-quoted item) (null-or-quoted result))
-         (list 'quote (append (safe-cadr item) (safe-cadr result))))
+         (list 'quote (append (cadr item) (cadr result))))
         ((or (null? result) (equal? result *bq-quote-nil*))
          (if (bq-splicing-frob item) (list op item) item))
         ((and (pair? result) (eq? (car result) op))
