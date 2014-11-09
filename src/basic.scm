@@ -33,6 +33,11 @@
   `(if ,pred
        (begin ,@body)))
 
+(define-macro (unless pred . body)
+  `(if ,pred
+       nil
+     (begin ,@body)))
+
 (define-macro (cond . clauses)
   (if (null? clauses)
       '()
