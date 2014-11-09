@@ -19,4 +19,4 @@ sread-test:
 	cd test && node sread-test.js
 
 simple-test:
-	./test.sh
+	cd test && ./test.sh
