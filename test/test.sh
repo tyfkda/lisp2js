@@ -64,6 +64,11 @@ run_raw defmacro nil "(define-macro (nil! x) (list 'define x 'nil))
                       (nil! xyz)
                       (print xyz)"
 
+# Field reference.
+run_raw refer-field 123 "(define h (make-hash-table))
+                         (set! h.x 123)
+                         (print h.x)"
+
 ################################################################
 # All tests succeeded.
 

@@ -48,7 +48,7 @@ LISP = {
     this.name = name;
   },
   "symbol->string": function(x) {
-    return x.toString();
+    return x.name;
   },
   __gensymIndex: 0,
   gensym: function() {
@@ -230,6 +230,10 @@ LISP = {
   },
   substring: function(str, start, end) {
     return str.slice(start, end);
+  },
+  "string-scan": function(str, item) {
+    var index = str.indexOf(item);
+    return index >= 0 ? index : LISP.nil;
   },
 
   "char->integer": function(char, index) {

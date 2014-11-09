@@ -1,5 +1,13 @@
+;; Get symbol which sits on the top of dot-concatenated symbol.
+;;   ex. foo.bar.baz => foo
+(define (get-receiver sym)
+  (let ((s (symbol->string sym)))
+    (aif (string-scan s ".")
+         (intern (substring s 0 it))
+      sym)))
+
 (define (local-var? sym env)
-  (member sym env))
+  (member (get-receiver sym) env))
 
 (define (expand-args args env)
   (string-join (map (lambda (x) (compile* x env))
@@ -32,14 +40,14 @@
            (sl (string-length s))
            (pl (string-length padding)))
       (substring s (- sl pl) sl)))
-  (regexp-replace-all #/[^0-9A-Za-z_]/ (symbol->string sym)
+  (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
                       (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
 (define (compile-symbol sym env)
   (if (local-var? sym env)
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
-      (if (rxmatch #/^[0-9A-Za-z_]*$/ s)
+      (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
           (string-append "LISP."
                          s)
         (string-append "LISP[\""
