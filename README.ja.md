@@ -22,8 +22,8 @@ Lispコードは下のルールでJSにコンパイルされる：
 
 | Lisp       | JavaScript      |
 |------------|-----------------|
-| `()`       | `null`          |
-| `#f`       | `null`          |
+| `()`       | `false`         |
+| `#f`       | `false`         |
 | `#t`       | `true`          |
 | Pair       | `Cons` object   |
 | symbol     | `Symbol` object |

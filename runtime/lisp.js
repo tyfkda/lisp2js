@@ -1,5 +1,5 @@
 LISP = {
-  nil: null,
+  nil: false,
   t: true,
 
   _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil; },
