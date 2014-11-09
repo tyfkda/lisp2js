@@ -22,7 +22,7 @@ Lisp code is compiled into JS, in a rule below:
 
 | Lisp       | JavaScript      |
 |------------|-----------------|
-| `()`       | `null`          |
+| `()`       | `false`         |
 | `#f`       | `null`          |
 | `#t`       | `true`          |
 | Pair       | `Cons` object   |
