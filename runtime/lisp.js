@@ -2,7 +2,7 @@ LISP = {
   nil: null,
   t: true,
 
-  _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil;  },
+  _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil; },
   _getRestArgs: function(args, start) {
     return Array.prototype.slice.call(args, start).toList();
   },
@@ -245,7 +245,7 @@ LISP = {
     return LISP._jsBoolToS(x instanceof RegExp);
   },
   rxmatch: function(re, str) {
-    return re.exec(str);
+    return LISP._jsBoolToS(re.exec(str));
   },
   "regexp-replace-all": function(re, str, fn) {
     if (!re.global)
