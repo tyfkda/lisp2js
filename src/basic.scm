@@ -1,7 +1,3 @@
-(if *run-on-js*
-    (define-macro (quasiquote x)
-      (bq-completely-process x)))
-
 ;; Currently body expression in `define-macro` is evaluated in base Lisp
 ;; environment, so we don't have to have basic functions in our environment.
 (define-macro (let pairs . body)

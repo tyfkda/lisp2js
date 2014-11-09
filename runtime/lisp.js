@@ -9,7 +9,6 @@ LISP = {
   _output: function(str) {
     console.log(str);
   },
-  "*run-on-js*": true,  // LISP.t
 
   "*macro-table*": {},
   "register-macro": function(name, func) {
