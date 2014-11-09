@@ -63,6 +63,8 @@ function main() {
 
   test('line comment', 123, reads(';comment\n123'));
   test('symbol', LISP.intern('symbol'), reads('symbol'));
+  test('number like symbol', LISP.intern('1+'), reads('1+'));
+  test('non ascii character symbol', LISP.intern('Ｓｙｍｂｏｌ'), reads('Ｓｙｍｂｏｌ'));
   test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), reads("'abc"));
   test('string', 'abc', reads('"abc"'));
   test('complex string', 'foo bar\nbaz', reads('"foo bar\nbaz"'));
