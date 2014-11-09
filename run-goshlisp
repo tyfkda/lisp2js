@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -e
-
-gosh run-goshlisp.scm > compiled-result.js
-cat runtime/lisp.js runtime/sread.js compiled-result.js | node
-rm compiled-result.js
