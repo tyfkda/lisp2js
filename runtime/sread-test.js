@@ -53,6 +53,7 @@ function main() {
   var reads = LISP['read-from-string'];
 
   test('integer', 123, reads('123'));
+  test('float', 1.23, reads('1.23'));
   test('nil', LISP.nil, reads('()'));
   test('single element list', LISP.cons(1, LISP.nil), reads('(1)'));
   test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), reads('(1 2 3)'));
