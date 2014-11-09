@@ -13,6 +13,7 @@ Translate Lisp code into JavaScript.
 ### No
 * Continuation
 * Tail call optimization
+* Argument count check (because of JavaScript nature)
 
 Currently, many features and syntaxes are Scheme-ish, but will be replaced into CommonLisp/Arc style.
 
