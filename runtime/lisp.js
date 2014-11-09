@@ -77,12 +77,12 @@ LISP = {
     return new LISP.Cons(car, cdr);
   },
   car: function(s) {
-    if (s == LISP.nil)
+    if (s === LISP.nil)
       return s;
     return s.car;
   },
   cdr: function(s) {
-    if (s == LISP.nil)
+    if (s === LISP.nil)
       return s;
     return s.cdr;
   },
@@ -145,12 +145,58 @@ LISP = {
       result -= arguments[i];
     return result;
   },
+  "/": function() {
+    if (arguments.length == 0)
+      return 1;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return 1.0 / result;
+    for (var i = 1; i < arguments.length; ++i)
+      result /= arguments[i];
+    return result;
+  },
   "<": function() {
     if (arguments.length > 0) {
       var value = arguments[0];
       for (var i = 1; i < arguments.length; ++i) {
         var target = arguments[i];
         if (!(value < target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  },
+  ">": function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value > target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  },
+  "<=": function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value <= target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  },
+  ">=": function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value >= target))
           return LISP.nil;
         value = target;
       }

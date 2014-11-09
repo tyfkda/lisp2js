@@ -1,3 +1,6 @@
+(define (local-var? sym env)
+  (member sym env))
+
 (define (expand-args args env)
   (string-join (map (lambda (x) (compile* x env))
                     args)
@@ -33,8 +36,6 @@
                       (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
 (define (compile-symbol sym env)
-  (define (local-var? sym env)
-    (member sym env))
   (if (local-var? sym env)
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
@@ -65,13 +66,45 @@
         ((eq? s #f)  "LISP.nil")
         (else (error (string-append "compile-literal: [" s "]")))))
 
+(define (unary-op? sym)
+  (member sym '(-)))
+
+(define (compile-unary-op fn arg env)
+  (string-append "("
+                 (symbol->string fn)
+                 (compile* arg env)
+                 ")"))
+
+(define (binop? sym)
+  (member sym '(+ - * /)))
+
+(define (compile-binop fn args env)
+  (string-append "("
+                 (string-join (map (lambda (x) (compile* x env))
+                                   args)
+                              (string-append " " (symbol->string fn) " "))
+                 ")"))
+
+(define (do-compile-funcall fn args env)
+  (string-append (compile* fn env)
+                 "("
+                 (expand-args args env)
+                 ")"))
+
 (define (compile-funcall s env)
   (let ((fn (car s))
         (args (cdr s)))
-    (string-append (compile* fn env)
-                   "("
-                   (expand-args args env)
-                   ")")))
+    (if (and (symbol? fn)
+             (not (local-var? fn env))
+             (not (null? args)))
+        (cond ((and (binop? fn)
+                    (not (null? (cdr args))))
+               (compile-binop fn args env))
+              ((and (unary-op? fn)
+                    (null? (cdr args)))
+               (compile-unary-op fn (car args)))
+              (else (do-compile-funcall fn args env)))
+      (do-compile-funcall fn args env))))
 
 (define (compile-quote s env)
   (let ((x (car s)))
