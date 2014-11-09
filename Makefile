@@ -12,10 +12,6 @@ lisp2js.js:	$(SRCS)
 	./jslisp -c $(SRCS) >> $(TMPFN)
 	mv $(TMPFN) $@
 
-lisp2js-old.js:	$(SRCS)
-	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
-	cat $(SRCS) | gosh run-goshlisp.scm >> $@
-
 test:	sread-test simple-test
 	echo 'ok'
 
