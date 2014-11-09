@@ -247,6 +247,8 @@ LISP = {
       return 't';
     if (typeof x == 'string')
       return inspect ? LISP._inspectString(x) : x;
+    if (x === undefined || x === null)
+      return '' + x;
     return x.toString(inspect);
   },
   print: function(x) {
