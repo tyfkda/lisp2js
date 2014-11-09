@@ -363,7 +363,7 @@ LISP.NoCloseParenException = function() {};
 LISP.Reader.prototype = {
   read: function() {
     var m;
-    if (m = this.str.match(/^\s*([0-9]+(\.[0-9]*)?)/))  // Number.
+    if (m = this.str.match(/^\s*([+\-]?[0-9]+(\.[0-9]*)?)/))  // Number.
       return this.proceed(), parseFloat(m[1]);
     if (m = this.str.match(/^\s*([0-9A-Za-z_\-+*\/%!?~^&<>=]+)/))  // Symbol.
       return this.proceed(), LISP.intern(m[1]);
