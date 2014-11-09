@@ -3,6 +3,8 @@ lisp2js
 
 Lispコード→JavaScriptトランスレータ
 
+[デモ](https://tyfkda.github.io/lisp2js/)
+
 ## 特徴
 * コンパイルによって直接実行できるJSコードが吐き出される（VMではない）
 * JSの関数やオブジェクトに簡単にアクセスできる（逆もしかり）

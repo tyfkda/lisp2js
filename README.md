@@ -3,6 +3,8 @@ lisp2js
 
 Translate Lisp code into JavaScript.
 
+[Demo](https://tyfkda.github.io/lisp2js/)
+
 ## Feature
 * Compiled JS code is run on JS directly (not VM)
 * Compiled code can easily access JS, and vice versa
