@@ -75,6 +75,12 @@
             (if ,g ,g
               (or ,@(cdr args)))))))
 
+(define-macro (begin . body)
+  (cond ((null? body) nil)
+        ((null? (cdr body)) (car body))
+        (else `(let ()
+                 ,@body))))
+
 ;;
 (define (null? x)  (eq? x nil))
 (define (not x)    (eq? x nil))

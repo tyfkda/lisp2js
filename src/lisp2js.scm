@@ -108,13 +108,6 @@
                    " = "
                    (compile* val env))))
 
-(define (compile-begin s env)
-  (cond ((null? s) "LISP.nil")
-        ((null? (cdr s)) (compile* (car s) env))
-        (else (string-append "("
-                             (expand-body s env)
-                             ")"))))
-
 (define (compile-lambda s env)
   (define (extend-env env params)
     (append params env))
@@ -173,7 +166,6 @@
 (define *special-forms*
   (list (cons 'quote compile-quote)
         (cons 'if  compile-if)
-        (cons 'begin  compile-begin)
         (cons 'set! compile-set!)
         (cons 'lambda compile-lambda)
         (cons 'define  compile-define)
