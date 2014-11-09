@@ -81,6 +81,10 @@
         (else `(let ()
                  ,@body))))
 
+(define-macro (aif expr . rest)
+  `(let1 it ,expr
+     (if it ,@rest)))
+
 ;;
 (define (null? x)  (eq? x nil))
 (define (not x)    (eq? x nil))

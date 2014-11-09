@@ -170,15 +170,17 @@
     ))
 
 (define (special-form? s)
-  (cond ((assoc (car s) *special-forms*) => cdr)
-        (else #f)))
+  (aif (assoc (car s) *special-forms*)
+       (cdr it)
+    #f))
 
 (define (compile* s env)
   (let ((expanded (macroexpand s)))
     (if (eq? expanded s)
         (if (pair? s)
-            (cond ((special-form? s) => (lambda (fn) (fn (cdr s) env)))
-                  (else (compile-funcall (macroexpand s) env)))
+            (aif (special-form? s)
+                 (it (cdr s) env)
+              (compile-funcall (macroexpand s) env))
           (compile-literal s env))
       (compile* expanded env))))
 
