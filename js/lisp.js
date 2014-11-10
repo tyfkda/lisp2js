@@ -13,6 +13,7 @@ LISP = {
   "*macro-table*": {},
   "register-macro": function(name, func) {
     LISP['*macro-table*'][name] = func;
+    return name;
   },
   "do-compile-defmacro": function(name, exp) {
     var compiled = LISP.compile(exp);
@@ -47,7 +48,7 @@ LISP = {
     this.name = name;
   },
   "symbol->string": function(x) {
-    return x.toString();
+    return x.name;
   },
   __gensymIndex: 0,
   gensym: function() {
@@ -230,6 +231,10 @@ LISP = {
   substring: function(str, start, end) {
     return str.slice(start, end);
   },
+  "string-scan": function(str, item) {
+    var index = str.indexOf(item);
+    return index >= 0 ? index : LISP.nil;
+  },
 
   "char->integer": function(char, index) {
     return char.charCodeAt(index);
@@ -362,10 +367,6 @@ LISP.NoCloseParenException = function() {};
 LISP.Reader.prototype = {
   read: function() {
     var m;
-    if (m = this.str.match(/^\s*([0-9]+(\.[0-9]*)?)/))  // Number.
-      return this.proceed(), parseFloat(m[1]);
-    if (m = this.str.match(/^\s*([0-9A-Za-z_\-+*\/%!?~^&<>=]+)/))  // Symbol.
-      return this.proceed(), LISP.intern(m[1]);
     if (m = this.str.match(/^\s*\(/))  // Left paren '('.
       return this.proceed(), this.readList(RegExp.rightContext);
     if (m = this.str.match(/^\s*;[^\n]*\n?/))  // Line comment.
@@ -382,11 +383,23 @@ LISP.Reader.prototype = {
       return this.proceed(), new RegExp(m[1]);
     if (m = this.str.match(/^\s*#(t|f)\b/))  // #t, #f
       return this.proceed(), (m[1] == 't' ? LISP.t : LISP.nil);
+    if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;]+)/))  // Symbol or number.
+      return this.readSymbolOrNumber(m[1]);
     return undefined;
   },
 
   proceed: function(value) {
     this.str = RegExp.rightContext;
+  },
+
+  readSymbolOrNumber: function(str) {
+    if (str === '.')  // Refuse single dot.
+      return undefined;
+
+    this.proceed();
+    if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
+      return parseFloat(str);
+    return LISP.intern(str);
   },
 
   readList: function() {

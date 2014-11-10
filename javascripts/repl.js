@@ -8,8 +8,8 @@ $(function() {
 
   var cm = CodeMirror(holder[0], {
     value: '',
-    mode: "clojure",
-    theme: "ambiance",
+    mode: 'scheme',
+    theme: 'ambiance',
     matchBrackets: true,
     keyMap: 'emacs'
   });

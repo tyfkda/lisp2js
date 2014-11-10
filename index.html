@@ -24,7 +24,6 @@
 
     <script src="js/lisp.js"></script>
     <script src="js/lisp2js.js"></script>
-
     <script src="javascripts/repl.js"></script>
   </head>
   <body>
@@ -37,6 +36,44 @@
         <div id="holder"></div>
       </div>
     </div>
+
+    <h3>Canvas</h3>
+    <div style="width:800px; margin: 0 auto;">
+      <div style="width:400px; margin:0; float: left">
+        <div id="code-area" style="width:400px; margin:0; background-color: #000040; font-size: 14px;">
+<textarea id="code" style="width: 400px; height: 400px;">
+(let* ((canvas (JS.document.getElementById "canvas"))
+       (context (canvas.getContext "2d")))
+  ;; Fill rectangle.
+  (set! context.fillStyle "rgb(0, 0, 255)")
+  (context.fillRect 0 0 400 400)
+
+  ;; Draw line.
+  (context.beginPath)
+  (set! context.strokeStyle "#ff0000")
+  (context.moveTo 0 0)
+  (context.lineTo 400 400)
+  (context.closePath)
+  (context.stroke)
+
+  ;; Load and draw image.
+  (let ((img (new Image)))
+    (set! img.src "smile.png")
+    (set! img.onload
+          (lambda ()
+            (context.drawImage img (* (- 400 img.width) 0.5)
+                                   (* (- 400 img.height) 0.5)))))
+  )
+</textarea>
+        </div>
+        <button onClick="runTextAreaCode()">Run</button>
+      </div>
+      <div id="canvas-folder" style="width:400px; height: 400px; margin:0; float: left">
+        <canvas id="canvas" width="400" height="400">
+      </div>
+      <div style="clear:both;"></div>
+    </div>
+    <script src="javascripts/run-canvas.js"></script>
 
     <p><a href="https://github.com/tyfkda/lisp2js">View On GitHub</a></p>
   </body>

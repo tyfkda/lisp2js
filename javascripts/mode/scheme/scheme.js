@@ -2,7 +2,7 @@
  * Author: Hans Engel
  * Branched from CodeMirror's Scheme mode (by Koh Zi Han, based on implementation by Koh Zi Chun)
  */
-CodeMirror.defineMode("clojure", function () {
+CodeMirror.defineMode("scheme", function () {
     var BUILTIN = "builtin", COMMENT = "comment", STRING = "string", CHARACTER = "string-2",
         ATOM = "atom", NUMBER = "number", BRACKET = "bracket", KEYWORD = "keyword";
     var INDENT_WORD_SKIP = 2;
