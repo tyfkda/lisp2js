@@ -201,6 +201,15 @@
         exp
       (macroexpand expanded))))
 
+(define (compile-new s env)
+  (let ((class-name (car s))
+        (args (cdr s)))
+    (string-append "new "
+                   (symbol->string class-name)
+                   "("
+                   (expand-args args env)
+                   ")")))
+
 (define *special-forms*
   `((quote . ,compile-quote)
     (if . ,compile-if)
@@ -208,6 +217,7 @@
     (lambda . ,compile-lambda)
     (define . ,compile-define)
     (define-macro . ,compile-defmacro)
+    (new . ,compile-new)
     ))
 
 (define (special-form? s)
