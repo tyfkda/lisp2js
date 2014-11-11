@@ -262,6 +262,8 @@ LISP = {
       return 't';
     if (typeof x == 'string')
       return inspect ? LISP._inspectString(x) : x;
+    if (x instanceof Array)
+      return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
     if (x === undefined || x === null)
       return '' + x;
     return x.toString(inspect);
@@ -304,6 +306,13 @@ LISP = {
   },
   "hash-table-put!": function(hash, x, value) {
     return hash[x] = value;
+  },
+
+  // Vector.
+  vector: function() {
+    var argumentsArray = [];
+    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
+    return argumentsArray;
   },
 
   // Regexp.

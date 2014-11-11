@@ -59,6 +59,9 @@ run_raw define-lambda 2222 "(define (double x) (+ x x))
                             (print (double 1111))"
 run + 6 '(+ 1 2 3)'
 
+# Vector.
+run vector "#(1 \"foo\" (2 bar))" "(vector 1 \"foo\" '(2 bar))"
+
 # Macros.
 run_raw defmacro nil "(define-macro (nil! x) (list 'define x 'nil))
                       (nil! xyz)
