@@ -389,6 +389,8 @@ LISP.Reader.prototype = {
       return this.proceed(), this.readQuasiQuote();
     if (m = this.str.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
       return this.proceed(), this.readUnquote(m[1]);
+    if (m = this.str.match(/^\s*#\(/))  // vector.
+      return this.proceed(), this.readVector();
     if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
       return this.proceed(), new RegExp(m[1]);
     if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;]+)/))  // Symbol or number.
@@ -435,6 +437,25 @@ LISP.Reader.prototype = {
             return reversed;
           }
         }
+      }
+      // Error
+      throw new LISP.NoCloseParenException();
+    }
+  },
+
+  readVector: function() {
+    var result = [];
+    var m;
+    for (;;) {
+      var x = this.read();
+      if (x !== undefined) {
+        result.push(x);
+        continue;
+      }
+
+      if (m = this.str.match(/^\s*\)/)) {  // Close paren.
+        this.proceed();
+        return result;
       }
       // Error
       throw new LISP.NoCloseParenException();

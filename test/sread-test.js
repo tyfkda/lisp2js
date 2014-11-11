@@ -9,9 +9,10 @@ function equals(x, y) {
       equals(LISP.car(x), LISP.car(y)) &&
       equals(LISP.cdr(x), LISP.cdr(y)))
     return true;
-  if (x instanceof RegExp && y instanceof RegExp &&
-      x.toString() === y.toString())
-    return true;
+  if (x instanceof Array && y instanceof Array)
+    return x.toString() === y.toString();
+  if (x instanceof RegExp && y instanceof RegExp)
+    return x.toString() === y.toString();
   return false;
 }
 
@@ -73,6 +74,8 @@ function main() {
   test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), reads("`abc"));
   test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), reads(",abc"));
   test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), reads(",@abc"));
+
+  test('vector', [1, 2, 3], reads("#(1 2 3)"));
 
   test('regexp', /abc/, reads("#/abc/"));
 
