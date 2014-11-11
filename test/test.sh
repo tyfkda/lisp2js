@@ -61,6 +61,8 @@ run + 6 '(+ 1 2 3)'
 
 # Vector.
 run vector "#(1 \"foo\" (2 bar))" "(vector 1 \"foo\" '(2 bar))"
+run vector-length 3 "(vector-length #(1 2 3))"
+run vector-ref b "(vector-ref #(a b c) 1)"
 
 # Macros.
 run_raw defmacro nil "(define-macro (nil! x) (list 'define x 'nil))

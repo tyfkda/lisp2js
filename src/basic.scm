@@ -158,3 +158,13 @@
             (begin (set-cdr! p (car q))
                    args)
           (loop q (cdr q)))))))
+
+(define (vector-map proc vect)
+  (let* ((len (vector-length vect))
+         (new-vect (make-vector len)))
+    (let loop ((i 0))
+      (if (>= i len)
+          new-vect
+        (begin (vector-set! new-vect i
+                            (proc (vector-ref vect i)))
+               (loop (+ i 1)))))))

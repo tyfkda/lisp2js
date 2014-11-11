@@ -310,9 +310,29 @@ LISP = {
 
   // Vector.
   vector: function() {
-    var argumentsArray = [];
-    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
-    return argumentsArray;
+    var vector = [];
+    vector = vector.concat.apply(vector, arguments);
+    return vector;
+  },
+  "make-vector": function(count, value) {
+    if (value === undefined)
+      value = LISP.nil;
+    var vector = new Array(count);
+    for (var i = 0; i < count; ++i)
+      vector[i] = value;
+    return vector;
+  },
+  "vector?": function(x) {
+    return LISP._jsBoolToS(x instanceof Array);
+  },
+  "vector-length": function(vector) {
+    return vector.length;
+  },
+  "vector-ref": function(vector, index) {
+    return vector[index];
+  },
+  "vector-set!": function(vector, index, value) {
+    return vector[index] = value;
   },
 
   // Regexp.

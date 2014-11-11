@@ -59,6 +59,14 @@
                  (escape-string str)
                  "\""))
 
+(define (compile-vector vect env)
+  (string-append "["
+                 (let1 v (vector-map (lambda (x)
+                                       (compile-quoted-value x env))
+                                     vect)
+                   (v.join ", "))
+                 "]"))
+
 (define (compile-regexp regex)
   (string-append "/"
                  (regexp->string regex)
@@ -68,6 +76,7 @@
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s env))
         ((string? s) (compile-string s))
+        ((vector? s) (compile-vector s env))
         ((regexp? s) (compile-regexp s))
         ((null? s)   "LISP.nil")
         (else (error (string-append "compile-literal: [" s "]")))))
@@ -112,17 +121,19 @@
               (else (do-compile-funcall fn args env)))
       (do-compile-funcall fn args env))))
 
+(define (compile-quoted-value x env)
+  (if (pair? x)
+      (compile* `(cons ',(car x)
+                       ',(cdr x))
+                env)
+    (if (symbol? x)
+        (string-append "LISP.intern(\""
+                       (escape-string (symbol->string x))
+                       "\")")
+      (compile-literal x env))))
+
 (define (compile-quote s env)
-  (let ((x (car s)))
-    (if (pair? x)
-        (compile* `(cons ',(car x)
-                         ',(cdr x))
-                  env)
-      (if (symbol? x)
-          (string-append "LISP.intern(\""
-                         (escape-string (symbol->string x))
-                         "\")")
-        (compile-literal x env)))))
+  (compile-quoted-value (car s) env))
 
 (define (compile-if s env)
   (let ((p (car s))
