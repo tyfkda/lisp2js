@@ -240,7 +240,7 @@
         (if (pair? s)
             (aif (special-form? s)
                  (it (cdr s) env)
-              (compile-funcall (macroexpand s) env))
+              (compile-funcall s env))
           (compile-literal s env))
       (compile* expanded env))))
 
