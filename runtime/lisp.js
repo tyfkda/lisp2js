@@ -391,8 +391,6 @@ LISP.Reader.prototype = {
       return this.proceed(), this.readUnquote(m[1]);
     if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
       return this.proceed(), new RegExp(m[1]);
-    if (m = this.str.match(/^\s*#(t|f)\b/))  // #t, #f
-      return this.proceed(), (m[1] == 't' ? LISP.t : LISP.nil);
     if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;]+)/))  // Symbol or number.
       return this.readSymbolOrNumber(m[1]);
     return undefined;

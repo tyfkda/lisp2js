@@ -70,8 +70,6 @@
         ((string? s) (compile-string s))
         ((regexp? s) (compile-regexp s))
         ((null? s)   "LISP.nil")
-        ((eq? s #t)  "LISP.t")
-        ((eq? s #f)  "LISP.nil")
         (else (error (string-append "compile-literal: [" s "]")))))
 
 (define (unary-op? sym)
@@ -223,7 +221,7 @@
 (define (special-form? s)
   (aif (assoc (car s) *special-forms*)
        (cdr it)
-    #f))
+    nil))
 
 (define (compile* s env)
   (let ((expanded (macroexpand s)))
