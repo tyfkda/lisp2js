@@ -63,6 +63,7 @@ function main() {
   test('dotted pair2', LISP.list(1, LISP.cons(2, 3), 4), reads('(1 (2 . 3) 4)'));
 
   test('line comment', 123, reads(';comment\n123'));
+  test('block comment', 123, reads('#| commenct\n|# 123'));
   test('symbol', LISP.intern('symbol'), reads('symbol'));
   test('number like symbol', LISP.intern('1+'), reads('1+'));
   test('non ascii character symbol', LISP.intern('Ｓｙｍｂｏｌ'), reads('Ｓｙｍｂｏｌ'));

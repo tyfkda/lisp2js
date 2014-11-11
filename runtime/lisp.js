@@ -422,7 +422,9 @@ LISP.Reader.prototype = {
       return this.proceed(), this.readVector();
     if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
       return this.proceed(), new RegExp(m[1]);
-    if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;]+)/))  // Symbol or number.
+    if (m = this.str.match(/^\s*#\|(.|[\n\r])*?\|#/))  // Block comment.
+      return this.proceed(), this.read();
+    if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;#]+)/))  // Symbol or number.
       return this.readSymbolOrNumber(m[1]);
     return undefined;
   },
