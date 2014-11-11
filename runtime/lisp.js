@@ -156,6 +156,16 @@ LISP = {
       result /= arguments[i];
     return result;
   },
+  "%": function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return result;
+    for (var i = 1; i < arguments.length; ++i)
+      result %= arguments[i];
+    return result;
+  },
   "<": function() {
     if (arguments.length > 0) {
       var value = arguments[0];

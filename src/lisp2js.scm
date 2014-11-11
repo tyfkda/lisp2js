@@ -84,7 +84,7 @@
                  ")"))
 
 (define (binop? sym)
-  (member sym '(+ - * /)))
+  (member sym '(+ - * / %)))
 
 (define (compile-binop fn args env)
   (string-append "("
