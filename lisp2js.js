@@ -56,7 +56,7 @@ LISP["compile-symbol"] = (function(sym, env){return (((LISP["local-var?"](sym, e
 LISP["compile-string"] = (function(str){return (LISP["string-append"]("\"", LISP["escape-string"](str), "\""));});
 LISP["compile-regexp"] = (function(regex){return (LISP["string-append"]("/", LISP["regexp->string"](regex), "/"));});
 LISP["compile-literal"] = (function(s, env){return (((LISP["number?"](s)) !== LISP.nil ? (LISP["number->string"](s)) : (((LISP["symbol?"](s)) !== LISP.nil ? (LISP["compile-symbol"](s, env)) : (((LISP["string?"](s)) !== LISP.nil ? (LISP["compile-string"](s)) : (((LISP["regexp?"](s)) !== LISP.nil ? (LISP["compile-regexp"](s)) : (((LISP["null?"](s)) !== LISP.nil ? ("LISP.nil") : (((LISP["eq?"](s, LISP.t)) !== LISP.nil ? ("LISP.t") : (((LISP["eq?"](s, LISP.nil)) !== LISP.nil ? ("LISP.nil") : (LISP.error(LISP["string-append"]("compile-literal: [", s, "]")))))))))))))))));});
-LISP["unary-op?"] = (function(sym){return (LISP.member(sym, LISP.cons(LISP.intern("-"), LISP.nil)));});
+LISP["unary-op?"] = (function(sym){return (LISP.member(sym, LISP.cons(LISP.intern("+"), LISP.cons(LISP.intern("-"), LISP.nil))));});
 LISP["compile-unary-op"] = (function(fn, arg, env){return (LISP["string-append"]("(", LISP["symbol->string"](fn), LISP["compile*"](arg, env), ")"));});
 LISP["binop?"] = (function(sym){return (LISP.member(sym, LISP.cons(LISP.intern("+"), LISP.cons(LISP.intern("-"), LISP.cons(LISP.intern("*"), LISP.cons(LISP.intern("/"), LISP.cons(LISP.intern("%"), LISP.nil)))))));});
 LISP["compile-binop"] = (function(fn, args, env){return (LISP["string-append"]("(", LISP["string-join"](LISP.map((function(x){return (LISP["compile*"](x, env));}), args), LISP["string-append"](" ", LISP["symbol->string"](fn), " ")), ")"));});

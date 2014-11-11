@@ -75,7 +75,7 @@
         (else (error (string-append "compile-literal: [" s "]")))))
 
 (define (unary-op? sym)
-  (member sym '(-)))
+  (member sym '(+ -)))
 
 (define (compile-unary-op fn arg env)
   (string-append "("
