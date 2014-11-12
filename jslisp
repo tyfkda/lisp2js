@@ -30,7 +30,6 @@
       if (compile) {
         var compiled = LISP.compile(s);
         LISP.print(compiled + ';');
-        LISP.jseval(compiled);  // Evaluate JS, even if compile flag is set.
       } else {
         LISP.eval(s);
       }

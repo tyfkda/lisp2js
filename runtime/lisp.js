@@ -17,7 +17,6 @@ LISP = {
   },
   "do-compile-defmacro": function(name, exp) {
     var compiled = LISP.compile(exp);
-    LISP['register-macro'](name, compiled);
     return ("LISP['register-macro'](LISP.intern(\"" +
             LISP['escape-string'](LISP['symbol->string'](name)) +
             "\"), " +
