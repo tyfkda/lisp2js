@@ -201,7 +201,7 @@
   (let ((name (caar s))
         (params (cdar s))
         (body (cdr s)))
-    (let ((exp (list* 'lambda params body)))
+    (let ((exp `(lambda ,params ,@body)))
       (do-compile-defmacro name exp))))
 
 (define (macroexpand exp)
