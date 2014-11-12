@@ -9,6 +9,15 @@ LISP = {
   _output: function(str) {
     console.log(str);
   },
+  _arguments2Array: function(args, start) {
+    var len = args.length - start;
+    if (len <= 0)
+      return [];
+    var array = new Array(len);
+    for (var i = 0; i < len; ++i)
+      array[i] = args[i + start];
+    return array;
+  },
 
   "*macro-table*": {},
   "register-macro": function(name, func) {
@@ -38,9 +47,7 @@ LISP = {
   },
 
   error: function() {
-    var argumentsArray = [];
-    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
-    throw argumentsArray.join(', ');
+    throw LISP._arguments2Array(arguments, 0).join(', ');
   },
 
   Symbol: function(name) {
@@ -222,9 +229,7 @@ LISP = {
     return LISP._jsBoolToS(x === y);
   },
   "string-append": function() {
-    var argumentsArray = [];
-    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
-    return argumentsArray.join('');
+    return LISP._arguments2Array(arguments, 0).join('');
   },
   "string-join": function(list, separator) {
     if (list === LISP.nil)
@@ -309,9 +314,7 @@ LISP = {
 
   // Vector.
   vector: function() {
-    var vector = [];
-    vector = vector.concat.apply(vector, arguments);
-    return vector;
+    return LISP._arguments2Array(arguments, 0);
   },
   "make-vector": function(count, value) {
     if (value === undefined)
