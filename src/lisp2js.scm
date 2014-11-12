@@ -1,3 +1,26 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Syntax Tree creator.
+
+(define-macro (record args param . body)
+  `(apply (lambda ,param ,@body)
+          ,args))
+
+(define-macro (record-case x . clauses)
+  (let1 value (gensym)
+    `(let1 ,value ,x
+       (case (car ,value)
+         ,@(map (lambda (clause)
+                  (if (eq? (car clause) 'else)
+                      clause
+                    (let1 key (caar clause)
+                      `((,key)
+                        (record (cdr ,value) ,(cdar clause) ,@(cdr clause))))))
+                clauses)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Compiler
+
 ;; Get symbol which sits on the top of dot-concatenated symbol.
 ;;   ex. foo.bar.baz => foo
 (define (get-receiver sym)
@@ -245,4 +268,5 @@
       (compile* expanded env))))
 
 (define (compile s)
-  (compile* s '()))
+  (compile* s
+            ()))

@@ -54,6 +54,18 @@
                  (begin ,@(cdr clause))
                (cond ,@rest))))))))
 
+(define-macro (case x . clauses)
+  (let1 value (gensym)
+    `(let1 ,value ,x
+       (cond
+        ,@(map (lambda (clause)
+                 (cond ((eq? (car clause) 'else)
+                        clause)
+                       ((null? (cdar clause))
+                        `((eq? ,value ',(caar clause)) ,@(cdr clause)))
+                       (else `((member ,value ',(car clause)) ,@(cdr clause)))))
+               clauses)))))
+
 (define-macro (and . args)
   (if (null? args)
       't  ; (and) = true
