@@ -58,6 +58,7 @@ run_raw define 123 "(define x 123)
                     (print x)"
 run_raw define-lambda 2222 "(define (double x) (+ x x))
                             (print (double 1111))"
+run new '#()' '(new Array)'
 run + 6 '(+ 1 2 3)'
 
 # Vector.
