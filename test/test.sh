@@ -38,6 +38,7 @@ function run_raw() {
 run integer 123 '123'
 run symbol abc '(quote abc)'
 run string '"abc"' '"abc"'
+run vector '#(1 2 3)' '#(1 2 3)'
 run t 't' 't'
 run nil 'nil' 'nil'
 run quote 123 '(quote 123)'
