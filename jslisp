@@ -2,7 +2,6 @@
 
 (function() {
   require("./runtime/lisp.js");
-  require("./lisp2js.js");
 
   // Read all input from stdin, and fire callback.
   var readAllFromStdin = function(callback) {
@@ -37,6 +36,7 @@
     return s === undefined;
   };
 
+  var translator = "./lisp2js.js";
   var index = 2;
   var compileOnly = false;
   for (; index < process.argv.length; ++index) {
@@ -45,8 +45,14 @@
       compileOnly = true;
       continue;
     }
+    if (option == '-t') {
+      translator = process.argv[++index];
+      continue;
+    }
     break;
   }
+
+  require(translator);
 
   if (index >= process.argv.length) {
     readAllFromStdin(function(text) {
