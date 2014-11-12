@@ -8,9 +8,12 @@ clean:
 
 update-compiler:	lisp2js.js
 lisp2js.js:	$(SRCS)
-	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $(TMPFN)
-	./jslisp -c $(SRCS) >> $(TMPFN)
-	mv $(TMPFN) $@
+	make ,lisp2js.js
+	mv ,lisp2js.js $@
+
+,lisp2js.js:	$(SRCS)
+	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
+	./jslisp -c $(SRCS) >> $@
 
 test:	sread-test simple-test
 	echo 'ok'
