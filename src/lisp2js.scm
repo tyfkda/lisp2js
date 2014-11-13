@@ -1,3 +1,73 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Syntax Tree creator.
+(define (traverse-args args scope)
+  (map (lambda (x)
+         (traverse* x scope))
+       args))
+
+(define (extend-scope parent-scope params)
+  (cons params parent-scope))
+
+(define-macro (record args param . body)
+  `(apply (lambda ,param ,@body)
+          ,args))
+
+(define-macro (record-case x . clauses)
+  (let1 value (gensym)
+    `(let1 ,value ,x
+       (case (car ,value)
+         ,@(map (lambda (clause)
+                  (if (eq? (car clause) 'else)
+                      clause
+                    (let1 key (caar clause)
+                      `((,key)
+                        (record (cdr ,value) ,(cdar clause) ,@(cdr clause))))))
+                clauses)))))
+
+(define (traverse-list s scope)
+  (record-case s
+    ((quote x)   (cond ((pair? x) (traverse* `(cons ',(car x)
+                                                    ',(cdr x))
+                                             scope))
+                       (else (vector ':CONST x))))
+    ((if)      (vector ':IF
+                       (traverse-args (cdr s) scope)))
+    ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
+    ((lambda params . body)  (let ((new-scope (extend-scope scope (cadr s))))
+                               (vector ':LAMBDA
+                                       new-scope
+                                       (traverse-args (cddr s) new-scope))))
+    ((define name value . rest)  (if (pair? name)
+                                     (traverse* `(define ,(car name)
+                                                   (lambda ,(cdr name) ,value ,@rest))
+                                                scope)
+                                   (vector ':DEFINE
+                                           (traverse* name scope)
+                                           (traverse* value scope))))
+    ((define-macro name-params . body)  (let ((name (car name-params))
+                                              (params (cdr name-params)))
+                                          (vector ':DEFMACRO
+                                                  name
+                                                  `(lambda ,params ,@body))))
+    ((new klass . args)  (vector ':NEW klass (traverse-args args new-scope)))
+    (else (vector ':FUNCALL
+                  (traverse* (car s) scope)
+                  (traverse-args (cdr s) scope)))))
+
+(define (traverse* s scope)
+  (cond ((pair? s)   (let1 expanded (macroexpand s)
+                       (if (pair? expanded)
+                           (traverse-list expanded scope)
+                         (traverse* expanded scope))))
+        ((symbol? s) (vector ':REF s))
+        (else        (vector ':CONST s))))
+
+(define (traverse s)
+  (traverse* s ()))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Compiler
+
 ;; Get symbol which sits on the top of dot-concatenated symbol.
 ;;   ex. foo.bar.baz => foo
 (define (get-receiver sym)
@@ -62,7 +132,7 @@
 (define (compile-vector vect env)
   (string-append "["
                  (let1 v (vector-map (lambda (x)
-                                       (compile-quoted-value x env))
+                                       (compile-quote x env))
                                      vect)
                    (v.join ", "))
                  "]"))
@@ -106,22 +176,21 @@
                  (expand-args args env)
                  ")"))
 
-(define (compile-funcall s env)
-  (let ((fn (car s))
-        (args (cdr s)))
-    (if (and (symbol? fn)
-             (not (local-var? fn env))
-             (not (null? args)))
-        (cond ((and (binop? fn)
+(define (compile-funcall fn args env)
+  (if (and (eq? (vector-ref fn 0) ':REF)
+           (not (local-var? (vector-ref fn 1) env))
+           (not (null? args)))
+      (let1 fnsym (vector-ref fn 1)
+        (cond ((and (binop? fnsym)
                     (not (null? (cdr args))))
-               (compile-binop fn args env))
-              ((and (unary-op? fn)
+               (compile-binop fnsym args env))
+              ((and (unary-op? fnsym)
                     (null? (cdr args)))
-               (compile-unary-op fn (car args)))
-              (else (do-compile-funcall fn args env)))
-      (do-compile-funcall fn args env))))
+               (compile-unary-op fnsym (car args)))
+              (else (do-compile-funcall fn args env))))
+    (do-compile-funcall fn args env)))
 
-(define (compile-quoted-value x env)
+(define (compile-quote x env)
   (if (pair? x)
       (compile* `(cons ',(car x)
                        ',(cdr x))
@@ -132,77 +201,55 @@
                        "\")")
       (compile-literal x env))))
 
-(define (compile-quote s env)
-  (compile-quoted-value (car s) env))
+(define (compile-if pred-node then-node else-node env)
+  (string-append "(("
+                 (compile* pred-node env)
+                 ") !== LISP.nil ? ("
+                 (compile* then-node env)
+                 ") : ("
+                 (if else-node
+                     (compile* else-node env)
+                   "LISP.nil")
+                 "))"))
 
-(define (compile-if s env)
-  (let ((p (car s))
-        (then-node (cadr s))
-        (else? (cddr s)))
-    (string-append "(("
-                   (compile* p env)
-                   ") !== LISP.nil ? ("
-                   (compile* then-node env)
-                   ") : ("
-                   (if (null? else?)
-                       "LISP.nil"
-                     (compile* (car else?) env))
-                   "))")))
+(define (compile-set! sym val env)
+  (string-append (compile* sym env)
+                 " = "
+                 (compile* val env)))
 
-(define (compile-set! s env)
-  (let ((sym (car s))
-        (val (cadr s)))
-    (string-append (compile* sym env)
-                   " = "
-                   (compile* val env))))
-
-(define (compile-lambda s env)
+(define (compile-lambda raw-params bodies env)
   (define (extend-env env params)
     (append params env))
-  (let ((raw-params (car s))
-        (bodies (cdr s)))
-    (let ((params (if (proper-list? raw-params)
-                      raw-params
-                    (reverse! (reverse raw-params))))  ; Remove dotted part.
-          (rest (if (pair? raw-params)
-                    (cdr (last-pair raw-params))
-                  raw-params)))
-      (let1 newenv (extend-env env (if (null? rest)
-                                       params
-                                     (append (list rest)
-                                             params)))
-        (string-append "(function("
-                       (expand-args params newenv)
-                       "){"
-                       (if (null? rest)
-                           ""
-                         (string-append "var "
-                                        (symbol->string rest)
-                                        " = LISP._getRestArgs(arguments, "
-                                        (number->string (length params))
-                                        "); "))
-                       "return ("
-                       (expand-body bodies newenv)
-                       ");})")))))
+  (let ((params (if (proper-list? raw-params)
+                    raw-params
+                  (reverse! (reverse raw-params))))  ; Remove dotted part.
+        (rest (if (pair? raw-params)
+                  (cdr (last-pair raw-params))
+                raw-params)))
+    (let1 newenv (extend-env env (if (null? rest)
+                                     params
+                                   (append (list rest)
+                                           params)))
+      (string-append "(function("
+                     (string-join (map (lambda (x) (escape-symbol x))
+                                       params)
+                                  ", ")
+                     "){"
+                     (if (null? rest)
+                         ""
+                       (string-append "var "
+                                      (symbol->string rest)
+                                      " = LISP._getRestArgs(arguments, "
+                                      (number->string (length params))
+                                      "); "))
+                     "return ("
+                     (expand-body bodies newenv)
+                     ");})"))))
 
-(define (compile-define s env)
-  (let ((name (car s))
-        (body (cdr s)))
-    (if (pair? name)
-        ;; Convert (define (foo args...) ...) => (define foo (lambda (args...) ...))
-        (compile* `(define ,(car name)
-                     (lambda ,(cdr name) ,@body))
-                  env)
-      (string-append (compile-symbol name env)
-                     " = "
-                     (compile* (car body) env)))))
-
-(define (compile-defmacro s env)
-  (let ((name (caar s))
-        (params (cdar s))
-        (body (cdr s)))
-    (let ((exp `(lambda ,params ,@body)))
-      (do-compile-defmacro name exp))))
+(define (compile-define name value env)
+  (string-append (compile* name env)
+                 " = "
+                 (compile* value env)))
 
 (define (macroexpand exp)
   (let ((expanded (macroexpand-1 exp)))
@@ -210,39 +257,28 @@
         exp
       (macroexpand expanded))))
 
-(define (compile-new s env)
-  (let ((class-name (car s))
-        (args (cdr s)))
-    (string-append "new "
-                   (symbol->string class-name)
-                   "("
-                   (expand-args args env)
-                   ")")))
-
-(define *special-forms*
-  `((quote . ,compile-quote)
-    (if . ,compile-if)
-    (set! . ,compile-set!)
-    (lambda . ,compile-lambda)
-    (define . ,compile-define)
-    (define-macro . ,compile-defmacro)
-    (new . ,compile-new)
-    ))
-
-(define (special-form? s)
-  (aif (assoc (car s) *special-forms*)
-       (cdr it)
-    nil))
+(define (compile-new class-name args env)
+  (string-append "new "
+                 (symbol->string class-name)
+                 "("
+                 (expand-args args env)
+                 ")"))
 
 (define (compile* s env)
-  (let ((expanded (macroexpand s)))
-    (if (eq? expanded s)
-        (if (pair? s)
-            (aif (special-form? s)
-                 (it (cdr s) env)
-              (compile-funcall s env))
-          (compile-literal s env))
-      (compile* expanded env))))
+  (case (vector-ref s 0)
+    ((:CONST)  (compile-quote (vector-ref s 1) env))
+    ((:REF)    (compile-symbol (vector-ref s 1) env))
+    ((:IF)     (let1 exp (vector-ref s 1)
+                 (compile-if (car exp) (cadr exp) (caddr exp) env)))
+    ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) env))
+    ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) env))
+    ((:LAMBDA)  (compile-lambda (car (vector-ref s 1)) (vector-ref s 2) env))
+    ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) env))
+    ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
+                                       (vector-ref s 2)))
+    ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) env))
+    (else  (string-append "???" s "???"))))
 
 (define (compile s)
-  (compile* s '()))
+  (compile* (traverse s)
+            ()))
