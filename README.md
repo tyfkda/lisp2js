@@ -6,9 +6,9 @@ Translate Lisp code into JavaScript.
 [Demo](https://tyfkda.github.io/lisp2js/)
 
 ## Feature
-* Compiled JS code is run on JS directly (not VM)
+* Compiled JS code run on JS directly (not VM)
 * Compiled code can easily access JS, and vice versa
-* Self compiler
+* Self hosting compiler
 * Lisp-1 (namespace for function and variable is same)
 * Old style macro (not hygienic)
 
