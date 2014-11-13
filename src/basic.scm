@@ -170,6 +170,25 @@
                    args)
           (loop q (cdr q)))))))
 
+(define (last-pair ls)
+  (if (pair? (cdr ls))
+      (last-pair (cdr ls))
+    ls))
+
+(define (proper-list? ls)
+  (null? (cdr (last-pair ls))))
+
+(define (dotted->proper ls)
+  (if (pair? ls)
+      (if (proper-list? ls)
+          ls
+        (let ((dot (cdr (last-pair ls)))
+              (rev (reverse ls)))
+          (let1 dup (reverse! rev)
+            (set-cdr! rev (list dot))
+            dup)))
+    (list ls)))
+
 (define (vector-map proc vect)
   (let* ((len (vector-length vect))
          (new-vect (make-vector len)))

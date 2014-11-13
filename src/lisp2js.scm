@@ -2,10 +2,18 @@
 ;; Scope
 
 (define (extend-scope parent-scope params)
-  (vector params parent-scope))
+  (vector (dotted->proper params) parent-scope))
 
 (define (scope-param scope)
   (vector-ref scope 0))
+
+(define (scope-outer scope)
+  (vector-ref scope 1))
+
+(define (scope-var? scope x)
+  (cond ((null? scope) nil)
+        ((member x (scope-param scope)) t)
+        (else (scope-var? (scope-outer scope) x))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
@@ -73,9 +81,6 @@
         ((symbol? s) (vector ':REF s))
         (else        (vector ':CONST s))))
 
-(define (traverse s)
-  (traverse* s ()))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compiler
 
@@ -87,18 +92,18 @@
          (intern (substring s 0 it))
       sym)))
 
-(define (local-var? sym env)
-  (member (get-receiver sym) env))
+(define (local-var? sym scope)
+  (scope-var? scope (get-receiver sym)))
 
-(define (expand-args args env)
-  (string-join (map (lambda (x) (compile* x env))
+(define (expand-args args scope)
+  (string-join (map (lambda (x) (compile* x scope))
                     args)
                ", "))
 
-(define (expand-body body env)
+(define (expand-body body scope)
   (if (null? body)
       "LISP.nil"
-    (expand-args body env)))
+    (expand-args body scope)))
 
 (define (escape-char c)
   (cond ((string=? c "\\") "\\\\")
@@ -124,8 +129,8 @@
   (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
                       (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
-(define (compile-symbol sym env)
-  (if (local-var? sym env)
+(define (compile-symbol sym scope)
+  (if (local-var? sym scope)
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
       (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
@@ -140,10 +145,10 @@
                  (escape-string str)
                  "\""))
 
-(define (compile-vector vect env)
+(define (compile-vector vect scope)
   (string-append "["
                  (let1 v (vector-map (lambda (x)
-                                       (compile-quote x env))
+                                       (compile-quote x scope))
                                      vect)
                    (v.join ", "))
                  "]"))
@@ -153,11 +158,11 @@
                  (regexp->string regex)
                  "/"))
 
-(define (compile-literal s env)
+(define (compile-literal s scope)
   (cond ((number? s) (number->string s))
-        ((symbol? s) (compile-symbol s env))
+        ((symbol? s) (compile-symbol s scope))
         ((string? s) (compile-string s))
-        ((vector? s) (compile-vector s env))
+        ((vector? s) (compile-vector s scope))
         ((regexp? s) (compile-regexp s))
         ((null? s)   "LISP.nil")
         (else (error (string-append "compile-literal: [" s "]")))))
@@ -165,102 +170,96 @@
 (define (unary-op? sym)
   (member sym '(+ -)))
 
-(define (compile-unary-op fn arg env)
+(define (compile-unary-op fn arg scope)
   (string-append "("
                  (symbol->string fn)
-                 (compile* arg env)
+                 (compile* arg scope)
                  ")"))
 
 (define (binop? sym)
   (member sym '(+ - * / %)))
 
-(define (compile-binop fn args env)
+(define (compile-binop fn args scope)
   (string-append "("
-                 (string-join (map (lambda (x) (compile* x env))
+                 (string-join (map (lambda (x) (compile* x scope))
                                    args)
                               (string-append " " (symbol->string fn) " "))
                  ")"))
 
-(define (do-compile-funcall fn args env)
-  (string-append (compile* fn env)
+(define (do-compile-funcall fn args scope)
+  (string-append (compile* fn scope)
                  "("
-                 (expand-args args env)
+                 (expand-args args scope)
                  ")"))
 
-(define (compile-funcall fn args env)
+(define (compile-funcall fn args scope)
   (if (and (eq? (vector-ref fn 0) ':REF)
-           (not (local-var? (vector-ref fn 1) env))
+           (not (local-var? (vector-ref fn 1) scope))
            (not (null? args)))
       (let1 fnsym (vector-ref fn 1)
         (cond ((and (binop? fnsym)
                     (not (null? (cdr args))))
-               (compile-binop fnsym args env))
+               (compile-binop fnsym args scope))
               ((and (unary-op? fnsym)
                     (null? (cdr args)))
                (compile-unary-op fnsym (car args)))
-              (else (do-compile-funcall fn args env))))
-    (do-compile-funcall fn args env)))
+              (else (do-compile-funcall fn args scope))))
+    (do-compile-funcall fn args scope)))
 
-(define (compile-quote x env)
+(define (compile-quote x scope)
   (if (pair? x)
       (compile* `(cons ',(car x)
                        ',(cdr x))
-                env)
+                scope)
     (if (symbol? x)
         (string-append "LISP.intern(\""
                        (escape-string (symbol->string x))
                        "\")")
-      (compile-literal x env))))
+      (compile-literal x scope))))
 
-(define (compile-if pred-node then-node else-node env)
+(define (compile-if pred-node then-node else-node scope)
   (string-append "(("
-                 (compile* pred-node env)
+                 (compile* pred-node scope)
                  ") !== LISP.nil ? ("
-                 (compile* then-node env)
+                 (compile* then-node scope)
                  ") : ("
                  (if else-node
-                     (compile* else-node env)
+                     (compile* else-node scope)
                    "LISP.nil")
                  "))"))
 
-(define (compile-set! sym val env)
-  (string-append (compile* sym env)
+(define (compile-set! sym val scope)
+  (string-append (compile* sym scope)
                  " = "
-                 (compile* val env)))
+                 (compile* val scope)))
 
-(define (compile-lambda params bodies env)
-  (define (extend-env env params)
-    (append params env))
+(define (compile-lambda params bodies base-scope extended-scope)
   (let ((proper-params (if (proper-list? params)
                            params
                          (reverse! (reverse params))))  ; Remove dotted part.
         (rest (if (pair? params)
                   (cdr (last-pair params))
                 params)))
-    (let1 newenv (extend-env env (if (null? rest)
-                                     proper-params
-                                   (append (list rest)
-                                           proper-params)))
-      (string-append "(function("
-                     (string-join (map (lambda (x) (escape-symbol x))
-                                       proper-params)
-                                  ", ")
-                     "){"
-                     (if (null? rest)
-                         ""
-                       (string-append "var "
-                                      (symbol->string rest)
-                                      " = LISP._getRestArgs(arguments, "
-                                      (number->string (length proper-params))
-                                      "); "))
-                     "return ("
-                     (expand-body bodies newenv)
-                     ");})"))))
+    (string-append "(function("
+                   (string-join (map (lambda (x) (escape-symbol x))
+                                     proper-params)
+                                ", ")
+                   "){"
+                   (if (null? rest)
+                       ""
+                     (string-append "var "
+                                    (symbol->string rest)
+                                    " = LISP._getRestArgs(arguments, "
+                                    (number->string (length proper-params))
+                                    "); "))
+                   "return ("
+                   (expand-body bodies extended-scope)
+                   ");})")))
 
-(define (compile-define name value env)
-  (string-append (compile* name env)
+(define (compile-define name value scope)
+  (string-append (compile* name scope)
                  " = "
-                 (compile* value env)))
+                 (compile* value scope)))
 
 (define (macroexpand exp)
   (let ((expanded (macroexpand-1 exp)))
@@ -268,35 +267,36 @@
         exp
       (macroexpand expanded))))
 
-(define (compile-new class-name args env)
+(define (compile-new class-name args scope)
   (string-append "new "
                  (symbol->string class-name)
                  "("
-                 (expand-args args env)
+                 (expand-args args scope)
                  ")"))
 
-(define (compile* s env)
+(define (compile* s scope)
   (case (vector-ref s 0)
-    ((:CONST)  (compile-quote (vector-ref s 1) env))
-    ((:REF)    (compile-symbol (vector-ref s 1) env))
+    ((:CONST)  (compile-quote (vector-ref s 1) scope))
+    ((:REF)    (compile-symbol (vector-ref s 1) scope))
     ((:IF)     (let ((p (vector-ref s 1))
                      (thn (vector-ref s 2))
                      (els (vector-ref s 3)))
-                 (compile-if p thn els env)))
-    ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) env))
-    ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) env))
-    ((:LAMBDA)  (let ((scope (vector-ref s 1))
+                 (compile-if p thn els scope)))
+    ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) scope))
+    ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) scope))
+    ((:LAMBDA)  (let ((extended-scope (vector-ref s 1))
                       (params (vector-ref s 2))
                       (body (vector-ref s 3)))
-                  (compile-lambda params body env)))
-    ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) env))
+                  (compile-lambda params body scope extended-scope)))
+    ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) scope))
     ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
                                        (vector-ref s 2)))
-    ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) env))
+    ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     (else  (string-append "???" s "???"))))
 
 (define (compile s)
-  (let1 tree (traverse s)
+  (let* ((top-scope ())
+         (tree (traverse* s top-scope)))
     ;;(write tree)
     (compile* tree
-              ())))
+              top-scope)))
