@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Scope
 
-(define (extend-scope parent-scope params)
+(define (new-scope parent-scope params)
   (vector (dotted->proper params) parent-scope))
 
 (define (scope-param scope)
@@ -51,7 +51,7 @@
                                    nil
                                  (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params . body)  (let ((new-scope (extend-scope scope params)))
+    ((lambda params . body)  (let ((new-scope (new-scope scope params)))
                                (vector ':LAMBDA
                                        new-scope
                                        params
@@ -295,7 +295,7 @@
     (else  (string-append "???" s "???"))))
 
 (define (compile s)
-  (let* ((top-scope ())
+  (let* ((top-scope (new-scope nil ()))
          (tree (traverse* s top-scope)))
     ;;(write tree)
     (compile* tree
