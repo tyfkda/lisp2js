@@ -42,6 +42,7 @@
     ((lambda params . body)  (let ((new-scope (extend-scope scope (cadr s))))
                                (vector ':LAMBDA
                                        new-scope
+                                       params
                                        (traverse-args (cddr s) new-scope))))
     ((define name value . rest)  (if (pair? name)
                                      (traverse* `(define ,(car name)
@@ -279,8 +280,9 @@
     ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) env))
     ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) env))
     ((:LAMBDA)  (let ((scope (vector-ref s 1))
-                      (body (vector-ref s 2)))
-                  (compile-lambda (scope-param scope) body env)))
+                      (params (vector-ref s 2))
+                      (body (vector-ref s 3)))
+                  (compile-lambda params body env)))
     ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) env))
     ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
                                        (vector-ref s 2)))
