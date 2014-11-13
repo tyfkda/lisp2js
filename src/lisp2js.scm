@@ -39,11 +39,11 @@
     ((if)      (vector ':IF
                        (traverse-args (cdr s) scope)))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params . body)  (let ((new-scope (extend-scope scope (cadr s))))
+    ((lambda params . body)  (let ((new-scope (extend-scope scope params)))
                                (vector ':LAMBDA
                                        new-scope
                                        params
-                                       (traverse-args (cddr s) new-scope))))
+                                       (traverse-args body new-scope))))
     ((define name value . rest)  (if (pair? name)
                                      (traverse* `(define ,(car name)
                                                    (lambda ,(cdr name) ,value ,@rest))
