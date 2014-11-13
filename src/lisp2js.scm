@@ -2,12 +2,23 @@
 ;; Scope
 
 (define (new-scope parent-scope params)
-  (vector (dotted->proper params) parent-scope))
+  (vector (dotted->proper params) nil parent-scope))
 
 (define (scope-param scope)
   (vector-ref scope 0))
 
 (define (scope-outer scope)
+  (vector-ref scope 2))
+
+(define (scope-add-var scope val)
+  (let1 x (gensym)
+    (vector-set! scope 1
+                 (cons (cons x val) (vector-ref scope 1)))
+    (vector-set! scope 0
+                 (cons x (vector-ref scope 0)))
+    x))
+
+(define (scope-get-var scope)
   (vector-ref scope 1))
 
 (define (scope-var? scope x)
@@ -38,11 +49,15 @@
                         (record (cdr ,value) ,(cdar clause) ,@(cdr clause))))))
                 clauses)))))
 
+(define (traverse-quoted-value x)
+  (if (pair? x)
+      (vector ':FUNCALL (vector ':REF (if (proper-list? x) 'list 'list*))
+              (map traverse-quoted-value (dotted->proper x)))
+    (vector ':CONST x)))
+
 (define (traverse-list s scope)
   (record-case s
-    ((quote x)   (cond ((pair? x) (traverse* `(cons ',(car x)
-                                                    ',(cdr x))
-                                             scope))
+    ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
                        (else (vector ':CONST x))))
     ((if p thn . els)  (vector ':IF
                                (traverse* p scope)
@@ -274,6 +289,22 @@
                  (expand-args args scope)
                  ")"))
 
+;; If the given scope has quoted value, output them as local variable values,
+;; and encapsulate with anonymous function.
+(define (compile-new-scope scope compiled-body)
+  (aif (scope-get-var scope)
+       (string-append "(function() { var "
+                      (string-join (map (lambda (x)
+                                          (string-append (escape-symbol (car x))
+                                                         " = "
+                                                         (compile* (cdr x) scope)))
+                                        (reverse it))
+                                   ", ")
+                      "; return "
+                      compiled-body
+                      "; })()")
+    compiled-body))
+
 (define (compile* s scope)
   (case (vector-ref s 0)
     ((:CONST)  (compile-quote (vector-ref s 1) scope))
@@ -287,7 +318,8 @@
     ((:LAMBDA)  (let ((extended-scope (vector-ref s 1))
                       (params (vector-ref s 2))
                       (body (vector-ref s 3)))
-                  (compile-lambda params body scope extended-scope)))
+                  (compile-new-scope extended-scope
+                                     (compile-lambda params body scope extended-scope))))
     ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) scope))
     ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
                                        (vector-ref s 2)))
@@ -298,5 +330,5 @@
   (let* ((top-scope (new-scope nil ()))
          (tree (traverse* s top-scope)))
     ;;(write tree)
-    (compile* tree
-              top-scope)))
+    (compile-new-scope top-scope
+                       (compile* tree top-scope))))
