@@ -217,7 +217,7 @@
                (compile-binop fnsym args scope))
               ((and (unary-op? fnsym)
                     (null? (cdr args)))
-               (compile-unary-op fnsym (car args)))
+               (compile-unary-op fnsym (car args) scope))
               (else (do-compile-funcall fn args scope))))
     (do-compile-funcall fn args scope)))
 
