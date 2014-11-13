@@ -1,12 +1,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Scope
+
+(define (extend-scope parent-scope params)
+  (vector params parent-scope))
+
+(define (scope-param scope)
+  (vector-ref scope 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
 (define (traverse-args args scope)
   (map (lambda (x)
          (traverse* x scope))
        args))
-
-(define (extend-scope parent-scope params)
-  (cons params parent-scope))
 
 (define-macro (record args param . body)
   `(apply (lambda ,param ,@body)
@@ -272,7 +278,9 @@
                  (compile-if (car exp) (cadr exp) (caddr exp) env)))
     ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) env))
     ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) env))
-    ((:LAMBDA)  (compile-lambda (car (vector-ref s 1)) (vector-ref s 2) env))
+    ((:LAMBDA)  (let ((scope (vector-ref s 1))
+                      (body (vector-ref s 2)))
+                  (compile-lambda (scope-param scope) body env)))
     ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) env))
     ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
                                        (vector-ref s 2)))
@@ -280,5 +288,7 @@
     (else  (string-append "???" s "???"))))
 
 (define (compile s)
-  (compile* (traverse s)
-            ()))
+  (let1 tree (traverse s)
+    ;;(write tree)
+    (compile* tree
+              ())))
