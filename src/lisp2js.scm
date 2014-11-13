@@ -223,22 +223,22 @@
                  " = "
                  (compile* val env)))
 
-(define (compile-lambda raw-params bodies env)
+(define (compile-lambda params bodies env)
   (define (extend-env env params)
     (append params env))
-  (let ((params (if (proper-list? raw-params)
-                    raw-params
-                  (reverse! (reverse raw-params))))  ; Remove dotted part.
-        (rest (if (pair? raw-params)
-                  (cdr (last-pair raw-params))
-                raw-params)))
+  (let ((proper-params (if (proper-list? params)
+                           params
+                         (reverse! (reverse params))))  ; Remove dotted part.
+        (rest (if (pair? params)
+                  (cdr (last-pair params))
+                params)))
     (let1 newenv (extend-env env (if (null? rest)
-                                     params
+                                     proper-params
                                    (append (list rest)
-                                           params)))
+                                           proper-params)))
       (string-append "(function("
                      (string-join (map (lambda (x) (escape-symbol x))
-                                       params)
+                                       proper-params)
                                   ", ")
                      "){"
                      (if (null? rest)
@@ -246,7 +246,7 @@
                        (string-append "var "
                                       (symbol->string rest)
                                       " = LISP._getRestArgs(arguments, "
-                                      (number->string (length params))
+                                      (number->string (length proper-params))
                                       "); "))
                      "return ("
                      (expand-body bodies newenv)
