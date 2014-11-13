@@ -36,7 +36,7 @@
 
 (define-macro (cond . clauses)
   (if (null? clauses)
-      '()
+      ()
     (let ((clause (car clauses))
           (rest (cdr clauses)))
       (if (eq? (car clause) 'else)
@@ -129,7 +129,7 @@
 
 (define (map f ls)
   (if (null? ls)
-      '()
+      ()
     (cons (f (car ls))
           (map f (cdr ls)))))
 
@@ -141,7 +141,7 @@
 
 (define (reverse ls)
   (let loop ((ls ls)
-             (acc '()))
+             (acc ()))
     (if (pair? ls)
         (loop (cdr ls)
               (cons (car ls) acc))
