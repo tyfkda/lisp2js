@@ -1,14 +1,13 @@
-;; Currently body expression in `define-macro` is evaluated in base Lisp
-;; environment, so we don't have to have basic functions in our environment.
 (define-macro (let pairs . body)
   (if (symbol? pairs)  ; named-let
-      ((lambda (name pairs body)
-         `((lambda (,name)
-             (set! ,name (lambda ,(map car pairs)
-                           ,@body))
-             (,name ,@(map cadr pairs)))
-           nil))
-       pairs (car body) (cdr body))
+      (let ((name pairs)
+            (pairs (car body))
+            (body (cdr body)))
+        `((lambda (,name)
+            (set! ,name (lambda ,(map car pairs)
+                          ,@body))
+            (,name ,@(map cadr pairs)))
+          nil))
     `((lambda ,(map car pairs)
         ,@body)
       ,@(map cadr pairs))))
