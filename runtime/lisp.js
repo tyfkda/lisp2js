@@ -366,22 +366,30 @@ LISP.Symbol.prototype = {
 };
 
 LISP.Cons.prototype = {
-  toString: function(inspect) {
-    var ss = [];
-    var separator = "(";
-    var p;
-    for (p = this; p instanceof LISP.Cons; p = p.cdr) {
-      ss.push(separator);
-      ss.push(LISP.makeString(p.car, inspect));
-      separator = " ";
-    }
-    if (p !== LISP.nil) {
-      ss.push(" . ");
-      ss.push(LISP.makeString(p, inspect));
-    }
-    ss.push(")");
-    return ss.join("");
-  },
+  toString: (function() {
+    var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', "unquote-splicing": ',@' };
+    return function(inspect) {
+      if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
+          this.car.name in abbrevTable) {
+        return abbrevTable[this.car.name] + LISP.makeString(this.cdr.car, inspect);
+      }
+
+      var ss = [];
+      var separator = "(";
+      var p;
+      for (p = this; p instanceof LISP.Cons; p = p.cdr) {
+        ss.push(separator);
+        ss.push(LISP.makeString(p.car, inspect));
+        separator = " ";
+      }
+      if (p !== LISP.nil) {
+        ss.push(" . ");
+        ss.push(LISP.makeString(p, inspect));
+      }
+      ss.push(")");
+      return ss.join("");
+    };
+  })(),
   toArray: function() {
     var result = [];
     for (var p = this; p instanceof LISP.Cons; p = p.cdr)
