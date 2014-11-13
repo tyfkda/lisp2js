@@ -36,8 +36,12 @@
                                                     ',(cdr x))
                                              scope))
                        (else (vector ':CONST x))))
-    ((if)      (vector ':IF
-                       (traverse-args (cdr s) scope)))
+    ((if p thn . els)  (vector ':IF
+                               (traverse* p scope)
+                               (traverse* thn scope)
+                               (if (null? els)
+                                   nil
+                                 (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
     ((lambda params . body)  (let ((new-scope (extend-scope scope params)))
                                (vector ':LAMBDA
@@ -275,8 +279,10 @@
   (case (vector-ref s 0)
     ((:CONST)  (compile-quote (vector-ref s 1) env))
     ((:REF)    (compile-symbol (vector-ref s 1) env))
-    ((:IF)     (let1 exp (vector-ref s 1)
-                 (compile-if (car exp) (cadr exp) (caddr exp) env)))
+    ((:IF)     (let ((p (vector-ref s 1))
+                     (thn (vector-ref s 2))
+                     (els (vector-ref s 3)))
+                 (compile-if p thn els env)))
     ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) env))
     ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) env))
     ((:LAMBDA)  (let ((scope (vector-ref s 1))
