@@ -3,39 +3,86 @@
 (function() {
   require("./runtime/lisp.js");
 
-  // Read all input from stdin, and fire callback.
-  var readAllFromStdin = function(callback) {
-    process.stdin.resume();
-    process.stdin.setEncoding('utf8');
-
-    var all = '';
-    process.stdin.on('data', function (chunk) {
-      all += chunk;
-    });
-    process.stdin.on('end', function () {
-      callback(all);
-    });
-  };
-
   // Run codes.
   var runCodes = function(codes, compile) {
     var reader = new LISP.Reader(codes);
-    var s;
-    for (;;) {
-      s = reader.read();
-      if (!s)
-        break;
+    try {
+      var s;
+      var result;
+      for (;;) {
+        s = reader.read();
+        if (!s)
+          return result;
 
-      if (compile) {
-        var compiled = LISP.compile(s);
-        LISP.print(compiled + ';');
-      } else {
-        LISP.eval(s);
+        if (compile) {
+          result = LISP.compile(s);
+          LISP.print(result + ';');
+        } else {
+          result = LISP.eval(s);
+        }
       }
+    } catch (e) {
+      if (e instanceof LISP.NoCloseParenException)
+        return false;  // Continue input.
+      console.error(e);
     }
-    return s === undefined;
+    return false;
   };
 
+  // Read-Eval-Print loop.
+  var repl = function() {
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    var tty = require('tty');
+    var isatty = tty.isatty(0);  // Whether the stdin is a tty.
+    var prompt = '> ';
+    var inputs = [];
+
+    if (isatty)
+      process.stdout.write(prompt);
+    process.stdin.on('data', function (chunk) {
+      inputs.push(chunk);
+      var result = runCodes(inputs.join(''), compileOnly);
+      if (result) {
+        if (isatty) {
+          console.log(LISP.makeString(result, 10));
+          process.stdout.write(prompt);
+        }
+        inputs = [];
+      }
+    });
+    process.stdin.on('end', function () {
+      process.exit(0);
+    });
+  };
+
+  // Run script.
+  var fs = require('fs');
+  var runArgv = function(index) {
+    if (index >= process.argv.length) {
+      process.exit(0);
+      return;
+    }
+    var fileName = process.argv[index];
+    if (fileName === '-c') {
+      compileOnly = true;
+      return runArgv(index + 1);
+    }
+    fs.readFile(fileName, 'utf-8', function(error, text) {
+      if (error) {
+        console.error('File open error [' + fileName + ']: ' + error);
+        process.exit(1);
+      }
+
+      if (!runCodes(text, compileOnly))
+        process.exit(1);
+      runArgv(index + 1);
+    });
+  };
+
+
+  // Main.
   var translator = "./lisp2js.js";
   var index = 2;
   var compileOnly = false;
@@ -54,33 +101,9 @@
 
   require(translator);
 
-  if (index >= process.argv.length) {
-    readAllFromStdin(function(text) {
-      process.exit(runCodes(text, compileOnly) ? 0 : 1);
-    });
-  } else {
-    var fs = require('fs');
-    var loop = function(index) {
-      if (index >= process.argv.length) {
-        process.exit(0);
-        return;
-      }
-      var fileName = process.argv[index];
-      if (fileName === '-c') {
-        compileOnly = true;
-        return loop(index + 1);
-      }
-      fs.readFile(fileName, 'utf-8', function(error, text) {
-        if (error) {
-          console.error('File open error [' + fileName + ']: ' + error);
-          process.exit(1);
-        }
-
-        if (!runCodes(text, compileOnly))
-          process.exit(1);
-        loop(index + 1);
-      });
-    };
-    loop(index);
+  if (index >= process.argv.length) {  // No input file name: read from stdin.
+    return repl();
+  } else {  // Process command line argument files.
+    return runArgv(index);
   }
 })();
