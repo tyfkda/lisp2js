@@ -53,6 +53,11 @@
       }
     });
     process.stdin.on('end', function () {
+      if (inputs.length > 0) {
+        console.error('Input not terminated');
+        process.exit(1);
+        return;
+      }
       process.exit(0);
     });
   };
