@@ -24,10 +24,10 @@
       }
     } catch (e) {
       if (e instanceof LISP.NoCloseParenException)
-        return false;  // Continue input.
+        return e;  // Continue input.
       console.error(e);
+      return e;
     }
-    return false;
   };
 
   // Read-Eval-Print loop.
@@ -37,25 +37,33 @@
 
     var tty = require('tty');
     var isatty = tty.isatty(0);  // Whether the stdin is a tty.
-    var prompt = '> ';
+    var prompt1 = '> ';
+    var prompt2 = '| ';
     var inputs = [];
 
     if (isatty)
-      process.stdout.write(prompt);
+      process.stdout.write(prompt1);
     process.stdin.on('data', function (chunk) {
       inputs.push(chunk);
       var result = runCodes(inputs.join(''), compileOnly);
-      if (result) {
+      if (result instanceof LISP.NoCloseParenException) {
+        // In REPL, if NoCloseParenException occurs,
+        // a user keep typing so inputs should be kept.
+        if (isatty) {
+          process.stdout.write(prompt2);
+        }
+      } else {
+        // Otherwise should be consumed.
+        inputs = [];
         if (isatty) {
           console.log(LISP.makeString(result, 10));
-          process.stdout.write(prompt);
+          process.stdout.write(prompt1);
         }
-        inputs = [];
       }
     });
     process.stdin.on('end', function () {
       if (inputs.length > 0) {
-        console.error('Input not terminated');
+        console.error('Input not terminated: [' + inputs + ']');
         process.exit(1);
         return;
       }
@@ -81,7 +89,7 @@
         process.exit(1);
       }
 
-      if (!runCodes(text, compileOnly))
+      if (runCodes(text, compileOnly) !== true)
         process.exit(1);
       runArgv(index + 1);
     });
