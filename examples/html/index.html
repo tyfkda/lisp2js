@@ -4,15 +4,7 @@
     <title>JsLisp test</title>
     <meta charset="utf-8">
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-
-    <style type="text/css" media="screen">
-      #terminal {
-        margin: 16px;
-        padding: 8px;
-        background-color: #eee;
-        font-family: monospace;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
     <h1>JsLisp test</h1>
@@ -34,6 +26,11 @@
     </script>
 
     <script src="jslisp.js">
+;; Hello world
+(print "Hello, world!")
+    </script>
+
+    <script src="jslisp.js">
 ;; Calculate Fibonacci number
 (define (fib n)
   (if (< n 2)
@@ -41,7 +38,7 @@
     (+ (fib (- n 1))
        (fib (- n 2)))))
 
-(print (list 'fib30 '= (fib 30)))
+(print (+ "fib30 = " (fib 30)))
     </script>
 
     <script src="jslisp.js">
