@@ -13,7 +13,7 @@
       for (;;) {
         s = reader.read();
         if (!s)
-          return true;
+          return result;
 
         if (compile) {
           result = LISP.compile(s);
@@ -56,7 +56,8 @@
         // Otherwise should be consumed.
         inputs = [];
         if (isatty) {
-          console.log(LISP.makeString(result, 10));
+          if (result !== undefined)
+            console.log(LISP.makeString(result, 10));
           process.stdout.write(prompt1);
         }
       }
@@ -85,7 +86,7 @@
         process.exit(1);
       }
 
-      if (runCodes(text, compileOnly) !== true)
+      if (runCodes(text, compileOnly) instanceof LISP.NoCloseParenException)
         process.exit(1);
       runArgv(index + 1);
     });
