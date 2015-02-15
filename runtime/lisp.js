@@ -442,7 +442,7 @@ LISP = (function() {
       return undefined;
     },
 
-    proceed: function(value) {
+    proceed: function() {
       this.str = RegExp.rightContext;
     },
 
