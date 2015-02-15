@@ -1,5 +1,6 @@
 // DO NOT EDIT, this file is generated from src/*.scm
 (function(LISP) {
+'use strict';
 LISP['register-macro'](LISP.intern("let"), (function(pairs){var body = LISP._getRestArgs(arguments, 1); return (((LISP["symbol?"](pairs)) !== LISP.nil ? ((function() { var __2 = LISP.list(LISP.intern("nil")); return (function(name, pairs, body){return (LISP["list*"](LISP.list(LISP.intern("lambda"), LISP.list(name), LISP.list(LISP.intern("set!"), name, LISP["list*"](LISP.intern("lambda"), LISP.map(LISP.car, pairs), body)), LISP["list*"](name, LISP.map(LISP.cadr, pairs))), __2));}); })()(pairs, LISP.car(body), LISP.cdr(body))) : (LISP["list*"](LISP["list*"](LISP.intern("lambda"), LISP.map(LISP.car, pairs), body), LISP.map(LISP.cadr, pairs)))));}));
 LISP['register-macro'](LISP.intern("let1"), (function(name, value){var body = LISP._getRestArgs(arguments, 2); return (LISP.list(LISP["list*"](LISP.intern("lambda"), LISP.list(name), body), value));}));
 LISP['register-macro'](LISP.intern("let*"), (function(pairs){var body = LISP._getRestArgs(arguments, 1); return (((LISP["null?"](pairs)) !== LISP.nil ? (LISP["list*"](LISP.intern("begin"), body)) : (LISP.list(LISP.intern("let1"), LISP.caar(pairs), LISP.cadar(pairs), LISP["list*"](LISP.intern("let*"), LISP.cdr(pairs), body)))));}));

@@ -76,10 +76,9 @@
 
   // Run script.
   var fs = require('fs');
-  var runArgv = function(index) {
+  var runArgv = function(index, onFinish) {
     if (index >= process.argv.length) {
-      process.exit(0);
-      return;
+      return onFinish();
     }
     var fileName = process.argv[index];
     fs.readFile(fileName, 'utf-8', function(error, text) {
@@ -90,7 +89,7 @@
 
       if (runCodes(text, compileOnly) instanceof LISP.NoCloseParenException)
         process.exit(1);
-      runArgv(index + 1);
+      runArgv(index + 1, onFinish);
     });
   };
 
@@ -117,6 +116,12 @@
   if (index >= process.argv.length) {  // No input file name: read from stdin.
     return repl();
   } else {  // Process command line argument files.
-    return runArgv(index);
+    if (compileOnly)
+      console.log("(function(LISP) {\n'use strict';");
+    runArgv(index, function() {
+      if (compileOnly)
+        console.log("})(LISP);");
+      process.exit(0);
+    });
   }
 })();

@@ -13,9 +13,7 @@ lisp2js.js:	$(SRCS)
 
 $(TMPFN):	$(SRCS)
 	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
-	echo '(function(LISP) {' >> $@
 	./jslisp -c $(SRCS) >> $@
-	echo '})(LISP);' >> $@
 
 test:	sread-test simple-test
 
