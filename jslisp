@@ -2,6 +2,8 @@
 //-*- mode:js -*-
 
 (function() {
+  'use strict';
+
   require("./runtime/lisp.js");
 
   // Run codes.
