@@ -25,11 +25,14 @@ Lispコードは下のルールでJSにコンパイルされる：
 | Lisp       | JavaScript      |
 |------------|-----------------|
 | `()`       | `false`         |
+| nil        | `false`         |
+| t          | `true`          |
 | Pair       | `Cons` object   |
 | symbol     | `Symbol` object |
 | string     | String          |
 | lambda     | Function        |
 | hash table | Object          |
+| vector     | Array           |
 
 
 ## 履歴

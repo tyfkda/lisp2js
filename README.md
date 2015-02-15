@@ -25,11 +25,14 @@ Lisp code is compiled into JS, in a rule below:
 | Lisp       | JavaScript      |
 |------------|-----------------|
 | `()`       | `false`         |
+| nil        | `false`         |
+| t          | `true`          |
 | Pair       | `Cons` object   |
 | symbol     | `Symbol` object |
 | string     | String          |
 | lambda     | Function        |
 | hash table | Object          |
+| vector     | Array           |
 
 
 ## History
