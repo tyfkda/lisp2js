@@ -8,10 +8,10 @@ clean:
 
 update-compiler:	lisp2js.js
 lisp2js.js:	$(SRCS)
-	make ,lisp2js.js
-	mv ,lisp2js.js $@
+	make $(TMPFN)
+	mv $(TMPFN) $@
 
-,lisp2js.js:	$(SRCS)
+$(TMPFN):	$(SRCS)
 	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
 	./jslisp -c $(SRCS) >> $@
 

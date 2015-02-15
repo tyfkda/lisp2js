@@ -13,7 +13,7 @@
       for (;;) {
         s = reader.read();
         if (!s)
-          return result;
+          return true;
 
         if (compile) {
           result = LISP.compile(s);
@@ -79,10 +79,6 @@
       return;
     }
     var fileName = process.argv[index];
-    if (fileName === '-c') {
-      compileOnly = true;
-      return runArgv(index + 1);
-    }
     fs.readFile(fileName, 'utf-8', function(error, text) {
       if (error) {
         console.error('File open error [' + fileName + ']: ' + error);
