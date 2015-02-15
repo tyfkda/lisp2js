@@ -16,7 +16,6 @@ lisp2js.js:	$(SRCS)
 	./jslisp -c $(SRCS) >> $@
 
 test:	sread-test simple-test
-	echo 'ok'
 
 sread-test:
 	cd test && node sread-test.js
