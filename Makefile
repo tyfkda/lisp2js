@@ -25,6 +25,9 @@ sread-test:
 simple-test:
 	cd test && ./test.sh
 
+runtime/lisp.min.js:	runtime/lisp.js
+	uglifyjs -c -o $@ --source-map $<.map $<
+
 update-gh-pages:
 	git checkout gh-pages && \
 	git checkout master -- lisp2js.js && mv lisp2js.js js/ && \
