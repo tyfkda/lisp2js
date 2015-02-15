@@ -22,3 +22,10 @@ sread-test:
 
 simple-test:
 	cd test && ./test.sh
+
+update-gh-pages:
+	git checkout gh-pages && \
+	git checkout master -- lisp2js.js && mv lisp2js.js js/ && \
+	git checkout master -- runtime/lisp.js && mv runtime/lisp.js js/ && \
+	git commit -am 'Update runtime' && \
+	git checkout master
