@@ -9,6 +9,15 @@ LISP = {
   _output: function(str) {
     console.log(str);
   },
+  _arguments2Array: function(args, start) {
+    var len = args.length - start;
+    if (len <= 0)
+      return [];
+    var array = new Array(len);
+    for (var i = 0; i < len; ++i)
+      array[i] = args[i + start];
+    return array;
+  },
 
   "*macro-table*": {},
   "register-macro": function(name, func) {
@@ -17,7 +26,6 @@ LISP = {
   },
   "do-compile-defmacro": function(name, exp) {
     var compiled = LISP.compile(exp);
-    LISP['register-macro'](name, compiled);
     return ("LISP['register-macro'](LISP.intern(\"" +
             LISP['escape-string'](LISP['symbol->string'](name)) +
             "\"), " +
@@ -39,9 +47,7 @@ LISP = {
   },
 
   error: function() {
-    var argumentsArray = [];
-    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
-    throw argumentsArray.join(', ');
+    throw LISP._arguments2Array(arguments, 0).join(', ');
   },
 
   Symbol: function(name) {
@@ -156,6 +162,16 @@ LISP = {
       result /= arguments[i];
     return result;
   },
+  "%": function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return result;
+    for (var i = 1; i < arguments.length; ++i)
+      result %= arguments[i];
+    return result;
+  },
   "<": function() {
     if (arguments.length > 0) {
       var value = arguments[0];
@@ -213,9 +229,7 @@ LISP = {
     return LISP._jsBoolToS(x === y);
   },
   "string-append": function() {
-    var argumentsArray = [];
-    argumentsArray = argumentsArray.concat.apply(argumentsArray, arguments);
-    return argumentsArray.join('');
+    return LISP._arguments2Array(arguments, 0).join('');
   },
   "string-join": function(list, separator) {
     if (list === LISP.nil)
@@ -252,6 +266,8 @@ LISP = {
       return 't';
     if (typeof x == 'string')
       return inspect ? LISP._inspectString(x) : x;
+    if (x instanceof Array)
+      return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
     if (x === undefined || x === null)
       return '' + x;
     return x.toString(inspect);
@@ -296,6 +312,31 @@ LISP = {
     return hash[x] = value;
   },
 
+  // Vector.
+  vector: function() {
+    return LISP._arguments2Array(arguments, 0);
+  },
+  "make-vector": function(count, value) {
+    if (value === undefined)
+      value = LISP.nil;
+    var vector = new Array(count);
+    for (var i = 0; i < count; ++i)
+      vector[i] = value;
+    return vector;
+  },
+  "vector?": function(x) {
+    return LISP._jsBoolToS(x instanceof Array);
+  },
+  "vector-length": function(vector) {
+    return vector.length;
+  },
+  "vector-ref": function(vector, index) {
+    return vector[index];
+  },
+  "vector-set!": function(vector, index, value) {
+    return vector[index] = value;
+  },
+
   // Regexp.
   "regexp?": function(x) {
     return LISP._jsBoolToS(x instanceof RegExp);
@@ -325,22 +366,30 @@ LISP.Symbol.prototype = {
 };
 
 LISP.Cons.prototype = {
-  toString: function(inspect) {
-    var ss = [];
-    var separator = "(";
-    var p;
-    for (p = this; p instanceof LISP.Cons; p = p.cdr) {
-      ss.push(separator);
-      ss.push(LISP.makeString(p.car, inspect));
-      separator = " ";
-    }
-    if (p !== LISP.nil) {
-      ss.push(" . ");
-      ss.push(LISP.makeString(p, inspect));
-    }
-    ss.push(")");
-    return ss.join("");
-  },
+  toString: (function() {
+    var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', "unquote-splicing": ',@' };
+    return function(inspect) {
+      if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
+          this.car.name in abbrevTable) {
+        return abbrevTable[this.car.name] + LISP.makeString(this.cdr.car, inspect);
+      }
+
+      var ss = [];
+      var separator = "(";
+      var p;
+      for (p = this; p instanceof LISP.Cons; p = p.cdr) {
+        ss.push(separator);
+        ss.push(LISP.makeString(p.car, inspect));
+        separator = " ";
+      }
+      if (p !== LISP.nil) {
+        ss.push(" . ");
+        ss.push(LISP.makeString(p, inspect));
+      }
+      ss.push(")");
+      return ss.join("");
+    };
+  })(),
   toArray: function() {
     var result = [];
     for (var p = this; p instanceof LISP.Cons; p = p.cdr)
@@ -379,11 +428,13 @@ LISP.Reader.prototype = {
       return this.proceed(), this.readQuasiQuote();
     if (m = this.str.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
       return this.proceed(), this.readUnquote(m[1]);
+    if (m = this.str.match(/^\s*#\(/))  // vector.
+      return this.proceed(), this.readVector();
     if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
       return this.proceed(), new RegExp(m[1]);
-    if (m = this.str.match(/^\s*#(t|f)\b/))  // #t, #f
-      return this.proceed(), (m[1] == 't' ? LISP.t : LISP.nil);
-    if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;]+)/))  // Symbol or number.
+    if (m = this.str.match(/^\s*#\|(.|[\n\r])*?\|#/))  // Block comment.
+      return this.proceed(), this.read();
+    if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;#]+)/))  // Symbol or number.
       return this.readSymbolOrNumber(m[1]);
     return undefined;
   },
@@ -427,6 +478,25 @@ LISP.Reader.prototype = {
             return reversed;
           }
         }
+      }
+      // Error
+      throw new LISP.NoCloseParenException();
+    }
+  },
+
+  readVector: function() {
+    var result = [];
+    var m;
+    for (;;) {
+      var x = this.read();
+      if (x !== undefined) {
+        result.push(x);
+        continue;
+      }
+
+      if (m = this.str.match(/^\s*\)/)) {  // Close paren.
+        this.proceed();
+        return result;
       }
       // Error
       throw new LISP.NoCloseParenException();
