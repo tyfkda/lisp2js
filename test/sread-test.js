@@ -17,18 +17,20 @@ function equals(x, y) {
 }
 
 function test(title, expected, result) {
+  'use strict';
   process.stdout.write('Testing ' + title + '... ');
   if (equals(expected, result)) {
     print('ok');
     return;
   }
 
-  console.error("\033[1;31m[ERROR]\033[0;39m");
+  console.error("\x1b[1;31m[ERROR]\x1b[0;39m");
   console.error("  expected " + expected + ' : actual ' + result);
   process.exit(1);
 }
 
 function fail(title, exception, code) {
+  'use strict';
   process.stdout.write('Testing ' + title + '... ');
   var errorMessage;
   try {
@@ -42,12 +44,13 @@ function fail(title, exception, code) {
     errorMessage = 'Unexpected exception: expected ' + exceptin + ' : actual ' + exc;
   }
 
-  console.error("\033[1;31m[ERROR]\033[0;39m");
+  console.error("\x1b[1;31m[ERROR]\x1b[0;39m");
   console.error('  ' + errorMessage);
   process.exit(1);
 }
 
 function main() {
+  'use strict';
   require('../runtime/lisp');
   var cons = LISP.cons;
   var reads = LISP['read-from-string'];
@@ -83,7 +86,7 @@ function main() {
 
   fail('no close paren', LISP.NoCloseParenException, '(1 2 3');
 
-  print("\033[1;32mTEST ALL SUCCEEDED!\033[0;39m")
+  print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m")
 }
 
 main();
