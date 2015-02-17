@@ -15,12 +15,15 @@ $(TMPFN):	$(SRCS)
 	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
 	./jslisp -c $(SRCS) >> $@
 
-test:	sread-test simple-test
+test:	sread-test inside-test shell-test
 
 sread-test:
 	cd test && node sread-test.js
 
-simple-test:
+inside-test:
+	cd test && ../jslisp test.scm
+
+shell-test:
 	cd test && ./test.sh
 
 runtime/lisp.min.js:	runtime/lisp.js
