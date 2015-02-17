@@ -9,9 +9,12 @@ LISP = (function() {
     _getRestArgs: function(args, start) {
       return Array.prototype.slice.call(args, start).toList();
     },
-    _output: function(str) {
-      console.log(str);
-    },
+    _output: (typeof(process) !== 'undefined'
+              ? function(str) {  // for node.js.
+                process.stdout.write(str);
+              } : function(str) {  // for browser.
+                console.log(str);
+              }),
     _arguments2Array: function(args, start) {
       var len = args.length - start;
       if (len <= 0)
@@ -277,6 +280,12 @@ LISP = (function() {
     },
     print: function(x) {
       LISP._output(LISP.makeString(x));
+      return x;
+    },
+    puts: function(x) {
+      LISP._output(LISP.makeString(x));
+      if (typeof(process) !== 'undefined')
+        LISP._output('\n');
       return x;
     },
     write: function(x) {
