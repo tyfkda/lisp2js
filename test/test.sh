@@ -32,6 +32,15 @@ function run_raw() {
   echo ok
 }
 
+function fail() {
+  echo -n "Testing $1 ... "
+  echo "$2" | $LISP_RUNNER 1>/dev/null 2>/dev/null
+  if [ $? -eq 0 ]; then
+    error_exit "Failure expected, but succeeded!"
+  fi
+  echo ok
+}
+
 ################################################################
 # Test cases.
 
@@ -75,6 +84,10 @@ run_raw defmacro nil "(define-macro (nil! x) (list 'define x 'nil))
 run_raw refer-field 123 "(define h (make-hash-table))
                          (set! h.x 123)
                          (print h.x)"
+
+
+# Fail cases
+fail invalid-apply '(1 2 3)'
 
 ################################################################
 # All tests succeeded.
