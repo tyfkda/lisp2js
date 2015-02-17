@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  var LISP = require('../src/runtime/lisp');
+  var LISP = require('../src/runtime/runtime');
 
   function print(value) {
     console.log(value);
