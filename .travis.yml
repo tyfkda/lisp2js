@@ -2,8 +2,4 @@ sudo: false
 language: node_js
 node_js:
   - 0.12
-before_install:
-    - make
-before_script:
-    - pwd
 script: "make test"
