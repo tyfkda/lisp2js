@@ -84,6 +84,18 @@
     "symbol?": function(x) {
       return LISP._jsBoolToS(x instanceof LISP.Symbol);
     },
+    type: function(x) {
+      var type = typeof x;
+      if (type === 'object') {
+        if (x instanceof LISP.Symbol)
+          type = 'symbol';
+        else if (x instanceof LISP.Cons)
+          type = 'pair';
+        else if (x instanceof Array)
+          type = 'vector';
+      }
+      return LISP.intern(type);
+    },
 
     "eq?": function(x, y) {
       return LISP._jsBoolToS(x === y);
