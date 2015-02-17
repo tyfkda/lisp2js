@@ -92,7 +92,7 @@
 
 
   // Main.
-  var translator = "./lisp2js.js";
+  var translator = "./lisp2js";
   var index = 2;
   var compileOnly = false;
   for (; index < process.argv.length; ++index) {
