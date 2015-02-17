@@ -58,7 +58,10 @@
           }
         } else {
           console.error(e);
-          process.exit(1);
+          if (!isatty)
+            process.exit(1);
+          inputs = [];
+          process.stdout.write(prompt1);
         }
       }
     });
