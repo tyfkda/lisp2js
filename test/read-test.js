@@ -51,7 +51,7 @@ function fail(title, exception, code) {
 
 function main() {
   'use strict';
-  require('../runtime/lisp');
+  require('../src/runtime/lisp');
   var cons = LISP.cons;
   var reads = LISP['read-from-string'];
 

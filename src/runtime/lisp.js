@@ -546,6 +546,8 @@ LISP = (function() {
     return reader.read();
   };
 
+  /*==== EMBED COMPILED CODE HERE ====*/
+
   return LISP;
 })();
 

@@ -7,12 +7,12 @@ clean:
 	rm -rf lisp2js-old.js $(TMPFN)
 
 update-compiler:	lisp2js.js
-lisp2js.js:	$(SRCS)
+lisp2js.js:	$(SRCS) src/runtime/lisp.js
 	make $(TMPFN)
-	mv $(TMPFN) $@
+	ruby -e 'marker = "/*==== EMBED COMPILED CODE HERE ====*/"; compiled_code = File.read("$(TMPFN)"); runtime = File.read("src/runtime/lisp.js"); print runtime.sub(marker) { marker + "\n" + compiled_code };' > $@
+	rm $(TMPFN)
 
 $(TMPFN):	$(SRCS)
-	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
 	./jslisp -c $(SRCS) >> $@
 
 test:	read-test inside-test shell-test
@@ -32,6 +32,5 @@ runtime/lisp.min.js:	runtime/lisp.js
 update-gh-pages:
 	git checkout gh-pages && \
 	git checkout master -- lisp2js.js && mv lisp2js.js js/ && \
-	git checkout master -- runtime/lisp.js && mv runtime/lisp.js js/ && \
 	git commit -am 'Update runtime' && \
 	git checkout master

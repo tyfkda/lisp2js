@@ -4,8 +4,6 @@
 (function() {
   'use strict';
 
-  require("./runtime/lisp.js");
-
   // Run codes.
   var runCodes = function(codes, compile) {
     var reader = new LISP.Reader(codes);
@@ -18,7 +16,7 @@
 
       if (compile) {
         result = LISP.compile(s);
-        LISP.print(result + ';');
+        LISP.print(result + ';\n');
       } else {
         result = LISP.eval(s);
       }
@@ -113,11 +111,7 @@
   if (index >= process.argv.length) {  // No input file name: read from stdin.
     return repl();
   } else {  // Process command line argument files.
-    if (compileOnly)
-      console.log("(function(LISP) {\n'use strict';");
     runArgv(index, function() {
-      if (compileOnly)
-        console.log("})(LISP);");
       process.exit(0);
     });
   }
