@@ -1,4 +1,4 @@
-LISP = (function() {
+(function(dest) {
   'use strict';
 
   // Convert JS array into Lisp list.
@@ -548,7 +548,6 @@ LISP = (function() {
 
   /*==== EMBED COMPILED CODE HERE ====*/
 
-  return LISP;
-})();
-
-module.exports = LISP;
+  for (var k in LISP)
+    dest[k] = LISP[k];
+})(typeof exports !== 'undefined' ? exports : (this.LISP = {}));

@@ -1,4 +1,4 @@
-LISP = (function() {
+(function(dest) {
   'use strict';
 
   // Convert JS array into Lisp list.
@@ -640,7 +640,6 @@ LISP["compile*"] = (function(s, scope){return ((function(__21){return (((LISP["e
 LISP.compile = (function(s){return ((function(top$2dscope){return ((function(tree){return (LISP["compile-new-scope"](top$2dscope, LISP["compile*"](tree, top$2dscope)));})(LISP["traverse*"](s, top$2dscope)));})(LISP["new-scope"](LISP.nil, LISP.nil)));});
 
 
-  return LISP;
-})();
-
-module.exports = LISP;
+  for (var k in LISP)
+    dest[k] = LISP[k];
+})(typeof exports !== 'undefined' ? exports : (this.LISP = {}));

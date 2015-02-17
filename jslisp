@@ -4,6 +4,8 @@
 (function() {
   'use strict';
 
+  var LISP;
+
   // Run codes.
   var runCodes = function(codes, compile) {
     var reader = new LISP.Reader(codes);
@@ -106,7 +108,7 @@
     break;
   }
 
-  require(translator);
+  LISP = require(translator);
 
   if (index >= process.argv.length) {  // No input file name: read from stdin.
     return repl();
