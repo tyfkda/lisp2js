@@ -1,13 +1,21 @@
 LISP = (function() {
   'use strict';
 
+  // Convert JS array into Lisp list.
+  var arrayToList = function(array) {
+    var result = LISP.nil;
+    for (var i = array.length; --i >= 0; )
+      result = LISP.cons(array[i], result);
+    return result;
+  };
+
   var LISP = {
     nil: false,
     t: true,
 
     _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil; },
     _getRestArgs: function(args, start) {
-      return Array.prototype.slice.call(args, start).toList();
+      return arrayToList(Array.prototype.slice.call(args, start));
     },
     _output: (typeof(process) !== 'undefined'
               ? function(str) {  // for node.js.
@@ -408,14 +416,6 @@ LISP = (function() {
         result.push(p.car);
       return result;
     },
-  };
-
-  // Convert JS array into Lisp list.
-  Array.prototype.toList = function() {
-    var result = LISP.nil;
-    for (var i = this.length; --i >= 0; )
-      result = LISP.cons(this[i], result);
-    return result;
   };
 
   // Reader.
