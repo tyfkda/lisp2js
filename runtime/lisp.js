@@ -529,7 +529,9 @@ LISP = (function() {
     },
 
     unescape: function(str) {
-      return str.replace(/\\./g, function(match) {
+      return str.replace(/(\\x[0-9a-fA-F]{2})/g, function(match) {
+        return eval('"' + match + '"');
+      }).replace(/\\./g, function(match) {
         switch (match[1]) {
         case 't':  return '\t';
         case 'n':  return '\n';

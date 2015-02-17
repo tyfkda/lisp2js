@@ -71,6 +71,7 @@ function main() {
   test('string', 'abc', reads('"abc"'));
   test('complex string', 'foo bar\nbaz', reads('"foo bar\nbaz"'));
   test('double quote in string', '"', reads('"\\""'));
+  test('escape character', '\x1b', reads('"\x1b"'));
 
   test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), reads("`abc"));
   test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), reads(",abc"));
