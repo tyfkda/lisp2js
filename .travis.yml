@@ -1,0 +1,8 @@
+language: node_js
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install libgtest-dev
+    - make
+before_script:
+    - pwd
+script: "make test"
