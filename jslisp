@@ -44,8 +44,7 @@
         // Otherwise input should be consumed.
         inputs = [];
         if (isatty) {
-          if (result !== undefined)
-            console.log(LISP.makeString(result, 10));
+          console.log(LISP.makeString(result, 10));
           process.stdout.write(prompt1);
         }
       } catch (e) {
