@@ -93,6 +93,8 @@
           type = 'pair';
         else if (x instanceof Array)
           type = 'vector';
+        else if (x instanceof LISP.HashTable)
+          type = 'table';
       }
       return LISP.intern(type);
     },
@@ -328,9 +330,14 @@
     JS: ((typeof window !== 'undefined') ? window :
          (typeof GLOBAL !== 'undefined') ? GLOBAL : {}),
 
+    HashTable: function() {},
+
     // Hash table.
     "make-hash-table": function() {
-      return {};
+      return new LISP.HashTable();
+    },
+    "hash-table?": function(x) {
+      return x instanceof LISP.HashTable;
     },
     "hash-table-exists?": function(hash, x) {
       return x in hash ? LISP.t : LISP.nil;

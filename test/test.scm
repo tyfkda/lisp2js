@@ -18,5 +18,6 @@
 (test "type of pair" 'pair (type '(1 2 3)))
 (test "type of string" 'string (type "123"))
 (test "type of vector" 'vector (type #(1 2 3)))
+(test "type of table" 'table (type (make-hash-table)))
 
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")
