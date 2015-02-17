@@ -20,4 +20,9 @@
 (test "type of vector" 'vector (type #(1 2 3)))
 (test "type of table" 'table (type (make-hash-table)))
 
+;; equal?
+(test "eq? string" t (eq? "123" "123"))
+(test "eq? vector" nil (eq? #(1 2 3) #(1 2 3)))
+(test "equal? vector" t (equal? #(1 2 3) #(1 2 3)))
+
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")

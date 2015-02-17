@@ -107,10 +107,18 @@
 (define (equal? x y)
   (if (eq? x y)
       t
-    (and (pair? x)
-         (pair? y)
-         (equal? (car x) (car y))
-         (equal? (cdr x) (cdr y)))))
+    (let1 xtype (type x)
+      (when (eq? xtype (type y))
+        (case xtype
+          ((pair) (and (equal? (car x) (car y))
+                       (equal? (cdr x) (cdr y))))
+          ((vector) (let1 n (vector-length x)
+                      (and (eq? n (vector-length y))
+                           (let loop ((i 0))
+                             (or (>= i n)
+                                 (and (equal? (vector-ref x i) (vector-ref y i))
+                                      (loop (+ i 1))))))))
+          )))))
 
 (define (length ls)
   (let loop ((ls ls)
