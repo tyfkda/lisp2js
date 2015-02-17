@@ -5,7 +5,7 @@
                 (actual-value ,actual))
             (if (equal? expect-value actual-value)
                 (print "ok\n")
-              (begin (print (list "ERROR" ,name expect-value "expected, but" actual-value))
+              (begin (print (string-append "ERROR [" expect-value "] expected, but [" actual-value "]\n"))
                      (exit 1))))))
 
 ;; not
