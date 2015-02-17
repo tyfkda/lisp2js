@@ -128,7 +128,7 @@
         (else c)))
 
 (define (escape-string s)
-  (regexp-replace-all #/[\\\t\n"]/ s
+  (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
                       (lambda (m) (escape-char (m)))))
 
 (define (escape-symbol sym)
