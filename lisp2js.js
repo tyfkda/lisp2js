@@ -53,9 +53,6 @@
       return LISP.apply(macrofn, s.cdr);
     },
 
-    jseval: function(str) {
-      return eval(str);
-    },
     eval: function(exp) {
       return eval(LISP.compile(exp));
     },
