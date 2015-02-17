@@ -7,9 +7,9 @@ clean:
 	rm -rf lisp2js-old.js $(TMPFN)
 
 update-compiler:	lisp2js.js
-lisp2js.js:	$(SRCS)
+lisp2js.js:	$(SRCS) src/runtime/lisp.js
 	make $(TMPFN)
-	ruby -e 'marker = "/*==== EMBED COMPILED CODE HERE ====*/"; compiled_code = File.read("$(TMPFN)"); runtime = File.read("runtime/lisp.js"); print runtime.sub(marker) { marker + "\n" + compiled_code };' > $@
+	ruby -e 'marker = "/*==== EMBED COMPILED CODE HERE ====*/"; compiled_code = File.read("$(TMPFN)"); runtime = File.read("src/runtime/lisp.js"); print runtime.sub(marker) { marker + "\n" + compiled_code };' > $@
 	rm $(TMPFN)
 
 $(TMPFN):	$(SRCS)
