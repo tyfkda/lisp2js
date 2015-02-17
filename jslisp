@@ -9,10 +9,9 @@
   // Run codes.
   var runCodes = function(codes, compile) {
     var reader = new LISP.Reader(codes);
-    var s;
     var result;
     for (;;) {
-      s = reader.read();
+      var s = reader.read();
       if (!s)
         return result;
 
