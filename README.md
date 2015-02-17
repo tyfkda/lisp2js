@@ -1,6 +1,8 @@
 lisp2js
 =======
 
+[![Build Status](https://travis-ci.org/tyfkda/lisp2js.svg)](https://travis-ci.org/tyfkda/lisp2js)
+
 Translate Lisp code into JavaScript.
 
 [Demo](https://tyfkda.github.io/lisp2js/)
