@@ -377,6 +377,12 @@
       var s = x.toString();
       return s.slice(1, s.length - 1);
     },
+
+
+    // System
+    exit: function(code) {
+      process.exit(code);
+    },
   };
 
   LISP.Symbol.prototype = {
