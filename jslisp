@@ -79,13 +79,12 @@
   var fs = require('fs');
   var runArgv = function(index, onFinish) {
     if (index >= process.argv.length) {
-      return onFinish();
+      return onFinish(null);
     }
     var fileName = process.argv[index];
     fs.readFile(fileName, 'utf-8', function(error, text) {
       if (error) {
-        console.error('File open error [' + fileName + ']: ' + error);
-        process.exit(1);
+        return onFinish('File open error [' + fileName + ']: ' + error);
       }
 
       runCodes(text, compileOnly);
@@ -116,7 +115,11 @@
   if (index >= process.argv.length) {  // No input file name: read from stdin.
     return repl();
   } else {  // Process command line argument files.
-    runArgv(index, function() {
+    runArgv(index, function(error) {
+      if (error !== null) {
+        console.error(error);
+        return process.exit(1);
+      }
       process.exit(0);
     });
   }
