@@ -9,9 +9,12 @@ LISP = (function() {
     _getRestArgs: function(args, start) {
       return Array.prototype.slice.call(args, start).toList();
     },
-    _output: function(str) {
-      console.log(str);
-    },
+    _output: (typeof(process) !== 'undefined'
+              ? function(str) {  // for node.js.
+                process.stdout.write(str);
+              } : function(str) {  // for browser.
+                console.log(str);
+              }),
     _arguments2Array: function(args, start) {
       var len = args.length - start;
       if (len <= 0)
@@ -279,6 +282,12 @@ LISP = (function() {
       LISP._output(LISP.makeString(x));
       return x;
     },
+    puts: function(x) {
+      LISP._output(LISP.makeString(x));
+      if (typeof(process) !== 'undefined')
+        LISP._output('\n');
+      return x;
+    },
     write: function(x) {
       LISP._output(LISP.makeString(x, 10));  // 10 means true, and it is used as radix.
       return x;
@@ -520,7 +529,9 @@ LISP = (function() {
     },
 
     unescape: function(str) {
-      return str.replace(/\\./g, function(match) {
+      return str.replace(/(\\x[0-9a-fA-F]{2})/g, function(match) {
+        return eval('"' + match + '"');
+      }).replace(/\\./g, function(match) {
         switch (match[1]) {
         case 't':  return '\t';
         case 'n':  return '\n';
