@@ -9,10 +9,10 @@ clean:
 update-compiler:	lisp2js.js
 lisp2js.js:	$(SRCS)
 	make $(TMPFN)
-	mv $(TMPFN) $@
+	ruby -e 'marker = "/*==== EMBED COMPILED CODE HERE ====*/"; compiled_code = File.read("$(TMPFN)"); runtime = File.read("runtime/lisp.js"); print runtime.sub(marker) { marker + "\n" + compiled_code };' > $@
+	rm $(TMPFN)
 
 $(TMPFN):	$(SRCS)
-	echo '// DO NOT EDIT, this file is generated from src/*.scm' > $@
 	./jslisp -c $(SRCS) >> $@
 
 test:	read-test inside-test shell-test
