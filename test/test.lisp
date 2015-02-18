@@ -1,4 +1,4 @@
-(defmacro (test name expect actual)
+(defmacro test (name expect actual)
   `(begin (print (string-append ,name
                                 " ... "))
           (let ((expect-value ,expect)

@@ -74,7 +74,7 @@ run vector-length 3 "(vector-length #(1 2 3))"
 run vector-ref b "(vector-ref #(a b c) 1)"
 
 # Macros.
-run_raw defmacro nil "(defmacro (nil! x) (list 'def x 'nil))
+run_raw defmacro nil "(defmacro nil! (x) (list 'def x 'nil))
                       (nil! xyz)
                       (print xyz)"
 

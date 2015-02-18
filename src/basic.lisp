@@ -1,4 +1,4 @@
-(defmacro (let pairs . body)
+(defmacro let (pairs . body)
   (if (symbol? pairs)  ; named-let
       (let ((name pairs)
             (pairs (car body))
@@ -12,28 +12,28 @@
         ,@body)
       ,@(map cadr pairs))))
 
-(defmacro (let1 name value . body)
+(defmacro let1 (name value . body)
   `((lambda (,name)
       ,@body)
     ,value))
 
-(defmacro (let* pairs . body)
+(defmacro let* (pairs . body)
   (if (null? pairs)
       `(begin ,@body)
     `(let1 ,(caar pairs) ,(cadar pairs)
        (let* ,(cdr pairs)
          ,@body))))
 
-(defmacro (when pred . body)
+(defmacro when (pred . body)
   `(if ,pred
        (begin ,@body)))
 
-(defmacro (unless pred . body)
+(defmacro unless (pred . body)
   `(if ,pred
        nil
      (begin ,@body)))
 
-(defmacro (cond . clauses)
+(defmacro cond clauses
   (if (null? clauses)
       ()
     (let ((clause (car clauses))
@@ -54,7 +54,7 @@
                  (begin ,@(cdr clause))
                (cond ,@rest))))))))
 
-(defmacro (case x . clauses)
+(defmacro case (x . clauses)
   (let1 value (gensym)
     `(let1 ,value ,x
        (cond
@@ -66,7 +66,7 @@
                        (else `((member ,value ',(car clause)) ,@(cdr clause)))))
                clauses)))))
 
-(defmacro (and . args)
+(defmacro and args
   (if (null? args)
       't  ; (and) = true
     (if (null? (cdr args))
@@ -75,24 +75,24 @@
            (and ,@(cdr args))
          nil))))
 
-(defmacro (or . args)
+(defmacro or args
   (and (not (null? args))
        (let1 g (gensym)
          `(let1 ,g ,(car args)
             (if ,g ,g
               (or ,@(cdr args)))))))
 
-(defmacro (begin . body)
+(defmacro begin body
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
         (else `(let ()
                  ,@body))))
 
-(defmacro (aif expr . rest)
+(defmacro aif (expr . rest)
   `(let1 it ,expr
      (if it ,@rest)))
 
-(defmacro (awhile expr . body)
+(defmacro awhile (expr . body)
   (let ((loop (gensym)))
     `(let ,loop ()
           (let1 it ,expr
