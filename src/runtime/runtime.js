@@ -10,6 +10,15 @@
   };
 
   function jsBoolToS(x)  { return x ? LISP.t : LISP.nil; }
+  function arguments2Array(args, start) {
+    var len = args.length - start;
+    if (len <= 0)
+      return [];
+    var array = new Array(len);
+    for (var i = 0; i < len; ++i)
+      array[i] = args[i + start];
+    return array;
+  };
 
   LISP.nil = false;
   LISP.t = true;
@@ -23,15 +32,6 @@
                  } : function(str) {  // for browser.
                    console.log(str);
                  });
-  LISP._arguments2Array = function(args, start) {
-    var len = args.length - start;
-    if (len <= 0)
-      return [];
-    var array = new Array(len);
-    for (var i = 0; i < len; ++i)
-      array[i] = args[i + start];
-    return array;
-  };
 
   LISP["*macro-table*"] = {};
   LISP["register-macro"] = function(name, func) {
@@ -58,7 +58,7 @@
   };
 
   LISP.error = function() {
-    throw LISP._arguments2Array(arguments, 0).join(', ');
+    throw arguments2Array(arguments, 0).join(', ');
   };
 
   // Symbol.
@@ -295,7 +295,7 @@
     return jsBoolToS(x === y);
   };
   LISP["string-append"] = function() {
-    return LISP._arguments2Array(arguments, 0).join('');
+    return arguments2Array(arguments, 0).join('');
   };
   LISP["string-join"] = function(list, separator) {
     if (list === LISP.nil)
@@ -391,7 +391,7 @@
 
   // Vector.
   LISP.vector = function() {
-    return LISP._arguments2Array(arguments, 0);
+    return arguments2Array(arguments, 0);
   };
   LISP["make-vector"] = function(count, value) {
     if (value === undefined)
