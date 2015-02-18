@@ -1,4 +1,4 @@
-(function(dest) {
+(function(LISP) {
   'use strict';
 
   // Convert JS array into Lisp list.
@@ -9,398 +9,398 @@
     return result;
   };
 
-  var LISP = {
-    nil: false,
-    t: true,
+  LISP.nil = false;
+  LISP.t = true;
 
-    _jsBoolToS: function(x)  { return x ? LISP.t : LISP.nil; },
-    _getRestArgs: function(args, start) {
-      return arrayToList(Array.prototype.slice.call(args, start));
-    },
-    _output: (typeof(process) !== 'undefined'
-              ? function(str) {  // for node.js.
-                process.stdout.write(str);
-              } : function(str) {  // for browser.
-                console.log(str);
-              }),
-    _arguments2Array: function(args, start) {
-      var len = args.length - start;
-      if (len <= 0)
-        return [];
-      var array = new Array(len);
-      for (var i = 0; i < len; ++i)
-        array[i] = args[i + start];
-      return array;
-    },
-
-    "*macro-table*": {},
-    "register-macro": function(name, func) {
-      LISP['*macro-table*'][name] = func;
-      return name;
-    },
-    "do-compile-defmacro": function(name, exp) {
-      var compiled = LISP.compile(exp);
-      return ("LISP['register-macro'](LISP.intern(\"" +
-              LISP['escape-string'](LISP['symbol->string'](name)) +
-              "\"), " +
-              compiled +
-              ")");
-    },
-    "macroexpand-1": function(s) {
-      if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
-        return s;
-      var macrofn = LISP['*macro-table*'][s.car];
-      return LISP.apply(macrofn, s.cdr);
-    },
-
-    eval: function(exp) {
-      return eval(LISP.compile(exp));
-    },
-
-    error: function() {
-      throw LISP._arguments2Array(arguments, 0).join(', ');
-    },
-
-    Symbol: function(name) {
-      this.name = name;
-    },
-    "symbol->string": function(x) {
-      return x.name;
-    },
-    __gensymIndex: 0,
-    gensym: function() {
-      return LISP.intern("__" + (++LISP.__gensymIndex));
-    },
-
-    $$symbolTable: {},  // key(string) => Symbol object
-    intern: function(name) {
-      if (name in LISP.$$symbolTable)
-        return LISP.$$symbolTable[name];
-      return LISP.$$symbolTable[name] = new LISP.Symbol(name);
-    },
-    "symbol?": function(x) {
-      return LISP._jsBoolToS(x instanceof LISP.Symbol);
-    },
-    type: function(x) {
-      var type = typeof x;
-      if (type === 'object') {
-        if (x instanceof LISP.Symbol)
-          type = 'symbol';
-        else if (x instanceof LISP.Cons)
-          type = 'pair';
-        else if (x instanceof Array)
-          type = 'vector';
-        else if (x instanceof LISP.HashTable)
-          type = 'table';
-      }
-      return LISP.intern(type);
-    },
-
-    "eq?": function(x, y) {
-      return LISP._jsBoolToS(x === y);
-    },
-
-    Cons: function(car, cdr) {
-      this.car = car;
-      this.cdr = cdr;
-    },
-
-    cons: function(car, cdr) {
-      return new LISP.Cons(car, cdr);
-    },
-    car: function(s) {
-      if (s === LISP.nil)
-        return s;
-      return s.car;
-    },
-    cdr: function(s) {
-      if (s === LISP.nil)
-        return s;
-      return s.cdr;
-    },
-    "set-car!": function(s, x) {
-      return (s.car = x);
-    },
-    "set-cdr!": function(s, x) {
-      return (s.cdr = x);
-    },
-
-    "pair?": function(x) {
-      return LISP._jsBoolToS(x instanceof LISP.Cons);
-    },
-    list: function() {
-      var result = LISP.nil;
-      for (var i = arguments.length; --i >= 0; )
-        result = LISP.cons(arguments[i], result);
-      return result;
-    },
-    "reverse!": function(x) {
-      var rev = LISP.nil;
-      for (var ls = x; LISP['pair?'](ls, LISP.nil); ) {
-        var d = ls.cdr;
-        ls.cdr = rev;
-        rev = ls;
-        ls = d;
-      }
-      return rev;
-    },
-
-    "number?": function(x) {
-      return LISP._jsBoolToS(typeof x === 'number');
-    },
-    "number->string": function(x, n) {
-      return x.toString(n);
-    },
-    "+": function() {
-      if (arguments.length == 0)
-        return 0;
-      var result = arguments[0];
-      for (var i = 1; i < arguments.length; ++i)
-        result += arguments[i];
-      return result;
-    },
-    "*": function() {
-      if (arguments.length == 0)
-        return 1;
-      var result = arguments[0];
-      for (var i = 1; i < arguments.length; ++i)
-        result *= arguments[i];
-      return result;
-    },
-    "-": function() {
-      if (arguments.length == 0)
-        return 0;
-      var result = arguments[0];
-      if (arguments.length == 1)
-        return -result;
-      for (var i = 1; i < arguments.length; ++i)
-        result -= arguments[i];
-      return result;
-    },
-    "/": function() {
-      if (arguments.length == 0)
-        return 1;
-      var result = arguments[0];
-      if (arguments.length == 1)
-        return 1.0 / result;
-      for (var i = 1; i < arguments.length; ++i)
-        result /= arguments[i];
-      return result;
-    },
-    "%": function() {
-      if (arguments.length == 0)
-        return 0;
-      var result = arguments[0];
-      if (arguments.length == 1)
-        return result;
-      for (var i = 1; i < arguments.length; ++i)
-        result %= arguments[i];
-      return result;
-    },
-    "<": function() {
-      if (arguments.length > 0) {
-        var value = arguments[0];
-        for (var i = 1; i < arguments.length; ++i) {
-          var target = arguments[i];
-          if (!(value < target))
-            return LISP.nil;
-          value = target;
-        }
-      }
-      return LISP.t;
-    },
-    ">": function() {
-      if (arguments.length > 0) {
-        var value = arguments[0];
-        for (var i = 1; i < arguments.length; ++i) {
-          var target = arguments[i];
-          if (!(value > target))
-            return LISP.nil;
-          value = target;
-        }
-      }
-      return LISP.t;
-    },
-    "<=": function() {
-      if (arguments.length > 0) {
-        var value = arguments[0];
-        for (var i = 1; i < arguments.length; ++i) {
-          var target = arguments[i];
-          if (!(value <= target))
-            return LISP.nil;
-          value = target;
-        }
-      }
-      return LISP.t;
-    },
-    ">=": function() {
-      if (arguments.length > 0) {
-        var value = arguments[0];
-        for (var i = 1; i < arguments.length; ++i) {
-          var target = arguments[i];
-          if (!(value >= target))
-            return LISP.nil;
-          value = target;
-        }
-      }
-      return LISP.t;
-    },
-
-    // String.
-    "string?": function(x) {
-      return LISP._jsBoolToS(typeof x === 'string');
-    },
-    "string=?": function(x, y) {
-      return LISP._jsBoolToS(x === y);
-    },
-    "string-append": function() {
-      return LISP._arguments2Array(arguments, 0).join('');
-    },
-    "string-join": function(list, separator) {
-      if (list === LISP.nil)
-        return '';
-      return list.toArray().join(separator);
-    },
-    "string-length": function(str) {
-      return str.length;
-    },
-    "string-ref": function(str, index) {
-      return str[index];
-    },
-    substring: function(str, start, end) {
-      return str.slice(start, end);
-    },
-    "string-scan": function(str, item) {
-      var index = str.indexOf(item);
-      return index >= 0 ? index : LISP.nil;
-    },
-
-    "char->integer": function(char, index) {
-      return char.charCodeAt(index);
-    },
-
-    _escapeCharTable: { '\\': '\\\\', '\t': '\\t', '\n': '\\n' },
-    _inspectString: function(str) {
-      return '"' + str.replace(/[\\\t\n"]/g, function(m) { return LISP._escapeCharTable[m]; }) + '"';
-    },
-
-    makeString: function(x, inspect) {
-      if (x === LISP.nil)
-        return 'nil';
-      if (x === LISP.t)
-        return 't';
-      if (typeof x == 'string')
-        return inspect ? LISP._inspectString(x) : x;
-      if (x instanceof Array)
-        return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
-      if (x === undefined || x === null)
-        return '' + x;
-      return x.toString(inspect);
-    },
-    print: function(x) {
-      LISP._output(LISP.makeString(x));
-      return x;
-    },
-    puts: function(x) {
-      LISP._output(LISP.makeString(x));
-      if (typeof(process) !== 'undefined')
-        LISP._output('\n');
-      return x;
-    },
-    write: function(x) {
-      LISP._output(LISP.makeString(x, 10));  // 10 means true, and it is used as radix.
-      return x;
-    },
-
-    apply: function(fn) {
-      var params = [];
-      if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length - 1; ++i)
-          params.push(arguments[i]);
-        // Last argument for `apply` is expected as list (or nil).
-        var last = arguments[arguments.length - 1];
-        if (last !== LISP.nil)
-          params = params.concat(last.toArray());
-      }
-      return fn.apply(null, params);
-    },
-    JS: ((typeof window !== 'undefined') ? window :
-         (typeof GLOBAL !== 'undefined') ? GLOBAL : {}),
-
-    HashTable: function() {},
-
-    // Hash table.
-    "make-hash-table": function() {
-      return new LISP.HashTable();
-    },
-    "hash-table?": function(x) {
-      return x instanceof LISP.HashTable;
-    },
-    "hash-table-exists?": function(hash, x) {
-      return x in hash ? LISP.t : LISP.nil;
-    },
-    "hash-table-get": function(hash, x) {
-      if (x in hash)
-        return hash[x];
-      return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil;
-    },
-    "hash-table-put!": function(hash, x, value) {
-      return hash[x] = value;
-    },
-
-    // Vector.
-    vector: function() {
-      return LISP._arguments2Array(arguments, 0);
-    },
-    "make-vector": function(count, value) {
-      if (value === undefined)
-        value = LISP.nil;
-      var vector = new Array(count);
-      for (var i = 0; i < count; ++i)
-        vector[i] = value;
-      return vector;
-    },
-    "vector?": function(x) {
-      return LISP._jsBoolToS(x instanceof Array);
-    },
-    "vector-length": function(vector) {
-      return vector.length;
-    },
-    "vector-ref": function(vector, index) {
-      return vector[index];
-    },
-    "vector-set!": function(vector, index, value) {
-      return vector[index] = value;
-    },
-
-    // Regexp.
-    "regexp?": function(x) {
-      return LISP._jsBoolToS(x instanceof RegExp);
-    },
-    rxmatch: function(re, str) {
-      return LISP._jsBoolToS(re.exec(str));
-    },
-    "regexp-replace-all": function(re, str, fn) {
-      if (!re.global)
-        re = eval(re.toString() + 'g')
-      return str.replace(re, function (match) {
-        return fn(function() {  // TODO: handle arguments.
-          return match;
-        });
-      });
-    },
-    "regexp->string": function(x) {
-      var s = x.toString();
-      return s.slice(1, s.length - 1);
-    },
-
-
-    // System
-    exit: function(code) {
-      process.exit(code);
-    },
+  LISP._jsBoolToS = function(x)  { return x ? LISP.t : LISP.nil; };
+  LISP._getRestArgs = function(args, start) {
+    return arrayToList(Array.prototype.slice.call(args, start));
+  };
+  LISP._output = (typeof(process) !== 'undefined'
+                 ? function(str) {  // for node.js.
+                   process.stdout.write(str);
+                 } : function(str) {  // for browser.
+                   console.log(str);
+                 });
+  LISP._arguments2Array = function(args, start) {
+    var len = args.length - start;
+    if (len <= 0)
+      return [];
+    var array = new Array(len);
+    for (var i = 0; i < len; ++i)
+      array[i] = args[i + start];
+    return array;
   };
 
+  LISP["*macro-table*"] = {};
+  LISP["register-macro"] = function(name, func) {
+    LISP['*macro-table*'][name] = func;
+    return name;
+  };
+  LISP["do-compile-defmacro"] = function(name, exp) {
+    var compiled = LISP.compile(exp);
+    return ("LISP['register-macro'](LISP.intern(\"" +
+            LISP['escape-string'](LISP['symbol->string'](name)) +
+            "\"), " +
+            compiled +
+            ")");
+  };
+  LISP["macroexpand-1"] = function(s) {
+    if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
+      return s;
+    var macrofn = LISP['*macro-table*'][s.car];
+    return LISP.apply(macrofn, s.cdr);
+  };
+
+  LISP.eval = function(exp) {
+    return eval(LISP.compile(exp));
+  };
+
+  LISP.error = function() {
+    throw LISP._arguments2Array(arguments, 0).join(', ');
+  };
+
+  LISP.Symbol = function(name) {
+    this.name = name;
+  };
+  LISP["symbol->string"] = function(x) {
+    return x.name;
+  };
+  LISP.__gensymIndex = 0;
+  LISP.gensym = function() {
+    return LISP.intern("__" + (++LISP.__gensymIndex));
+  };
+
+  LISP.$$symbolTable = {};  // key(string) => Symbol object
+  LISP.intern = function(name) {
+    if (name in LISP.$$symbolTable)
+      return LISP.$$symbolTable[name];
+    return LISP.$$symbolTable[name] = new LISP.Symbol(name);
+  };
+  LISP["symbol?"] = function(x) {
+    return LISP._jsBoolToS(x instanceof LISP.Symbol);
+  };
+  LISP.type = function(x) {
+    var type = typeof x;
+    if (type === 'object') {
+      if (x instanceof LISP.Symbol)
+        type = 'symbol';
+      else if (x instanceof LISP.Cons)
+        type = 'pair';
+      else if (x instanceof Array)
+        type = 'vector';
+      else if (x instanceof LISP.HashTable)
+        type = 'table';
+    }
+    return LISP.intern(type);
+  };
+
+  LISP["eq?"] = function(x, y) {
+    return LISP._jsBoolToS(x === y);
+  };
+
+  LISP.Cons = function(car, cdr) {
+    this.car = car;
+    this.cdr = cdr;
+  };
+
+  LISP.cons = function(car, cdr) {
+    return new LISP.Cons(car, cdr);
+  };
+  LISP.car = function(s) {
+    if (s === LISP.nil)
+      return s;
+    return s.car;
+  };
+  LISP.cdr = function(s) {
+    if (s === LISP.nil)
+      return s;
+    return s.cdr;
+  };
+  LISP["set-car!"] = function(s, x) {
+    return (s.car = x);
+  };
+  LISP["set-cdr!"] = function(s, x) {
+    return (s.cdr = x);
+  };
+
+  LISP["pair?"] = function(x) {
+    return LISP._jsBoolToS(x instanceof LISP.Cons);
+  };
+  LISP.list = function() {
+    var result = LISP.nil;
+    for (var i = arguments.length; --i >= 0; )
+      result = LISP.cons(arguments[i], result);
+    return result;
+  };
+  LISP["reverse!"] = function(x) {
+    var rev = LISP.nil;
+    for (var ls = x; LISP['pair?'](ls, LISP.nil); ) {
+      var d = ls.cdr;
+      ls.cdr = rev;
+      rev = ls;
+      ls = d;
+    }
+    return rev;
+  };
+
+  LISP["number?"] = function(x) {
+    return LISP._jsBoolToS(typeof x === 'number');
+  };
+  LISP["number->string"] = function(x, n) {
+    return x.toString(n);
+  };
+  LISP["+"] = function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    for (var i = 1; i < arguments.length; ++i)
+      result += arguments[i];
+    return result;
+  };
+  LISP["*"] = function() {
+    if (arguments.length == 0)
+      return 1;
+    var result = arguments[0];
+    for (var i = 1; i < arguments.length; ++i)
+      result *= arguments[i];
+    return result;
+  };
+  LISP["-"] = function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return -result;
+    for (var i = 1; i < arguments.length; ++i)
+      result -= arguments[i];
+    return result;
+  };
+  LISP["/"] = function() {
+    if (arguments.length == 0)
+      return 1;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return 1.0 / result;
+    for (var i = 1; i < arguments.length; ++i)
+      result /= arguments[i];
+    return result;
+  };
+  LISP["%"] = function() {
+    if (arguments.length == 0)
+      return 0;
+    var result = arguments[0];
+    if (arguments.length == 1)
+      return result;
+    for (var i = 1; i < arguments.length; ++i)
+      result %= arguments[i];
+    return result;
+  };
+  LISP["<"] = function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value < target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  };
+  LISP[">"] = function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value > target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  };
+  LISP["<="] = function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value <= target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  };
+  LISP[">="] = function() {
+    if (arguments.length > 0) {
+      var value = arguments[0];
+      for (var i = 1; i < arguments.length; ++i) {
+        var target = arguments[i];
+        if (!(value >= target))
+          return LISP.nil;
+        value = target;
+      }
+    }
+    return LISP.t;
+  };
+
+  // String.
+  LISP["string?"] = function(x) {
+    return LISP._jsBoolToS(typeof x === 'string');
+  };
+  LISP["string=?"] = function(x, y) {
+    return LISP._jsBoolToS(x === y);
+  };
+  LISP["string-append"] = function() {
+    return LISP._arguments2Array(arguments, 0).join('');
+  };
+  LISP["string-join"] = function(list, separator) {
+    if (list === LISP.nil)
+      return '';
+    return list.toArray().join(separator);
+  };
+  LISP["string-length"] = function(str) {
+    return str.length;
+  };
+  LISP["string-ref"] = function(str, index) {
+    return str[index];
+  };
+  LISP.substring = function(str, start, end) {
+    return str.slice(start, end);
+  };
+  LISP["string-scan"] = function(str, item) {
+    var index = str.indexOf(item);
+    return index >= 0 ? index : LISP.nil;
+  };
+
+  LISP["char->integer"] = function(char, index) {
+    return char.charCodeAt(index);
+  };
+
+  LISP._escapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n' };
+  LISP._inspectString = function(str) {
+    return '"' + str.replace(/[\\\t\n"]/g, function(m) { return LISP._escapeCharTable[m]; }) + '"';
+  };
+
+  LISP.makeString = function(x, inspect) {
+    if (x === LISP.nil)
+      return 'nil';
+    if (x === LISP.t)
+      return 't';
+    if (typeof x == 'string')
+      return inspect ? LISP._inspectString(x) : x;
+    if (x instanceof Array)
+      return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
+    if (x === undefined || x === null)
+      return '' + x;
+    return x.toString(inspect);
+  };
+  LISP.print = function(x) {
+    LISP._output(LISP.makeString(x));
+    return x;
+  };
+  LISP.puts = function(x) {
+    LISP._output(LISP.makeString(x));
+    if (typeof(process) !== 'undefined')
+      LISP._output('\n');
+    return x;
+  };
+  LISP.write = function(x) {
+    LISP._output(LISP.makeString(x, 10));  // 10 means true, and it is used as radix.
+    return x;
+  };
+
+  LISP.apply = function(fn) {
+    var params = [];
+    if (arguments.length > 1) {
+      for (var i = 1; i < arguments.length - 1; ++i)
+        params.push(arguments[i]);
+      // Last argument for `apply` is expected as list (or nil).
+      var last = arguments[arguments.length - 1];
+      if (last !== LISP.nil)
+        params = params.concat(last.toArray());
+    }
+    return fn.apply(null, params);
+  };
+  LISP.JS = ((typeof window !== 'undefined') ? window :
+             (typeof GLOBAL !== 'undefined') ? GLOBAL : {}),
+
+  LISP.HashTable = function() {};
+
+  // Hash table.
+  LISP["make-hash-table"] = function() {
+    return new LISP.HashTable();
+  };
+  LISP["hash-table?"] = function(x) {
+    return x instanceof LISP.HashTable;
+  };
+  LISP["hash-table-exists?"] = function(hash, x) {
+    return x in hash ? LISP.t : LISP.nil;
+  };
+  LISP["hash-table-get"] = function(hash, x) {
+    if (x in hash)
+      return hash[x];
+    return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil;
+  };
+  LISP["hash-table-put!"] = function(hash, x, value) {
+    return hash[x] = value;
+  };
+
+  // Vector.
+  LISP.vector = function() {
+    return LISP._arguments2Array(arguments, 0);
+  };
+  LISP["make-vector"] = function(count, value) {
+    if (value === undefined)
+      value = LISP.nil;
+    var vector = new Array(count);
+    for (var i = 0; i < count; ++i)
+      vector[i] = value;
+    return vector;
+  };
+  LISP["vector?"] = function(x) {
+    return LISP._jsBoolToS(x instanceof Array);
+  };
+  LISP["vector-length"] = function(vector) {
+    return vector.length;
+  };
+  LISP["vector-ref"] = function(vector, index) {
+    return vector[index];
+  };
+  LISP["vector-set!"] = function(vector, index, value) {
+    return vector[index] = value;
+  };
+
+  // Regexp.
+  LISP["regexp?"] = function(x) {
+    return LISP._jsBoolToS(x instanceof RegExp);
+  };
+  LISP.rxmatch = function(re, str) {
+    return LISP._jsBoolToS(re.exec(str));
+  };
+  LISP["regexp-replace-all"] = function(re, str, fn) {
+    if (!re.global)
+      re = eval(re.toString() + 'g')
+    return str.replace(re, function (match) {
+      return fn(function() {  // TODO: handle arguments.
+        return match;
+      });
+    });
+  };
+  LISP["regexp->string"] = function(x) {
+    var s = x.toString();
+    return s.slice(1, s.length - 1);
+  };
+
+
+  // System
+  LISP.exit = function(code) {
+    process.exit(code);
+  };
+
+
+  // Data types.
   LISP.Symbol.prototype = {
     toString: function() {
       return this.name;
@@ -661,7 +661,4 @@ LISP["compile-new-scope"] = (function(scope, compiled$2dbody){return ((function(
 LISP["compile*"] = (function(s, scope){return ((function(__24){return (((LISP["eq?"](__24, LISP.intern(":CONST"))) !== LISP.nil ? (LISP["compile-quote"](LISP["vector-ref"](s, 1), scope)) : (((LISP["eq?"](__24, LISP.intern(":REF"))) !== LISP.nil ? (LISP["compile-symbol"](LISP["vector-ref"](s, 1), scope)) : (((LISP["eq?"](__24, LISP.intern(":IF"))) !== LISP.nil ? ((function(p, thn, els){return (LISP["compile-if"](p, thn, els, scope));})(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3))) : (((LISP["eq?"](__24, LISP.intern(":FUNCALL"))) !== LISP.nil ? (LISP["compile-funcall"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope)) : (((LISP["eq?"](__24, LISP.intern(":SET!"))) !== LISP.nil ? (LISP["compile-set!"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope)) : (((LISP["eq?"](__24, LISP.intern(":LAMBDA"))) !== LISP.nil ? ((function(extended$2dscope, params, body){return (LISP["compile-new-scope"](extended$2dscope, LISP["compile-lambda"](params, body, scope, extended$2dscope)));})(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3))) : (((LISP["eq?"](__24, LISP.intern(":DEFINE"))) !== LISP.nil ? (LISP["compile-define"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope)) : (((LISP["eq?"](__24, LISP.intern(":DEFMACRO"))) !== LISP.nil ? (LISP["do-compile-defmacro"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2))) : (((LISP["eq?"](__24, LISP.intern(":NEW"))) !== LISP.nil ? (LISP["compile-new"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope)) : (LISP["string-append"]("???", s, "???"))))))))))))))))))));})(LISP["vector-ref"](s, 0)));});
 LISP.compile = (function(s){return ((function(top$2dscope){return ((function(tree){return (LISP["compile-new-scope"](top$2dscope, LISP["compile*"](tree, top$2dscope)));})(LISP["traverse*"](s, top$2dscope)));})(LISP["new-scope"](LISP.nil, LISP.nil)));});
 
-
-  for (var k in LISP)
-    dest[k] = LISP[k];
 })(typeof exports !== 'undefined' ? exports : (this.LISP = {}));
