@@ -101,18 +101,18 @@
               (,loop))))))
 
 ;;
-(define (null? x)  (eq? x nil))
-(define (not x)    (eq? x nil))
+(defun null? (x)  (eq? x nil))
+(defun not (x)    (eq? x nil))
 
-(define (caar x)  (car (car x)))
-(define (cadr x)  (car (cdr x)))
-(define (cdar x)  (cdr (car x)))
-(define (cddr x)  (cdr (cdr x)))
-(define (cadar x)  (cadr (car x)))
-(define (caddr x)  (car (cddr x)))
-(define (cdddr x)  (cdr (cddr x)))
+(defun caar (x)  (car (car x)))
+(defun cadr (x)  (car (cdr x)))
+(defun cdar (x)  (cdr (car x)))
+(defun cddr (x)  (cdr (cdr x)))
+(defun cadar (x)  (cadr (car x)))
+(defun caddr (x)  (car (cddr x)))
+(defun cdddr (x)  (cdr (cddr x)))
 
-(define (equal? x y)
+(defun equal? (x y)
   (if (eq? x y)
       t
     (let1 xtype (type x)
@@ -128,45 +128,45 @@
                                       (loop (+ i 1))))))))
           )))))
 
-(define (length ls)
+(defun length (ls)
   (let loop ((ls ls)
              (acc 0))
     (if (pair? ls)
         (loop (cdr ls) (+ acc 1))
       acc)))
 
-(define (last-pair ls)
+(defun last-pair (ls)
   (if (pair? (cdr ls))
       (last-pair (cdr ls))
     ls))
 
-(define (proper-list? ls)
+(defun proper-list? (ls)
   (and (pair? ls)
        (null? (cdr (last-pair ls)))))
 
-(define (member x ls)
+(defun member (x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)
         (else (member x (cdr ls)))))
 
-(define (assoc x ls)
+(defun assoc (x ls)
   (if (null? ls) nil
     (if (eq? x (caar ls)) (car ls)
       (assoc x (cdr ls)))))
 
-(define (map f ls)
+(defun map (f ls)
   (if (null? ls)
       ()
     (cons (f (car ls))
           (map f (cdr ls)))))
 
-(define (append ls . rest)
+(defun append (ls . rest)
   (cond ((null? rest) ls)
         ((null? ls)   (apply append rest))
         (else (cons (car ls)
                     (apply append (cdr ls) rest)))))
 
-(define (reverse ls)
+(defun reverse (ls)
   (let loop ((ls ls)
              (acc ()))
     (if (pair? ls)
@@ -174,7 +174,7 @@
               (cons (car ls) acc))
       acc)))
 
-(define (list* . args)
+(defun list* args
   (if (null? args)
       nil
     (if (null? (cdr args))
@@ -186,15 +186,15 @@
                    args)
           (loop q (cdr q)))))))
 
-(define (last-pair ls)
+(defun last-pair (ls)
   (if (pair? (cdr ls))
       (last-pair (cdr ls))
     ls))
 
-(define (proper-list? ls)
+(defun proper-list? (ls)
   (null? (cdr (last-pair ls))))
 
-(define (dotted->proper ls)
+(defun dotted->proper (ls)
   (if (pair? ls)
       (if (proper-list? ls)
           ls
@@ -205,7 +205,7 @@
             dup)))
     (list ls)))
 
-(define (vector-map proc vect)
+(defun vector-map (proc vect)
   (let* ((len (vector-length vect))
          (new-vect (make-vector len)))
     (let loop ((i 0))
