@@ -320,9 +320,9 @@
     return char.charCodeAt(index);
   };
 
-  LISP._escapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n' };
-  LISP._inspectString = function(str) {
-    return '"' + str.replace(/[\\\t\n"]/g, function(m) { return LISP._escapeCharTable[m]; }) + '"';
+  var kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n' };
+  function inspectString(str) {
+    return '"' + str.replace(/[\\\t\n"]/g, function(m) { return kEscapeCharTable[m]; }) + '"';
   };
 
   LISP.makeString = function(x, inspect) {
@@ -331,7 +331,7 @@
     if (x === LISP.t)
       return 't';
     if (typeof x == 'string')
-      return inspect ? LISP._inspectString(x) : x;
+      return inspect ? inspectString(x) : x;
     if (x instanceof Array)
       return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
     if (x === undefined || x === null)
