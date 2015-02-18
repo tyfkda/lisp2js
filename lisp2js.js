@@ -74,9 +74,9 @@
   LISP["symbol->string"] = function(x) {
     return x.name;
   };
-  LISP.__gensymIndex = 0;
+  var __gensymIndex = 0;
   LISP.gensym = function() {
-    return LISP.intern("__" + (++LISP.__gensymIndex));
+    return LISP.intern("__" + (++__gensymIndex));
   };
 
   LISP.$$symbolTable = {};  // key(string) => Symbol object
