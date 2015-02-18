@@ -570,5 +570,22 @@
     return reader.read();
   };
 
+
+  // For node JS.
+  if (typeof process !== 'undefined') {
+    var fs = require("fs");
+
+    LISP['read-line'] = (function() {
+      var BUFFER_SIZE = 4096;
+      var buffer = new Buffer(BUFFER_SIZE);
+      return function() {
+        var n = fs.readSync(process.stdin.fd, buffer, 0, BUFFER_SIZE);
+        if (n <= 0)
+          return LISP.nil;
+        return buffer.slice(0, n).toString();
+      };
+    })();
+  }
+
   /*==== EMBED COMPILED CODE HERE ====*/
 })(typeof exports !== 'undefined' ? exports : (this.LISP = {}));

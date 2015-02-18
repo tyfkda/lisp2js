@@ -92,6 +92,14 @@
   `(let1 it ,expr
      (if it ,@rest)))
 
+(define-macro (awhile expr . body)
+  (let ((loop (gensym)))
+    `(let ,loop ()
+          (let1 it ,expr
+            (when it
+              ,@body
+              (,loop))))))
+
 ;;
 (define (null? x)  (eq? x nil))
 (define (not x)    (eq? x nil))

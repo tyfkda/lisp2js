@@ -570,6 +570,23 @@
     return reader.read();
   };
 
+
+  // For node JS.
+  if (typeof process !== 'undefined') {
+    var fs = require("fs");
+
+    LISP['read-line'] = (function() {
+      var BUFFER_SIZE = 4096;
+      var buffer = new Buffer(BUFFER_SIZE);
+      return function() {
+        var n = fs.readSync(process.stdin.fd, buffer, 0, BUFFER_SIZE);
+        if (n <= 0)
+          return LISP.nil;
+        return buffer.slice(0, n).toString();
+      };
+    })();
+  }
+
   /*==== EMBED COMPILED CODE HERE ====*/
 LISP['register-macro'](LISP.intern("let"), (function(pairs){var body = LISP._getRestArgs(arguments, 1); return (((LISP["symbol?"](pairs)) !== LISP.nil ? ((function() { var __2 = LISP.list(LISP.intern("nil")); return (function(name, pairs, body){return (LISP["list*"](LISP.list(LISP.intern("lambda"), LISP.list(name), LISP.list(LISP.intern("set!"), name, LISP["list*"](LISP.intern("lambda"), LISP.map(LISP.car, pairs), body)), LISP["list*"](name, LISP.map(LISP.cadr, pairs))), __2));}); })()(pairs, LISP.car(body), LISP.cdr(body))) : (LISP["list*"](LISP["list*"](LISP.intern("lambda"), LISP.map(LISP.car, pairs), body), LISP.map(LISP.cadr, pairs)))));}));
 LISP['register-macro'](LISP.intern("let1"), (function(name, value){var body = LISP._getRestArgs(arguments, 2); return (LISP.list(LISP["list*"](LISP.intern("lambda"), LISP.list(name), body), value));}));
@@ -582,6 +599,7 @@ LISP['register-macro'](LISP.intern("and"), (function() { var __3 = LISP.list(LIS
 LISP['register-macro'](LISP.intern("or"), (function(){var args = LISP._getRestArgs(arguments, 0); return (((LISP.not(LISP["null?"](args))) !== LISP.nil ? ((function(g){return (LISP.list(LISP.intern("let1"), g, LISP.car(args), LISP.list(LISP.intern("if"), g, g, LISP["list*"](LISP.intern("or"), LISP.cdr(args)))));})(LISP.gensym())) : (LISP.nil)));}));
 LISP['register-macro'](LISP.intern("begin"), (function(){var body = LISP._getRestArgs(arguments, 0); return (((LISP["null?"](body)) !== LISP.nil ? (LISP.nil) : (((LISP["null?"](LISP.cdr(body))) !== LISP.nil ? (LISP.car(body)) : (LISP["list*"](LISP.intern("let"), LISP.nil, body))))));}));
 LISP['register-macro'](LISP.intern("aif"), (function(expr){var rest = LISP._getRestArgs(arguments, 1); return (LISP.list(LISP.intern("let1"), LISP.intern("it"), expr, LISP["list*"](LISP.intern("if"), LISP.intern("it"), rest)));}));
+LISP['register-macro'](LISP.intern("awhile"), (function(expr){var body = LISP._getRestArgs(arguments, 1); return ((function(loop){return (LISP.list(LISP.intern("let"), loop, LISP.nil, LISP.list(LISP.intern("let1"), LISP.intern("it"), expr, LISP["list*"](LISP.intern("when"), LISP.intern("it"), LISP.append(body, LISP.list(LISP.list(loop)))))));})(LISP.gensym()));}));
 LISP["null?"] = (function(x){return (LISP["eq?"](x, LISP.nil));});
 LISP.not = (function(x){return (LISP["eq?"](x, LISP.nil));});
 LISP.caar = (function(x){return (LISP.car(LISP.car(x)));});
