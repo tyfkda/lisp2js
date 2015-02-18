@@ -60,9 +60,16 @@
     throw LISP._arguments2Array(arguments, 0).join(', ');
   };
 
+  // Symbol.
   LISP.Symbol = function(name) {
     this.name = name;
   };
+  LISP.Symbol.prototype = {
+    toString: function() {
+      return this.name;
+    },
+  };
+
   LISP["symbol->string"] = function(x) {
     return x.name;
   };
@@ -99,9 +106,43 @@
     return LISP._jsBoolToS(x === y);
   };
 
+  // Cons cell.
   LISP.Cons = function(car, cdr) {
     this.car = car;
     this.cdr = cdr;
+  };
+
+  LISP.Cons.prototype = {
+    toString: (function() {
+      var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', "unquote-splicing": ',@' };
+      return function(inspect) {
+        if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
+            this.car.name in abbrevTable) {
+          return abbrevTable[this.car.name] + LISP.makeString(this.cdr.car, inspect);
+        }
+
+        var ss = [];
+        var separator = "(";
+        var p;
+        for (p = this; p instanceof LISP.Cons; p = p.cdr) {
+          ss.push(separator);
+          ss.push(LISP.makeString(p.car, inspect));
+          separator = " ";
+        }
+        if (p !== LISP.nil) {
+          ss.push(" . ");
+          ss.push(LISP.makeString(p, inspect));
+        }
+        ss.push(")");
+        return ss.join("");
+      };
+    })(),
+    toArray: function() {
+      var result = [];
+      for (var p = this; p instanceof LISP.Cons; p = p.cdr)
+        result.push(p.car);
+      return result;
+    },
   };
 
   LISP.cons = function(car, cdr) {
@@ -399,46 +440,6 @@
     process.exit(code);
   };
 
-
-  // Data types.
-  LISP.Symbol.prototype = {
-    toString: function() {
-      return this.name;
-    },
-  };
-
-  LISP.Cons.prototype = {
-    toString: (function() {
-      var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', "unquote-splicing": ',@' };
-      return function(inspect) {
-        if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
-            this.car.name in abbrevTable) {
-          return abbrevTable[this.car.name] + LISP.makeString(this.cdr.car, inspect);
-        }
-
-        var ss = [];
-        var separator = "(";
-        var p;
-        for (p = this; p instanceof LISP.Cons; p = p.cdr) {
-          ss.push(separator);
-          ss.push(LISP.makeString(p.car, inspect));
-          separator = " ";
-        }
-        if (p !== LISP.nil) {
-          ss.push(" . ");
-          ss.push(LISP.makeString(p, inspect));
-        }
-        ss.push(")");
-        return ss.join("");
-      };
-    })(),
-    toArray: function() {
-      var result = [];
-      for (var p = this; p instanceof LISP.Cons; p = p.cdr)
-        result.push(p.car);
-      return result;
-    },
-  };
 
   // Reader.
   LISP.Reader = function(str) {
