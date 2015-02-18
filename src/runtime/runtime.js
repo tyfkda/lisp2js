@@ -9,10 +9,11 @@
     return result;
   };
 
+  function jsBoolToS(x)  { return x ? LISP.t : LISP.nil; }
+
   LISP.nil = false;
   LISP.t = true;
 
-  LISP._jsBoolToS = function(x)  { return x ? LISP.t : LISP.nil; };
   LISP._getRestArgs = function(args, start) {
     return arrayToList(Array.prototype.slice.call(args, start));
   };
@@ -85,7 +86,7 @@
     return LISP.$$symbolTable[name] = new LISP.Symbol(name);
   };
   LISP["symbol?"] = function(x) {
-    return LISP._jsBoolToS(x instanceof LISP.Symbol);
+    return jsBoolToS(x instanceof LISP.Symbol);
   };
   LISP.type = function(x) {
     var type = typeof x;
@@ -103,7 +104,7 @@
   };
 
   LISP["eq?"] = function(x, y) {
-    return LISP._jsBoolToS(x === y);
+    return jsBoolToS(x === y);
   };
 
   // Cons cell.
@@ -166,7 +167,7 @@
   };
 
   LISP["pair?"] = function(x) {
-    return LISP._jsBoolToS(x instanceof LISP.Cons);
+    return jsBoolToS(x instanceof LISP.Cons);
   };
   LISP.list = function() {
     var result = LISP.nil;
@@ -186,7 +187,7 @@
   };
 
   LISP["number?"] = function(x) {
-    return LISP._jsBoolToS(typeof x === 'number');
+    return jsBoolToS(typeof x === 'number');
   };
   LISP["number->string"] = function(x, n) {
     return x.toString(n);
@@ -288,10 +289,10 @@
 
   // String.
   LISP["string?"] = function(x) {
-    return LISP._jsBoolToS(typeof x === 'string');
+    return jsBoolToS(typeof x === 'string');
   };
   LISP["string=?"] = function(x, y) {
-    return LISP._jsBoolToS(x === y);
+    return jsBoolToS(x === y);
   };
   LISP["string-append"] = function() {
     return LISP._arguments2Array(arguments, 0).join('');
@@ -401,7 +402,7 @@
     return vector;
   };
   LISP["vector?"] = function(x) {
-    return LISP._jsBoolToS(x instanceof Array);
+    return jsBoolToS(x instanceof Array);
   };
   LISP["vector-length"] = function(vector) {
     return vector.length;
@@ -415,10 +416,10 @@
 
   // Regexp.
   LISP["regexp?"] = function(x) {
-    return LISP._jsBoolToS(x instanceof RegExp);
+    return jsBoolToS(x instanceof RegExp);
   };
   LISP.rxmatch = function(re, str) {
-    return LISP._jsBoolToS(re.exec(str));
+    return jsBoolToS(re.exec(str));
   };
   LISP["regexp-replace-all"] = function(re, str, fn) {
     if (!re.global)
