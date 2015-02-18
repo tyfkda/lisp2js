@@ -1,4 +1,4 @@
-(define (fib n)
+(defun fib (n)
   (if (< n 2)
       n
     (+ (fib (- n 1))

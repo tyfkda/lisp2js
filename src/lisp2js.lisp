@@ -1,16 +1,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Scope
 
-(define (new-scope parent-scope params)
+(defun new-scope (parent-scope params)
   (vector (dotted->proper params) nil parent-scope))
 
-(define (scope-param scope)
+(defun scope-param (scope)
   (vector-ref scope 0))
 
-(define (scope-outer scope)
+(defun scope-outer (scope)
   (vector-ref scope 2))
 
-(define (scope-add-var scope val)
+(defun scope-add-var (scope val)
   (let1 x (gensym)
     (vector-set! scope 1
                  (cons (cons x val) (vector-ref scope 1)))
@@ -18,26 +18,26 @@
                  (cons x (vector-ref scope 0)))
     x))
 
-(define (scope-get-var scope)
+(defun scope-get-var (scope)
   (vector-ref scope 1))
 
-(define (scope-var? scope x)
+(defun scope-var? (scope x)
   (cond ((null? scope) nil)
         ((member x (scope-param scope)) t)
         (else (scope-var? (scope-outer scope) x))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
-(define (traverse-args args scope)
+(defun traverse-args (args scope)
   (map (lambda (x)
          (traverse* x scope))
        args))
 
-(define-macro (record args param . body)
+(defmacro record (args param . body)
   `(apply (lambda ,param ,@body)
           ,args))
 
-(define-macro (record-case x . clauses)
+(defmacro record-case (x . clauses)
   (let1 value (gensym)
     `(let1 ,value ,x
        (case (car ,value)
@@ -49,13 +49,13 @@
                         (record (cdr ,value) ,(cdar clause) ,@(cdr clause))))))
                 clauses)))))
 
-(define (traverse-quoted-value x)
+(defun traverse-quoted-value (x)
   (if (pair? x)
       (vector ':FUNCALL (vector ':REF (if (proper-list? x) 'list 'list*))
               (map traverse-quoted-value (dotted->proper x)))
     (vector ':CONST x)))
 
-(define (traverse-list s scope)
+(defun traverse-list (s scope)
   (record-case s
     ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
                        (else (vector ':CONST x))))
@@ -71,24 +71,21 @@
                                        new-scope
                                        params
                                        (traverse-args body new-scope))))
-    ((define name value . rest)  (if (pair? name)
-                                     (traverse* `(define ,(car name)
-                                                   (lambda ,(cdr name) ,value ,@rest))
-                                                scope)
-                                   (vector ':DEFINE
-                                           (traverse* name scope)
-                                           (traverse* value scope))))
-    ((define-macro name-params . body)  (let ((name (car name-params))
-                                              (params (cdr name-params)))
-                                          (vector ':DEFMACRO
-                                                  name
-                                                  `(lambda ,params ,@body))))
+    ((def name value . rest)  (vector ':DEF
+                                      (traverse* name scope)
+                                      (traverse* value scope)))
+    ((defun name params . body)  (vector ':DEF
+                                         (traverse* name scope)
+                                         (traverse* `(lambda ,params ,@body) scope)))
+    ((defmacro name params . body)  (vector ':DEFMACRO
+                                            name
+                                            `(lambda ,params ,@body)))
     ((new klass . args)  (vector ':NEW klass (traverse-args args new-scope)))
     (else (vector ':FUNCALL
                   (traverse* (car s) scope)
                   (traverse-args (cdr s) scope)))))
 
-(define (traverse* s scope)
+(defun traverse* (s scope)
   (cond ((pair? s)   (let1 expanded (macroexpand s)
                        (if (pair? expanded)
                            (traverse-list expanded scope)
@@ -101,41 +98,41 @@
 
 ;; Get symbol which sits on the top of dot-concatenated symbol.
 ;;   ex. foo.bar.baz => foo
-(define (get-receiver sym)
+(defun get-receiver (sym)
   (let ((s (symbol->string sym)))
     (aif (string-scan s ".")
          (intern (substring s 0 it))
       sym)))
 
-(define (local-var? sym scope)
+(defun local-var? (sym scope)
   (scope-var? scope (get-receiver sym)))
 
-(define (expand-args args scope)
+(defun expand-args (args scope)
   (string-join (map (lambda (x) (compile* x scope))
                     args)
                ", "))
 
-(define (expand-body body scope)
+(defun expand-body (body scope)
   (if (null? body)
       "LISP.nil"
     (expand-args body scope)))
 
-(define (escape-char c)
+(defun escape-char (c)
   (cond ((string=? c "\\") "\\\\")
         ((string=? c "\t") "\\t")
         ((string=? c "\n") "\\n")
         ((string=? c "\"") "\\\"")
         (else c)))
 
-(define (escape-string s)
+(defun escape-string (s)
   (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
                       (lambda (m) (escape-char (m)))))
 
-(define (escape-symbol sym)
-  (define (escape-sym-char c)
+(defun escape-symbol (sym)
+  (defun escape-sym-char (c)
     (string-append "$"
                    (integer->hex-string (char->integer c) "00")))
-  (define (integer->hex-string x padding)
+  (defun integer->hex-string (x padding)
     (let* ((s (string-append padding
                              (number->string x 16)))
            (sl (string-length s))
@@ -144,7 +141,7 @@
   (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
                       (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
-(define (compile-symbol sym scope)
+(defun compile-symbol (sym scope)
   (if (local-var? sym scope)
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
@@ -155,12 +152,12 @@
                        (escape-string s)
                        "\"]")))))
 
-(define (compile-string str)
+(defun compile-string (str)
   (string-append "\""
                  (escape-string str)
                  "\""))
 
-(define (compile-vector vect scope)
+(defun compile-vector (vect scope)
   (string-append "["
                  (let1 v (vector-map (lambda (x)
                                        (compile-quote x scope))
@@ -168,12 +165,12 @@
                    (v.join ", "))
                  "]"))
 
-(define (compile-regexp regex)
+(defun compile-regexp (regex)
   (string-append "/"
                  (regexp->string regex)
                  "/"))
 
-(define (compile-literal s scope)
+(defun compile-literal (s scope)
   (cond ((number? s) (number->string s))
         ((symbol? s) (compile-symbol s scope))
         ((string? s) (compile-string s))
@@ -182,32 +179,32 @@
         ((null? s)   "LISP.nil")
         (else (error (string-append "compile-literal: [" s "]")))))
 
-(define (unary-op? sym)
+(defun unary-op? (sym)
   (member sym '(+ -)))
 
-(define (compile-unary-op fn arg scope)
+(defun compile-unary-op (fn arg scope)
   (string-append "("
                  (symbol->string fn)
                  (compile* arg scope)
                  ")"))
 
-(define (binop? sym)
+(defun binop? (sym)
   (member sym '(+ - * / %)))
 
-(define (compile-binop fn args scope)
+(defun compile-binop (fn args scope)
   (string-append "("
                  (string-join (map (lambda (x) (compile* x scope))
                                    args)
                               (string-append " " (symbol->string fn) " "))
                  ")"))
 
-(define (do-compile-funcall fn args scope)
+(defun do-compile-funcall (fn args scope)
   (string-append (compile* fn scope)
                  "("
                  (expand-args args scope)
                  ")"))
 
-(define (compile-funcall fn args scope)
+(defun compile-funcall (fn args scope)
   (if (and (eq? (vector-ref fn 0) ':REF)
            (not (local-var? (vector-ref fn 1) scope))
            (not (null? args)))
@@ -221,7 +218,7 @@
               (else (do-compile-funcall fn args scope))))
     (do-compile-funcall fn args scope)))
 
-(define (compile-quote x scope)
+(defun compile-quote (x scope)
   (if (pair? x)
       (compile* `(cons ',(car x)
                        ',(cdr x))
@@ -232,7 +229,7 @@
                        "\")")
       (compile-literal x scope))))
 
-(define (compile-if pred-node then-node else-node scope)
+(defun compile-if (pred-node then-node else-node scope)
   (string-append "(("
                  (compile* pred-node scope)
                  ") !== LISP.nil ? ("
@@ -243,12 +240,12 @@
                    "LISP.nil")
                  "))"))
 
-(define (compile-set! sym val scope)
+(defun compile-set! (sym val scope)
   (string-append (compile* sym scope)
                  " = "
                  (compile* val scope)))
 
-(define (compile-lambda params bodies base-scope extended-scope)
+(defun compile-lambda (params bodies base-scope extended-scope)
   (let ((proper-params (if (proper-list? params)
                            params
                          (reverse! (reverse params))))  ; Remove dotted part.
@@ -271,18 +268,18 @@
                    (expand-body bodies extended-scope)
                    ");})")))
 
-(define (compile-define name value scope)
+(defun compile-def (name value scope)
   (string-append (compile* name scope)
                  " = "
                  (compile* value scope)))
 
-(define (macroexpand exp)
+(defun macroexpand (exp)
   (let ((expanded (macroexpand-1 exp)))
     (if (equal? expanded exp)
         exp
       (macroexpand expanded))))
 
-(define (compile-new class-name args scope)
+(defun compile-new (class-name args scope)
   (string-append "new "
                  (symbol->string class-name)
                  "("
@@ -291,7 +288,7 @@
 
 ;; If the given scope has quoted value, output them as local variable values,
 ;; and encapsulate with anonymous function.
-(define (compile-new-scope scope compiled-body)
+(defun compile-new-scope (scope compiled-body)
   (aif (scope-get-var scope)
        (string-append "(function() { var "
                       (string-join (map (lambda (x)
@@ -305,7 +302,7 @@
                       "; })()")
     compiled-body))
 
-(define (compile* s scope)
+(defun compile* (s scope)
   (case (vector-ref s 0)
     ((:CONST)  (compile-quote (vector-ref s 1) scope))
     ((:REF)    (compile-symbol (vector-ref s 1) scope))
@@ -320,13 +317,13 @@
                       (body (vector-ref s 3)))
                   (compile-new-scope extended-scope
                                      (compile-lambda params body scope extended-scope))))
-    ((:DEFINE)  (compile-define (vector-ref s 1) (vector-ref s 2) scope))
+    ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
     ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
                                        (vector-ref s 2)))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     (else  (string-append "???" s "???"))))
 
-(define (compile s)
+(defun compile (s)
   (let* ((top-scope (new-scope nil ()))
          (tree (traverse* s top-scope)))
     ;;(write tree)

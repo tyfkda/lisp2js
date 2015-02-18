@@ -31,7 +31,7 @@
 
     <script src="jslisp.js">
 ;; Calculate Fibonacci number
-(define (fib n)
+(defun fib (n)
   (if (< n 2)
       n
     (+ (fib (- n 1))
@@ -43,7 +43,7 @@
     <script src="jslisp.js">
 ;; Call JavaScript function
 ;; `JS` is JavaScript global hash table.
-(define-macro (jscall name . args)
+(defmacro (jscall name . args)
   `((hash-table-get JS ,(symbol->string name))
     ,@args))
 (jscall alert "Hello, JsLisp!")

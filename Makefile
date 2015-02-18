@@ -1,6 +1,6 @@
 all:	update-compiler
 
-SRCS=src/basic.scm src/backquote.scm src/lisp2js.scm
+SRCS=src/basic.lisp src/backquote.lisp src/lisp2js.lisp
 TMPFN=,lisp2js.js
 
 clean:
@@ -21,7 +21,7 @@ read-test:
 	cd test && node read-test.js
 
 inside-test:
-	cd test && ../jslisp test.scm
+	cd test && ../jslisp test.lisp
 
 shell-test:
 	cd test && ./test.sh

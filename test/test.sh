@@ -58,15 +58,13 @@ run cdr 2 "(cdr '(1 . 2))"
 run if-true 2 "(if 1 2 3)"
 run if-false 3 "(if nil 2 3)"
 run if-false2 nil "(if nil 2)"
-run_raw set! 123 "(define xyz nil) (set! xyz 123) (print xyz)"
+run_raw set! 123 "(def xyz nil) (set! xyz 123) (print xyz)"
 run lambda 2222 '((lambda (x) (+ x x)) 1111)'
 run nested-lambda 3 '(((lambda (x) (lambda (y) (+ x y))) 1) 2)'
 run lambda-rest '(1 2 3)' '((lambda (x . y) (cons x y)) 1 2 3)'
 run lambda-rest2 '(1)' '((lambda (x . y) (cons x y)) 1)'
-run_raw define 123 "(define x 123)
+run_raw def 123 "(def x 123)
                     (print x)"
-run_raw define-lambda 2222 "(define (double x) (+ x x))
-                            (print (double 1111))"
 run new '#()' '(new Array)'
 run + 6 '(+ 1 2 3)'
 
@@ -76,12 +74,12 @@ run vector-length 3 "(vector-length #(1 2 3))"
 run vector-ref b "(vector-ref #(a b c) 1)"
 
 # Macros.
-run_raw defmacro nil "(define-macro (nil! x) (list 'define x 'nil))
+run_raw defmacro nil "(defmacro nil! (x) (list 'def x 'nil))
                       (nil! xyz)
                       (print xyz)"
 
 # Field reference.
-run_raw refer-field 123 "(define h (make-hash-table))
+run_raw refer-field 123 "(def h (make-hash-table))
                          (set! h.x 123)
                          (print h.x)"
 

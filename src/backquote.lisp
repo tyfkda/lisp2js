@@ -1,16 +1,16 @@
 
 ;; Reverse list and concatenate tail destructively.
-(define (nreconc ls tail)
+(defun nreconc (ls tail)
   (let1 top (reverse! ls)
     (set-cdr! ls tail)
     top))
 
-(define (any f ls)
+(defun any (f ls)
   (cond ((null? ls) nil)
         ((f (car ls)) t)
         (else (any f (cdr ls)))))
 
-(define (every f ls)
+(defun every (f ls)
   (cond ((null? ls) t)
         ((f (car ls)) (every f (cdr ls)))
         (else nil)))
@@ -29,8 +29,8 @@
 ;;; The following are unique tokens used during processing.
 ;;; They need not be symbols; they need not even be atoms.
 
-(define *bq-clobberable* (gensym))
-(define *bq-quote-nil* (list 'quote ()))
+(def *bq-clobberable* (gensym))
+(def *bq-quote-nil* (list 'quote ()))
 
 ;;; Reader macro characters:
 ;;;   $foo is read in as (BACKQUOTE foo)
@@ -68,7 +68,7 @@
 ;;; then the code resulting from BACKQUOTE is exactly that
 ;;; specified by the official rules.
 
-(define-macro (quasiquote x)
+(defmacro quasiquote (x)
   (bq-completely-process x))
 
 ;;; Backquote processing proceeds in three stages:
@@ -98,10 +98,10 @@
 ;;; LIST* or CONS (the latter is used in the two-argument case,
 ;;; purely to make the resulting code a tad more readable).
 
-(define (bq-completely-process x)
+(defun bq-completely-process (x)
   (bq-simplify (bq-process x)))
 
-(define (bq-process x)
+(defun bq-process (x)
   (cond ((not (pair? x))
          (list 'quote x))
         ((eq? (car x) 'quasiquote)
@@ -129,7 +129,7 @@
 
 ;;; This implements the bracket operator of the formal rules.
 
-(define (bracket x)
+(defun bracket (x)
   (cond ((not (pair? x))
          (list 'list (bq-process x)))
         ((eq? (car x) 'unquote)
@@ -144,7 +144,7 @@
 ;;; purposes: (1) it handles dotted lists; (2) it tries to make
 ;;; the result share with the argument x as much as possible.
 
-(define (maptree fn x)
+(defun maptree (fn x)
   (if (not (pair? x))
       (fn x)
     (let ((a (fn (car x)))
@@ -156,7 +156,7 @@
 ;;; This predicate is true of a form that when read looked
 ;;; like %@foo or %.foo.
 
-(define (bq-splicing-frob x)
+(defun bq-splicing-frob (x)
   (and (pair? x)
        (or (eq? (car x) 'unquote-splicing)
            (eq? (car x) 'unquote-dot))))
@@ -164,7 +164,7 @@
 ;;; This predicate is true of a form that when read
 ;;; loocked like %@foo or %.foo or just place %foo.
 
-(define (bq-frob x)
+(defun bq-frob (x)
   (and (pair? x)
        (or (eq? (car x) 'unquote)
            (eq? (car x) 'unquote-splicing)
@@ -183,7 +183,7 @@
 ;;; (APPEND (QUOTE (x)) foo) U> (LIST* (QUOTE x) foo)
 ;;; (APPEND (CLOBBERABLE x) foo) U> (NCONC x foo)
 
-(define (bq-simplify x)
+(defun bq-simplify (x)
   (if (pair? x)
       (let ((x (if (eq? (car x) 'quote)
                    x
@@ -193,7 +193,7 @@
           (bq-simplify-args x)))
     x))
 
-(define (bq-simplify-args x)
+(defun bq-simplify-args (x)
   (let loop ((args (reverse (cdr x)))
              (result '()))
     (if (not (null? args))
@@ -224,7 +224,7 @@
                                             result))))
       result)))
 
-(define (null-or-quoted x)
+(defun null-or-quoted (x)
   (or (null? x) (and (pair? x) (eq? (car x) 'quote))))
 
 ;;; When BQ-ATTACH-APPEND is called, the OP should be #:BQ-APPEND
@@ -236,7 +236,7 @@
 ;;; (op item ’nil) U>(op item), if item is a splicable frob
 ;;; (op item (op a b c)) U> (op item a b c)
 
-(define (bq-attach-append op item result)
+(defun bq-attach-append (op item result)
   (cond ((and (null-or-quoted item) (null-or-quoted result))
          (list 'quote (append (cadr item) (cadr result))))
         ((or (null? result) (equal? result *bq-quote-nil*))
@@ -254,7 +254,7 @@
 ;;; (LIST* a b c (list* d e f g)) U> (LIST* a b c d e f g)
 ;;; (LIST* a b c (list d e f g)) U> (LIST a b c d e f g)
 
-(define (bq-attach-conses items result)
+(defun bq-attach-conses (items result)
   (cond ((and (every null-or-quoted items)
               (null-or-quoted result))
          (list 'quote
