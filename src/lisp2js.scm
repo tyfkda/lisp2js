@@ -33,11 +33,11 @@
          (traverse* x scope))
        args))
 
-(define-macro (record args param . body)
+(defmacro (record args param . body)
   `(apply (lambda ,param ,@body)
           ,args))
 
-(define-macro (record-case x . clauses)
+(defmacro (record-case x . clauses)
   (let1 value (gensym)
     `(let1 ,value ,x
        (case (car ,value)
@@ -78,11 +78,11 @@
                                    (vector ':DEFINE
                                            (traverse* name scope)
                                            (traverse* value scope))))
-    ((define-macro name-params . body)  (let ((name (car name-params))
-                                              (params (cdr name-params)))
-                                          (vector ':DEFMACRO
-                                                  name
-                                                  `(lambda ,params ,@body))))
+    ((defmacro name-params . body)  (let ((name (car name-params))
+                                          (params (cdr name-params)))
+                                      (vector ':DEFMACRO
+                                              name
+                                              `(lambda ,params ,@body))))
     ((new klass . args)  (vector ':NEW klass (traverse-args args new-scope)))
     (else (vector ':FUNCALL
                   (traverse* (car s) scope)

@@ -68,7 +68,7 @@
 ;;; then the code resulting from BACKQUOTE is exactly that
 ;;; specified by the official rules.
 
-(define-macro (quasiquote x)
+(defmacro (quasiquote x)
   (bq-completely-process x))
 
 ;;; Backquote processing proceeds in three stages:
