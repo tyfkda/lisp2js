@@ -23,6 +23,10 @@
   LISP.nil = false;
   LISP.t = true;
 
+  LISP.isTrue = function(x) {
+    return x !== LISP.nil && x != null;  // !(false || null || undefined)
+  };
+
   LISP._getRestArgs = function(args, start) {
     return arrayToList(Array.prototype.slice.call(args, start));
   };

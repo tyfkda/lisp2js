@@ -230,9 +230,9 @@
       (compile-literal x scope))))
 
 (defun compile-if (pred-node then-node else-node scope)
-  (string-append "(("
+  (string-append "(LISP.isTrue("
                  (compile* pred-node scope)
-                 ") !== LISP.nil ? ("
+                 ") ? ("
                  (compile* then-node scope)
                  ") : ("
                  (if else-node
