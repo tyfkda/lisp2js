@@ -162,7 +162,7 @@
                  (let1 v (vector-map (lambda (x)
                                        (compile-quote x scope))
                                      vect)
-                   (v.join ", "))
+                   (v.join ", "))  ;; TODO: Fix this not to use Array#join/JavaScript.
                  "]"))
 
 (defun compile-regexp (regex)
