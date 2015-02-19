@@ -14,6 +14,21 @@
 
 (test "begin" 3 (begin 1 2 3))
 
+;; nil
+(test "nil isn't symbol" nil (symbol? nil))
+(test "nil is null" t (null? nil))
+(test "not nil is t" t (not nil))
+(test "nil isn't a pair" nil (pair? nil))
+(test "car of nil is nil" nil (car nil))
+(test "cdr of nil is nil" nil (cdr nil))
+
+;; symbol
+(test "t isn't a symbol" nil (symbol? t))
+(test "others are symbol" t (symbol? 'others))
+
+;; pair
+(test "list is a pair" t (pair? (list 1 2 3)))
+
 ;; type
 (test "type of int" 'number (type 123))
 (test "type of float" 'number (type 1.23))
