@@ -324,7 +324,7 @@
     return char.charCodeAt(index);
   };
 
-  var kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n' };
+  var kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' };
   function inspectString(str) {
     return '"' + str.replace(/[\\\t\n"]/g, function(m) { return kEscapeCharTable[m]; }) + '"';
   };
