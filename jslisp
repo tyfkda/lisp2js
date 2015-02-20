@@ -96,13 +96,15 @@
     return repl();
   }
 
-  // Process command line argument files.
+  // Process command line argument as a script file.
   try {
-    for (; index < process.argv.length; ++index) {
-      var text = fs.readFileSync(process.argv[index], 'utf-8');
-      runCodes(text, compileOnly);
-    }
-    process.exit(0);
+    LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1));
+    var text = fs.readFileSync(process.argv[index], 'utf-8');
+    runCodes(text, compileOnly);
+    var status = 0;
+    if ('main' in LISP)
+      status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']));
+    process.exit(status);
   } catch(e) {
     process.stderr.write(e.toString() + '\n');
     process.exit(1);
