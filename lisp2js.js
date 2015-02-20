@@ -446,30 +446,10 @@
 
 
   // Stream.
-  var FileStream = function(fs) {
-    this.fs = fs;
-    this.BUFFER_SIZE = 4096;
-    this.buffer = new Buffer(this.BUFFER_SIZE);
+  var Stream = function() {
+    this.str = '';
   };
-  FileStream.prototype = {
-    readLine: function() {
-      var n = this.fs.readSync(process.stdin.fd, this.buffer, 0, this.BUFFER_SIZE);
-      if (n <= 0)
-        return null;
-      return buffer.slice(0, n).toString();
-    },
-  };
-  LISP.FileStream = FileStream;
-
-  var StrStream = function(str) {
-    this.str = str;
-  };
-  StrStream.prototype = {
-    readLine: function() {
-      var result = this.str;
-      this.str = null;
-      return result;
-    },
+  Stream.prototype = {
     match: function(regexp, keep) {
       if (this.str == null)
         return null;
@@ -487,6 +467,30 @@
     eof: function() {
       return this.str == null;
     },
+  };
+
+  var FileStream = function(fs) {
+    Stream.call(this);
+    this.fs = fs;
+    this.BUFFER_SIZE = 4096;
+    this.buffer = new Buffer(this.BUFFER_SIZE);
+  };
+  FileStream.prototype = Object.create(Stream.prototype);
+  FileStream.prototype.readLine = function() {
+    var n = this.fs.readSync(process.stdin.fd, this.buffer, 0, this.BUFFER_SIZE);
+    if (n <= 0)
+      return null;
+    return buffer.slice(0, n).toString();
+  };
+  LISP.FileStream = FileStream;
+
+  var StrStream = function(str) {
+    Stream.call(this);
+    this.str = str;
+  };
+  StrStream.prototype = Object.create(Stream.prototype);
+  StrStream.prototype.readLine = function() {
+    return null;
   };
   LISP.StrStream = StrStream;
 
