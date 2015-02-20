@@ -484,41 +484,43 @@
   LISP.NoCloseParenException = function() {};
 
   var kDelimitors = "\\s(){}\\[\\]'`,;#\"";
-  var kReSingleDot = RegExp("^\\s*\\.(?=[" + kDelimitors + "])");
-  var kReSymbolOrNumber = RegExp("^\\s*([^" + kDelimitors + "]+)");
+  var kReSingleDot = RegExp("^\\.(?=[" + kDelimitors + "])");
+  var kReSymbolOrNumber = RegExp("^([^" + kDelimitors + "]+)");
 
   LISP.Reader.prototype = {
     read: function() {
       if (this.str == null)
         return undefined;
 
+      while (this.match(/^\s+/)) {
+        if (this.str === '')
+          if ((this.str = this.stream.readLine()) == null)
+            return undefined;
+      }
+
       var m;
-      if (this.match(/^\s*\(/))  // Left paren '('.
+      if (this.match(/^\(/))  // Left paren '('.
         return this.readList();
-      if (this.match(/^\s*;[^\n]*\n?/))  // Line comment.
+      if (this.match(/^;[^\n]*\n?/))  // Line comment.
         return this.read();
-      if (this.match(/^\s*'/))  // quote.
+      if (this.match(/^'/))  // quote.
         return this.readQuote();
-      if (m = this.match(/^\s*"((\\.|[^"\\])*)"/))  // string.
+      if (m = this.match(/^"((\\.|[^"\\])*)"/))  // string.
         return this.unescape(m[1]);
-      if (this.match(/^\s*`/))  // quasiquote.
+      if (this.match(/^`/))  // quasiquote.
         return this.readQuasiQuote();
-      if (m = this.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
+      if (m = this.match(/^,(@?)/))  // unquote or unquote-splicing.
         return this.readUnquote(m[1]);
-      if (this.match(/^\s*#\(/))  // vector.
+      if (this.match(/^#\(/))  // vector.
         return this.readVector();
-      if (m = this.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
+      if (m = this.match(/^#\/([^\/]*)\//))  // regexp TODO: Implement properly.
         return new RegExp(m[1]);
-      if (this.match(/^\s*#\|(.|[\n\r])*?\|#/))  // Block comment.
+      if (this.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
         return this.read();
       if (this.str.match(kReSingleDot))  // Single dot.
         return undefined;
       if (m = this.match(kReSymbolOrNumber))  // Symbol or number.
         return this.readSymbolOrNumber(m[1]);
-      if (this.str.match(/^\s*$/)) {  // End of string.
-        this.str = this.stream.readLine();
-        return this.read();
-      }
       return undefined;
     },
 
