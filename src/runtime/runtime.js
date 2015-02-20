@@ -438,13 +438,6 @@
     return s.slice(1, s.length - 1);
   };
 
-
-  // System
-  LISP.exit = function(code) {
-    process.exit(code);
-  };
-
-
   // Stream.
   var Stream = function() {
     this.str = '';
@@ -601,11 +594,15 @@
   };
 
   LISP.read = function(stream) {
-    return Reader.read(stream);
+    return Reader.read(stream || LISP['*stdin*']);
   };
 
   LISP["read-from-string"] = function(str) {
     return Reader.read(new StrStream(str));
+  };
+
+  LISP['read-line'] = function(stream) {
+    return (stream || LISP['*stdin*']).getLine();
   };
 
 
@@ -634,9 +631,9 @@
     LISP['*stdout*'] = new LISP.FileStream(process.stdout);
     LISP['*stderr*'] = new LISP.FileStream(process.stderr);
 
-    LISP['read-line'] = function(stream) {
-      stream = stream || LISP['*stdin*'];
-      return stream.getLine();
+    // System
+    LISP.exit = function(code) {
+      process.exit(code);
     };
   }
 
