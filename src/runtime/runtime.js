@@ -467,22 +467,12 @@
     eof: function() {
       return this.str == null;
     },
+    getLine: function() {
+      var result = this.str || this.readLine();
+      this.str = null;
+      return result;
+    },
   };
-
-  var FileStream = function(fs) {
-    Stream.call(this);
-    this.fs = fs;
-    this.BUFFER_SIZE = 4096;
-    this.buffer = new Buffer(this.BUFFER_SIZE);
-  };
-  FileStream.prototype = Object.create(Stream.prototype);
-  FileStream.prototype.readLine = function() {
-    var n = this.fs.readSync(process.stdin.fd, this.buffer, 0, this.BUFFER_SIZE);
-    if (n <= 0)
-      return null;
-    return buffer.slice(0, n).toString();
-  };
-  LISP.FileStream = FileStream;
 
   var StrStream = function(str) {
     Stream.call(this);
@@ -623,16 +613,31 @@
   if (typeof process !== 'undefined') {
     var fs = require("fs");
 
-    LISP['read-line'] = (function() {
+    LISP.FileStream = (function() {
       var BUFFER_SIZE = 4096;
       var buffer = new Buffer(BUFFER_SIZE);
-      return function() {
-        var n = fs.readSync(process.stdin.fd, buffer, 0, BUFFER_SIZE);
+      var FileStream = function(file) {
+        Stream.call(this);
+        this.file = file;
+      };
+      FileStream.prototype = Object.create(Stream.prototype);
+      FileStream.prototype.readLine = function() {
+        var n = fs.readSync(this.file.fd, buffer, 0, BUFFER_SIZE);
         if (n <= 0)
-          return LISP.nil;
+          return null;
         return buffer.slice(0, n).toString();
       };
+      return FileStream;
     })();
+
+    LISP['*stdin*'] = new LISP.FileStream(process.stdin);
+    LISP['*stdout*'] = new LISP.FileStream(process.stdout);
+    LISP['*stderr*'] = new LISP.FileStream(process.stderr);
+
+    LISP['read-line'] = function(stream) {
+      stream = stream || LISP['*stdin*'];
+      return stream.getLine();
+    };
   }
 
   /*==== EMBED COMPILED CODE HERE ====*/
