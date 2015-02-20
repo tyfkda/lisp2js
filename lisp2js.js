@@ -470,12 +470,28 @@
       this.str = null;
       return result;
     },
+    match: function(regexp, keep) {
+      if (this.str == null)
+        return null;
+
+      if (this.str === '') {
+        if ((this.str = this.readLine()) == null)
+          return undefined;
+      }
+
+      var m = this.str.match(regexp);
+      if (m && !keep)
+        this.str = RegExp.rightContext;
+      return m;
+    },
+    eof: function() {
+      return this.str == null;
+    },
   };
 
   // Reader.
   LISP.Reader = function(stream) {
     this.stream = stream;
-    this.str = this.stream.readLine();
   };
   LISP.Reader.create = function(str) {
     return new LISP.Reader(new StrStream(str));
@@ -489,48 +505,35 @@
 
   LISP.Reader.prototype = {
     read: function() {
-      if (this.str == null)
-        return undefined;
-
-      while (this.match(/^\s+/)) {
-        if (this.str === '')
-          if ((this.str = this.stream.readLine()) == null)
-            return undefined;
-      }
+      do {
+        if (this.stream.eof())
+          return undefined;
+      } while (this.stream.match(/^\s+/))
 
       var m;
-      if (this.match(/^\(/))  // Left paren '('.
+      if (this.stream.match(/^\(/))  // Left paren '('.
         return this.readList();
-      if (this.match(/^;[^\n]*\n?/))  // Line comment.
+      if (this.stream.match(/^;[^\n]*\n?/))  // Line comment.
         return this.read();
-      if (this.match(/^'/))  // quote.
+      if (this.stream.match(/^'/))  // quote.
         return this.readQuote();
-      if (m = this.match(/^"((\\.|[^"\\])*)"/))  // string.
+      if (m = this.stream.match(/^"((\\.|[^"\\])*)"/))  // string.
         return this.unescape(m[1]);
-      if (this.match(/^`/))  // quasiquote.
+      if (this.stream.match(/^`/))  // quasiquote.
         return this.readQuasiQuote();
-      if (m = this.match(/^,(@?)/))  // unquote or unquote-splicing.
+      if (m = this.stream.match(/^,(@?)/))  // unquote or unquote-splicing.
         return this.readUnquote(m[1]);
-      if (this.match(/^#\(/))  // vector.
+      if (this.stream.match(/^#\(/))  // vector.
         return this.readVector();
-      if (m = this.match(/^#\/([^\/]*)\//))  // regexp TODO: Implement properly.
+      if (m = this.stream.match(/^#\/([^\/]*)\//))  // regexp TODO: Implement properly.
         return new RegExp(m[1]);
-      if (this.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
+      if (this.stream.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
         return this.read();
-      if (this.str.match(kReSingleDot))  // Single dot.
+      if (this.stream.match(kReSingleDot, true))  // Single dot.
         return undefined;
-      if (m = this.match(kReSymbolOrNumber))  // Symbol or number.
+      if (m = this.stream.match(kReSymbolOrNumber))  // Symbol or number.
         return this.readSymbolOrNumber(m[1]);
       return undefined;
-    },
-
-    match: function(regexp) {
-      if (this.str == null)
-        return null;
-      var m = this.str.match(regexp);
-      if (m)
-        this.str = RegExp.rightContext;
-      return m;
     },
 
     readSymbolOrNumber: function(str) {
@@ -548,13 +551,13 @@
           continue;
         }
 
-        if (this.match(/^\s*\)/)) {  // Close paren.
+        if (this.stream.match(/^\s*\)/)) {  // Close paren.
           return LISP['reverse!'](result);
         }
-        if (this.match(kReSingleDot)) {  // Dot.
+        if (this.stream.match(kReSingleDot)) {  // Dot.
           var last = this.read();
           if (last !== undefined) {
-            if (this.match(/^\s*\)/)) {  // Close paren.
+            if (this.stream.match(/^\s*\)/)) {  // Close paren.
               var reversed = LISP['reverse!'](result);
               result.cdr = last;
               return reversed;
@@ -575,7 +578,7 @@
           continue;
         }
 
-        if (this.match(/^\s*\)/)) {  // Close paren.
+        if (this.stream.match(/^\s*\)/)) {  // Close paren.
           return result;
         }
         // Error
