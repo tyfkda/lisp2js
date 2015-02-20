@@ -214,3 +214,13 @@
         (begin (vector-set! new-vect i
                             (proc (vector-ref vect i)))
                (loop (+ i 1)))))))
+
+(defun vector->list (vect)
+  (let1 n (vector-length vect)
+    (if (<= n 0)
+        ()
+      (let loop ((i (- n 1))
+                 (acc ()))
+           (if (< i 0)
+               acc
+             (loop (- i 1) (cons (vector-ref vect i) acc)))))))

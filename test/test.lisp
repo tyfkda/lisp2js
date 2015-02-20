@@ -42,4 +42,7 @@
 (test "eq? vector" nil (eq? #(1 2 3) #(1 2 3)))
 (test "equal? vector" t (equal? #(1 2 3) #(1 2 3)))
 
+;; vector
+(test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
+
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")
