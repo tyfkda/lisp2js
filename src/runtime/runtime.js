@@ -495,7 +495,6 @@
 
     readList: function() {
       var result = LISP.nil;
-      var m;
       for (;;) {
         var x = this.read();
         if (x !== undefined) {
@@ -503,6 +502,7 @@
           continue;
         }
 
+        var m;
         if (m = this.str.match(/^\s*\)/)) {  // Close paren.
           this.proceed();
           return LISP['reverse!'](result);
@@ -526,7 +526,6 @@
 
     readVector: function() {
       var result = [];
-      var m;
       for (;;) {
         var x = this.read();
         if (x !== undefined) {
@@ -534,6 +533,7 @@
           continue;
         }
 
+        var m;
         if (m = this.str.match(/^\s*\)/)) {  // Close paren.
           this.proceed();
           return result;
