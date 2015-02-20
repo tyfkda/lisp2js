@@ -32,7 +32,6 @@
     var tty = require('tty');
     var isatty = tty.isatty(0);  // Whether the stdin is a tty.
     var prompt1 = '> ';
-    var prompt2 = '| ';
     var inputs = [];
 
     if (isatty)
@@ -51,9 +50,6 @@
         if (e instanceof LISP.NoCloseParenException) {
           // In REPL, if NoCloseParenException occurs,
           // a user keep typing so inputs should be kept.
-          if (isatty) {
-            process.stdout.write(prompt2);
-          }
         } else {
           console.error(e);
           if (!isatty)
