@@ -9,19 +9,26 @@
   <body>
     <h1>JsLisp test</h1>
 
+    <!-- You can access lisp function under `LISP` and can call it. -->
+    <form onsubmit="print('fib(' + this.num.value + ') = ' + LISP.fib(parseInt(this.num.value))); return false;">
+      Fib <input id="num" type="number" min="0" value="30">
+      <input type="submit">
+    </form>
+
     <h3>Result</h3>
     <div id="terminal">
     </div>
 
     <script type="text/javascript" src="../../lisp2js.js"></script>
     <script type="text/javascript">
-      // Steal Lisp output.
-      LISP._output = function(str) {
+      function print(str) {
         var terminalNode = document.getElementById('terminal');
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         terminalNode.appendChild(div);
       }
+      // Steal Lisp output.
+      LISP._output = print;
     </script>
 
     <script src="jslisp.js">
@@ -36,15 +43,13 @@
       n
     (+ (fib (- n 1))
        (fib (- n 2)))))
-
-(print (+ "fib30 = " (fib 30)))
     </script>
 
     <script src="jslisp.js">
 ;; Call JavaScript function
 ;; `JS` is JavaScript global hash table.
 ;; Can access with 'dot'
-(JS.alert "Hello, JsLisp!")
+(JS.alert "Welcome to JsLisp!")
     </script>
   </body>
 </html>
