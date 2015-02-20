@@ -445,9 +445,40 @@
   };
 
 
-  // Reader.
-  LISP.Reader = function(str) {
+  // Stream.
+  var FileStream = function(fs) {
+    this.fs = fs;
+    this.BUFFER_SIZE = 4096;
+    this.buffer = new Buffer(this.BUFFER_SIZE);
+  };
+  FileStream.prototype = {
+    readLine: function() {
+      var n = this.fs.readSync(process.stdin.fd, this.buffer, 0, this.BUFFER_SIZE);
+      if (n <= 0)
+        return null;
+      return buffer.slice(0, n).toString();
+    },
+  };
+  LISP.FileStream = FileStream;
+
+  var StrStream = function(str) {
     this.str = str;
+  };
+  StrStream.prototype = {
+    readLine: function() {
+      var result = this.str;
+      this.str = null;
+      return result;
+    },
+  };
+
+  // Reader.
+  LISP.Reader = function(stream) {
+    this.stream = stream;
+    this.str = this.stream.readLine();
+  };
+  LISP.Reader.create = function(str) {
+    return new LISP.Reader(new StrStream(str));
   };
 
   LISP.NoCloseParenException = function() {};
@@ -458,6 +489,9 @@
 
   LISP.Reader.prototype = {
     read: function() {
+      if (this.str == null)
+        return undefined;
+
       var m;
       if (this.match(/^\s*\(/))  // Left paren '('.
         return this.readList();
@@ -481,10 +515,16 @@
         return undefined;
       if (m = this.match(kReSymbolOrNumber))  // Symbol or number.
         return this.readSymbolOrNumber(m[1]);
+      if (this.str.match(/^\s*$/)) {  // End of string.
+        this.str = this.stream.readLine();
+        return this.read();
+      }
       return undefined;
     },
 
     match: function(regexp) {
+      if (this.str == null)
+        return null;
       var m = this.str.match(regexp);
       if (m)
         this.str = RegExp.rightContext;
@@ -568,7 +608,7 @@
   };
 
   LISP["read-from-string"] = function(str) {
-    var reader = new LISP.Reader(str);
+    var reader = new LISP.Reader(new StrStream(str));
     return reader.read();
   };
 
