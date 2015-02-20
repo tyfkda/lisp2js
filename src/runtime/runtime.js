@@ -338,7 +338,7 @@
       return inspect ? inspectString(x) : x;
     if (x instanceof Array)
       return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
-    if (x === undefined || x === null)
+    if (x == null)  // null or undefined
       return '' + x;
     return x.toString(inspect);
   };
