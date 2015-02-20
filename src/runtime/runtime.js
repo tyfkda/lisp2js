@@ -452,41 +452,46 @@
 
   LISP.NoCloseParenException = function() {};
 
+  var kDelimitors = "\\s(){}\\[\\]'`,;#\"";
+  var kReSingleDot = RegExp("^\\s*\\.(?=[" + kDelimitors + "])");
+  var kReSymbolOrNumber = RegExp("^\\s*([^" + kDelimitors + "]+)");
+
   LISP.Reader.prototype = {
     read: function() {
       var m;
-      if (m = this.str.match(/^\s*\(/))  // Left paren '('.
-        return this.proceed(), this.readList(RegExp.rightContext);
-      if (m = this.str.match(/^\s*;[^\n]*\n?/))  // Line comment.
-        return this.proceed(), this.read();
-      if (m = this.str.match(/^\s*'/))  // quote.
-        return this.proceed(), this.readQuote();
-      if (m = this.str.match(/^\s*"((\\.|[^"\\])*)"/))  // string.
-        return this.proceed(), this.unescape(m[1]);
-      if (m = this.str.match(/^\s*`/))  // quasiquote.
-        return this.proceed(), this.readQuasiQuote();
-      if (m = this.str.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
-        return this.proceed(), this.readUnquote(m[1]);
-      if (m = this.str.match(/^\s*#\(/))  // vector.
-        return this.proceed(), this.readVector();
-      if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
-        return this.proceed(), new RegExp(m[1]);
-      if (m = this.str.match(/^\s*#\|(.|[\n\r])*?\|#/))  // Block comment.
-        return this.proceed(), this.read();
-      if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;#]+)/))  // Symbol or number.
+      if (this.match(/^\s*\(/))  // Left paren '('.
+        return this.readList();
+      if (this.match(/^\s*;[^\n]*\n?/))  // Line comment.
+        return this.read();
+      if (this.match(/^\s*'/))  // quote.
+        return this.readQuote();
+      if (m = this.match(/^\s*"((\\.|[^"\\])*)"/))  // string.
+        return this.unescape(m[1]);
+      if (this.match(/^\s*`/))  // quasiquote.
+        return this.readQuasiQuote();
+      if (m = this.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
+        return this.readUnquote(m[1]);
+      if (this.match(/^\s*#\(/))  // vector.
+        return this.readVector();
+      if (m = this.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
+        return new RegExp(m[1]);
+      if (this.match(/^\s*#\|(.|[\n\r])*?\|#/))  // Block comment.
+        return this.read();
+      if (this.str.match(kReSingleDot))  // Single dot.
+        return undefined;
+      if (m = this.match(kReSymbolOrNumber))  // Symbol or number.
         return this.readSymbolOrNumber(m[1]);
       return undefined;
     },
 
-    proceed: function() {
-      this.str = RegExp.rightContext;
+    match: function(regexp) {
+      var m = this.str.match(regexp);
+      if (m)
+        this.str = RegExp.rightContext;
+      return m;
     },
 
     readSymbolOrNumber: function(str) {
-      if (str === '.')  // Refuse single dot.
-        return undefined;
-
-      this.proceed();
       if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
         return parseFloat(str);
       return LISP.intern(str);
@@ -501,17 +506,13 @@
           continue;
         }
 
-        var m;
-        if (m = this.str.match(/^\s*\)/)) {  // Close paren.
-          this.proceed();
+        if (this.match(/^\s*\)/)) {  // Close paren.
           return LISP['reverse!'](result);
         }
-        if (m = this.str.match(/^\s*\.\s/)) {  // Dot.
-          this.proceed();
+        if (this.match(kReSingleDot)) {  // Dot.
           var last = this.read();
           if (last !== undefined) {
-            if (m = this.str.match(/^\s*\)/)) {  // Close paren.
-              this.proceed();
+            if (this.match(/^\s*\)/)) {  // Close paren.
               var reversed = LISP['reverse!'](result);
               result.cdr = last;
               return reversed;
@@ -532,9 +533,7 @@
           continue;
         }
 
-        var m;
-        if (m = this.str.match(/^\s*\)/)) {  // Close paren.
-          this.proceed();
+        if (this.match(/^\s*\)/)) {  // Close paren.
           return result;
         }
         // Error
