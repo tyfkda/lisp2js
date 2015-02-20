@@ -117,12 +117,15 @@
       "LISP.nil"
     (expand-args body scope)))
 
-(defun escape-char (c)
-  (cond ((string=? c "\\") "\\\\")
-        ((string=? c "\t") "\\t")
-        ((string=? c "\n") "\\n")
-        ((string=? c "\"") "\\\"")
-        (else c)))
+(let1 table (make-hash-table)
+  (hash-table-put! table "\\" "\\\\")
+  (hash-table-put! table "\t" "\\t")
+  (hash-table-put! table "\n" "\\n")
+  (hash-table-put! table "\"" "\\\"")
+  (defun escape-char (c)
+    (aif (hash-table-get table c)
+         it
+      c)))
 
 (defun escape-string (s)
   (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
