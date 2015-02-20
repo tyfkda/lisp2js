@@ -445,73 +445,117 @@
   };
 
 
-  // Reader.
-  LISP.Reader = function(str) {
-    this.str = str;
+  // Stream.
+  var Stream = function() {
+    this.str = '';
+  };
+  Stream.prototype = {
+    match: function(regexp, keep) {
+      if (this.str == null)
+        return null;
+
+      if (this.str === '') {
+        if ((this.str = this.readLine()) == null)
+          return undefined;
+      }
+
+      var m = this.str.match(regexp);
+      if (m && !keep)
+        this.str = RegExp.rightContext;
+      return m;
+    },
+    eof: function() {
+      return this.str == null;
+    },
   };
 
+  var FileStream = function(fs) {
+    Stream.call(this);
+    this.fs = fs;
+    this.BUFFER_SIZE = 4096;
+    this.buffer = new Buffer(this.BUFFER_SIZE);
+  };
+  FileStream.prototype = Object.create(Stream.prototype);
+  FileStream.prototype.readLine = function() {
+    var n = this.fs.readSync(process.stdin.fd, this.buffer, 0, this.BUFFER_SIZE);
+    if (n <= 0)
+      return null;
+    return buffer.slice(0, n).toString();
+  };
+  LISP.FileStream = FileStream;
+
+  var StrStream = function(str) {
+    Stream.call(this);
+    this.str = str;
+  };
+  StrStream.prototype = Object.create(Stream.prototype);
+  StrStream.prototype.readLine = function() {
+    return null;
+  };
+  LISP.StrStream = StrStream;
+
+  // Reader.
   LISP.NoCloseParenException = function() {};
 
-  LISP.Reader.prototype = {
-    read: function() {
+  var kDelimitors = "\\s(){}\\[\\]'`,;#\"";
+  var kReSingleDot = RegExp("^\\.(?=[" + kDelimitors + "])");
+  var kReSymbolOrNumber = RegExp("^([^" + kDelimitors + "]+)");
+
+  var Reader = {
+    read: function(stream) {
+      do {
+        if (stream.eof())
+          return undefined;
+      } while (stream.match(/^\s+/))
+
       var m;
-      if (m = this.str.match(/^\s*\(/))  // Left paren '('.
-        return this.proceed(), this.readList(RegExp.rightContext);
-      if (m = this.str.match(/^\s*;[^\n]*\n?/))  // Line comment.
-        return this.proceed(), this.read();
-      if (m = this.str.match(/^\s*'/))  // quote.
-        return this.proceed(), this.readQuote();
-      if (m = this.str.match(/^\s*"((\\.|[^"\\])*)"/))  // string.
-        return this.proceed(), this.unescape(m[1]);
-      if (m = this.str.match(/^\s*`/))  // quasiquote.
-        return this.proceed(), this.readQuasiQuote();
-      if (m = this.str.match(/^\s*,(@?)/))  // unquote or unquote-splicing.
-        return this.proceed(), this.readUnquote(m[1]);
-      if (m = this.str.match(/^\s*#\(/))  // vector.
-        return this.proceed(), this.readVector();
-      if (m = this.str.match(/^\s*#\/([^\/]*)\//))  // regexp TODO: Implement properly.
-        return this.proceed(), new RegExp(m[1]);
-      if (m = this.str.match(/^\s*#\|(.|[\n\r])*?\|#/))  // Block comment.
-        return this.proceed(), this.read();
-      if (m = this.str.match(/^\s*([^\s(){}\[\]'`,;#]+)/))  // Symbol or number.
-        return this.readSymbolOrNumber(m[1]);
+      if (stream.match(/^\(/))  // Left paren '('.
+        return Reader.readList(stream);
+      if (stream.match(/^;[^\n]*\n?/))  // Line comment.
+        return Reader.read(stream);
+      if (stream.match(/^'/))  // quote.
+        return Reader.readQuote(stream);
+      if (m = stream.match(/^"((\\.|[^"\\])*)"/))  // string.
+        return Reader.unescape(m[1]);
+      if (stream.match(/^`/))  // quasiquote.
+        return Reader.readQuasiQuote(stream);
+      if (m = stream.match(/^,(@?)/))  // unquote or unquote-splicing.
+        return Reader.readUnquote(stream, m[1]);
+      if (stream.match(/^#\(/))  // vector.
+        return Reader.readVector(stream);
+      if (m = stream.match(/^#\/([^\/]*)\//))  // regexp TODO: Implement properly.
+        return new RegExp(m[1]);
+      if (stream.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
+        return Reader.read(stream);
+      if (stream.match(kReSingleDot, true))  // Single dot.
+        return undefined;
+      if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
+        return Reader.readSymbolOrNumber(m[1]);
       return undefined;
     },
 
-    proceed: function() {
-      this.str = RegExp.rightContext;
-    },
-
     readSymbolOrNumber: function(str) {
-      if (str === '.')  // Refuse single dot.
-        return undefined;
-
-      this.proceed();
       if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
         return parseFloat(str);
       return LISP.intern(str);
     },
 
-    readList: function() {
+    readList: function(stream) {
       var result = LISP.nil;
       for (;;) {
-        var x = this.read();
+        var x = Reader.read(stream);
         if (x !== undefined) {
           result = LISP.cons(x, result);
           continue;
         }
 
-        var m;
-        if (m = this.str.match(/^\s*\)/)) {  // Close paren.
-          this.proceed();
+        if (stream.match(/^\s*\)/)) {  // Close paren.
           return LISP['reverse!'](result);
         }
-        if (m = this.str.match(/^\s*\.\s/)) {  // Dot.
-          this.proceed();
-          var last = this.read();
+        if (stream.match(kReSingleDot)) {  // Dot.
+          var last = Reader.read(stream);
           if (last !== undefined) {
-            if (m = this.str.match(/^\s*\)/)) {  // Close paren.
-              this.proceed();
+            if (stream.match(/^\s*\)/)) {  // Close paren.
               var reversed = LISP['reverse!'](result);
               result.cdr = last;
               return reversed;
@@ -523,18 +567,16 @@
       }
     },
 
-    readVector: function() {
+    readVector: function(stream) {
       var result = [];
       for (;;) {
-        var x = this.read();
+        var x = Reader.read(stream);
         if (x !== undefined) {
           result.push(x);
           continue;
         }
 
-        var m;
-        if (m = this.str.match(/^\s*\)/)) {  // Close paren.
-          this.proceed();
+        if (stream.match(/^\s*\)/)) {  // Close paren.
           return result;
         }
         // Error
@@ -542,17 +584,17 @@
       }
     },
 
-    readQuote: function() {
-      return LISP.list(LISP.intern('quote'), this.read());
+    readQuote: function(stream) {
+      return LISP.list(LISP.intern('quote'), Reader.read(stream));
     },
 
-    readQuasiQuote: function() {
-      return LISP.list(LISP.intern('quasiquote'), this.read());
+    readQuasiQuote: function(stream) {
+      return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
     },
 
-    readUnquote: function(splicing) {
+    readUnquote: function(stream, splicing) {
       var keyword = splicing === '@' ? 'unquote-splicing' : 'unquote';
-      return LISP.list(LISP.intern(keyword), this.read());
+      return LISP.list(LISP.intern(keyword), Reader.read(stream));
     },
 
     unescape: function(str) {
@@ -568,9 +610,12 @@
     },
   };
 
+  LISP.read = function(stream) {
+    return Reader.read(stream);
+  };
+
   LISP["read-from-string"] = function(str) {
-    var reader = new LISP.Reader(str);
-    return reader.read();
+    return Reader.read(new StrStream(str));
   };
 
 

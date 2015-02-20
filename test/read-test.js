@@ -44,7 +44,7 @@
         print('ok');
         return;
       }
-      errorMessage = 'Unexpected exception: expected ' + exceptin + ' : actual ' + exc;
+      errorMessage = 'Unexpected exception: expected ' + exception + ' : actual ' + exc;
     }
 
     console.error("\x1b[1;31m[ERROR]\x1b[0;39m");

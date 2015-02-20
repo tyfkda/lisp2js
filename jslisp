@@ -8,10 +8,10 @@
 
   // Run codes.
   var runCodes = function(codes, compile) {
-    var reader = new LISP.Reader(codes);
+    var stream = new LISP.StrStream(codes);
     var result;
     for (;;) {
-      var s = reader.read();
+      var s = LISP.read(stream);
       if (!s)
         return result;
 
