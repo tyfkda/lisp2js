@@ -43,10 +43,8 @@
     <script src="jslisp.js">
 ;; Call JavaScript function
 ;; `JS` is JavaScript global hash table.
-(defmacro (jscall name . args)
-  `((hash-table-get JS ,(symbol->string name))
-    ,@args))
-(jscall alert "Hello, JsLisp!")
+;; Can access with 'dot'
+(JS.alert "Hello, JsLisp!")
     </script>
   </body>
 </html>
