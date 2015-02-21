@@ -1,3 +1,7 @@
-;; Echo.
-(awhile (read-line)
-  (print it))
+(unless (null? *argv*)
+  (let loop ((ls *argv*))
+       (print (car ls))
+       (aif (cdr ls)
+            (begin (print " ")
+                   (loop it)))))
+(print "\n")
