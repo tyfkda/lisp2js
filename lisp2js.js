@@ -489,7 +489,7 @@
     read: function(stream) {
       do {
         if (stream.eof())
-          return undefined;
+          return null;
       } while (stream.match(/^\s+/))
 
       var m;
@@ -528,7 +528,7 @@
       var result = LISP.nil;
       for (;;) {
         var x = Reader.read(stream);
-        if (x !== undefined) {
+        if (x != null) {
           result = LISP.cons(x, result);
           continue;
         }
@@ -538,7 +538,7 @@
         }
         if (stream.match(kReSingleDot)) {  // Dot.
           var last = Reader.read(stream);
-          if (last !== undefined) {
+          if (last != null) {
             if (stream.match(/^\s*\)/)) {  // Close paren.
               var reversed = LISP['reverse!'](result);
               result.cdr = last;
