@@ -12,7 +12,7 @@
     var result;
     for (;;) {
       var s = LISP.read(stream);
-      if (!s)
+      if (s == null)
         return result;
 
       if (compile) {
@@ -39,13 +39,16 @@
     process.stdin.on('data', function (chunk) {
       inputs.push(chunk);
       try {
-        var result = runCodes(inputs.join(''), compileOnly);
-        // Otherwise input should be consumed.
-        inputs = [];
-        if (isatty) {
-          console.log(LISP.makeString(result, 10));
-          process.stdout.write(prompt1);
+        var code = inputs.join('');
+        if (!code.match(/^\s*$/)) {
+          var result = runCodes(code, compileOnly);
+          // Otherwise input should be consumed.
+          inputs = [];
+          if (isatty)
+            console.log(LISP.makeString(result, 10));
         }
+        if (isatty)
+          process.stdout.write(prompt1);
       } catch (e) {
         if (e instanceof LISP.NoCloseParenException) {
           // In REPL, if NoCloseParenException occurs,
