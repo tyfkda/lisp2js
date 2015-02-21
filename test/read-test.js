@@ -87,7 +87,7 @@
 
     fail('no close paren', LISP.NoCloseParenException, '(1 2 3');
 
-    print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m")
+    print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m");
   }
 
   main();
