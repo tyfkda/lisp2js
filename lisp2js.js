@@ -443,6 +443,7 @@
     this.str = '';
   };
   Stream.prototype = {
+    close: function() {},
     match: function(regexp, keep) {
       if (this.str == null)
         return null;
@@ -613,23 +614,58 @@
     LISP.FileStream = (function() {
       var BUFFER_SIZE = 4096;
       var buffer = new Buffer(BUFFER_SIZE);
-      var FileStream = function(file) {
+      var FileStream = function(fd) {
         Stream.call(this);
-        this.file = file;
+        this.fd = fd;
+        this.lines = [];
+        this.index = 0;
       };
       FileStream.prototype = Object.create(Stream.prototype);
+      FileStream.prototype.close = function() {
+        if (this.fd == null)
+          return;
+        fs.closeSync(this.fd);
+        this.fd = null;
+        this.lines.length = this.index = 0;
+        this.str = null;
+      };
       FileStream.prototype.readLine = function() {
-        var n = fs.readSync(this.file.fd, buffer, 0, BUFFER_SIZE);
-        if (n <= 0)
-          return null;
-        return buffer.slice(0, n).toString();
+        for (;;) {
+          if (this.lines.length > this.index)
+            return this.lines[this.index++];
+
+          if (this.fd == null)
+            return LISP.nil;
+          var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
+          if (n <= 0)
+            return null;
+          var str = buffer.slice(0, n).toString().split('\n');
+          if (str.length > 0 && str[str.length - 1] === '\n')
+            str = str.slice(0, str.length - 1);
+          this.lines = buffer.slice(0, n).toString().split('\n');
+          this.index = 0;
+        }
       };
       return FileStream;
     })();
 
-    LISP['*stdin*'] = new LISP.FileStream(process.stdin);
-    LISP['*stdout*'] = new LISP.FileStream(process.stdout);
-    LISP['*stderr*'] = new LISP.FileStream(process.stderr);
+    LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd);
+    LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd);
+    LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd);
+
+    LISP.open = function(path, flag) {
+      try {
+        var fd = fs.openSync(path, flag || 'r');
+        return new LISP.FileStream(fd);
+      } catch (e) {
+        return LISP.nil;
+      }
+    };
+
+    LISP.close = function(stream) {
+      stream.close();
+      return stream;
+    };
 
     // System
     LISP.exit = function(code) {
