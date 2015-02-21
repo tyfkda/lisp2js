@@ -18,6 +18,7 @@ Lispコード→JavaScriptトランスレータ
 * 継続
 * 末尾呼び出し最適化
 * 引数チェック（JavaScriptに変換され実行されるので）
+* 多値
 
 現在のところ、多くの機能や文法はScheme的だが、CommonLisp/Arcスタイルに置き換えていく予定。
 
