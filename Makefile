@@ -18,7 +18,7 @@ $(TMPFN):	$(SRCS)
 	  ./jslisp -c $$fn >> $@ ; \
 	done
 
-test:	read-test inside-test shell-test
+test:	read-test inside-test js-test
 
 read-test:
 	cd test && node read-test.js
@@ -26,8 +26,8 @@ read-test:
 inside-test:
 	cd test && ../jslisp test.lisp
 
-shell-test:
-	cd test && ./test.sh
+js-test:
+	cd test && node ./test.js
 
 src/runtime/runtime.min.js:	src/runtime/runtime.js
 	uglifyjs -c -o $@ --source-map $<.map $<
