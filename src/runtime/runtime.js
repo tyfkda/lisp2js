@@ -671,6 +671,8 @@
     LISP.exit = function(code) {
       process.exit(code);
     };
+
+    LISP.jsrequire = require;
   }
 
   /*==== EMBED COMPILED CODE HERE ====*/

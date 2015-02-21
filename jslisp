@@ -107,7 +107,8 @@
     var status = 0;
     if ('main' in LISP)
       status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']));
-    process.exit(status);
+    if (status)
+      process.exit(status);
   } catch(e) {
     process.stderr.write(e.toString() + '\n');
     process.exit(1);
