@@ -21,8 +21,9 @@
     return false;
   }
 
-  function test(title, expected, result) {
+  function test(title, expected, expression) {
     process.stdout.write('Testing ' + title + '... ');
+    var result = LISP['read-from-string'](expression);
     if (equals(expected, result)) {
       print('ok');
       return;
@@ -52,43 +53,36 @@
     process.exit(1);
   }
 
-  function main() {
-    var cons = LISP.cons;
-    var reads = LISP['read-from-string'];
+  test('integer', 123, '123');
+  test('float', 1.23, '1.23');
+  test('positive number', 123, '+123');
+  test('negative number', -123, '-123');
+  test('nil', LISP.nil, '()');
+  test('single element list', LISP.cons(1, LISP.nil), '(1)');
+  test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), '(1 2 3)');
+  test('dotted pair', LISP.cons(1, LISP.cons(2, 3)), '(1 2 . 3)');
+  test('dotted pair2', LISP.list(1, LISP.cons(2, 3), 4), '(1 (2 . 3) 4)');
 
-    test('integer', 123, reads('123'));
-    test('float', 1.23, reads('1.23'));
-    test('positive number', 123, reads('+123'));
-    test('negative number', -123, reads('-123'));
-    test('nil', LISP.nil, reads('()'));
-    test('single element list', LISP.cons(1, LISP.nil), reads('(1)'));
-    test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), reads('(1 2 3)'));
-    test('dotted pair', LISP.cons(1, LISP.cons(2, 3)), reads('(1 2 . 3)'));
-    test('dotted pair2', LISP.list(1, LISP.cons(2, 3), 4), reads('(1 (2 . 3) 4)'));
+  test('line comment', 123, ';comment\n123');
+  test('block comment', 123, '#| commenct\n|# 123');
+  test('symbol', LISP.intern('symbol'), 'symbol');
+  test('number like symbol', LISP.intern('1+'), '1+');
+  test('non ascii character symbol', LISP.intern('Ｓｙｍｂｏｌ'), 'Ｓｙｍｂｏｌ');
+  test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), "'abc");
+  test('string', 'abc', '"abc"');
+  test('complex string', 'foo bar\nbaz', '"foo bar\nbaz"');
+  test('double quote in string', '"', '"\\""');
+  test('escape character', '\x1b', '"\x1b"');
 
-    test('line comment', 123, reads(';comment\n123'));
-    test('block comment', 123, reads('#| commenct\n|# 123'));
-    test('symbol', LISP.intern('symbol'), reads('symbol'));
-    test('number like symbol', LISP.intern('1+'), reads('1+'));
-    test('non ascii character symbol', LISP.intern('Ｓｙｍｂｏｌ'), reads('Ｓｙｍｂｏｌ'));
-    test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), reads("'abc"));
-    test('string', 'abc', reads('"abc"'));
-    test('complex string', 'foo bar\nbaz', reads('"foo bar\nbaz"'));
-    test('double quote in string', '"', reads('"\\""'));
-    test('escape character', '\x1b', reads('"\x1b"'));
+  test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), "`abc");
+  test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), ",abc");
+  test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), ",@abc");
 
-    test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), reads("`abc"));
-    test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), reads(",abc"));
-    test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), reads(",@abc"));
+  test('vector', [1, 2, 3], "#(1 2 3)");
 
-    test('vector', [1, 2, 3], reads("#(1 2 3)"));
+  test('regexp', /abc/, "#/abc/");
 
-    test('regexp', /abc/, reads("#/abc/"));
+  fail('no close paren', LISP.NoCloseParenException, '(1 2 3');
 
-    fail('no close paren', LISP.NoCloseParenException, '(1 2 3');
-
-    print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m");
-  }
-
-  main();
+  print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m");
 })();
