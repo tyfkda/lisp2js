@@ -20,8 +20,6 @@ Translate Lisp code into JavaScript.
 * Argument count check (because of JavaScript nature)
 * Multiple values
 
-Currently, many features and syntaxes are Scheme-ish, but will be replaced into CommonLisp/Arc style.
-
 ## Mapping
 Lisp code is compiled into JS, in a rule below:
 
