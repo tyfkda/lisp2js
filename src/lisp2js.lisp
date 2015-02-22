@@ -131,16 +131,18 @@
   (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
                       (lambda (m) (escape-char (m)))))
 
+(defun escape-sym-char (c)
+  (string-append "$"
+                 (integer->hex-string (char->integer c) "00")))
+
+(defun integer->hex-string (x padding)
+  (let* ((s (string-append padding
+                           (number->string x 16)))
+         (sl (string-length s))
+         (pl (string-length padding)))
+    (substring s (- sl pl) sl)))
+
 (defun escape-symbol (sym)
-  (defun escape-sym-char (c)
-    (string-append "$"
-                   (integer->hex-string (char->integer c) "00")))
-  (defun integer->hex-string (x padding)
-    (let* ((s (string-append padding
-                             (number->string x 16)))
-           (sl (string-length s))
-           (pl (string-length padding)))
-      (substring s (- sl pl) sl)))
   (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
                       (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
