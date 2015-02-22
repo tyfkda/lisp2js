@@ -60,10 +60,10 @@
   test('nil', LISP.nil, '()');
   test('nil2', LISP.nil, 'nil');
   test('t', LISP.t, 't');
-  test('single element list', LISP.cons(1, LISP.nil), '(1)');
-  test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), '(1 2 3)');
-  test('dotted pair', LISP.cons(1, LISP.cons(2, 3)), '(1 2 . 3)');
-  test('dotted pair2', LISP.list(1, LISP.cons(2, 3), 4), '(1 (2 . 3) 4)');
+  test('single element list', [1], '(1)');
+  test('multiple elements list', [1, 2, 3], '(1 2 3)');
+  //test('dotted pair', LISP.cons(1, LISP.cons(2, 3)), '(1 2 . 3)');
+  //test('dotted pair2', LISP.list(1, LISP.cons(2, 3), 4), '(1 (2 . 3) 4)');
 
   test('line comment', 123, ';comment\n123');
   test('block comment', 123, '#| commenct\n|# 123');

@@ -50,10 +50,12 @@
             ")");
   };
   LISP["macroexpand-1"] = function(s) {
-    if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
+    //if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
+    //  return s;
+    if (!LISP['vector?'](s) || !(LISP.car(s) in LISP['*macro-table*']))
       return s;
-    var macrofn = LISP['*macro-table*'][s.car];
-    return LISP.apply(macrofn, s.cdr);
+    var macrofn = LISP['*macro-table*'][LISP.car(s)];
+    return LISP.apply(macrofn, LISP.cdr(s));
   };
 
   LISP.eval = function(exp) {
@@ -150,27 +152,42 @@
   };
 
   LISP.cons = function(car, cdr) {
-    return new LISP.Cons(car, cdr);
+    //return new LISP.Cons(car, cdr);
+    if (cdr === LISP.nil)
+      return [car];
+    return [car].concat(cdr);
   };
   LISP.car = function(s) {
     if (s instanceof LISP.Cons)
       return s.car;
+    if (s instanceof Array)
+      return s[0];
     return s;
   };
   LISP.cdr = function(s) {
     if (s instanceof LISP.Cons)
       return s.cdr;
+    if (s instanceof Array)
+      if (s.length > 1)
+        return s.slice(1);
     return LISP.nil;
   };
   LISP["set-car!"] = function(s, x) {
-    return (s.car = x);
+    //return (s.car = x);
+    s[0] = x;
   };
   LISP["set-cdr!"] = function(s, x) {
-    return (s.cdr = x);
+    //return (s.cdr = x);
+    if (x instanceof Array)
+      s.concat(x);
+    else
+      s.push(x);
+    return x;
   };
 
   LISP["pair?"] = function(x) {
-    return jsBoolToS(x instanceof LISP.Cons);
+    //return jsBoolToS(x instanceof LISP.Cons);
+    return jsBoolToS(x instanceof Array);
   };
   LISP.list = function() {
     var result = LISP.nil;
@@ -179,6 +196,7 @@
     return result;
   };
   LISP["reverse!"] = function(x) {
+    /*
     var rev = LISP.nil;
     for (var ls = x; LISP['pair?'](ls, LISP.nil); ) {
       var d = ls.cdr;
@@ -187,6 +205,13 @@
       ls = d;
     }
     return rev;
+    */
+    for (var i = 0, n = x.length, m = n / 2; i < m; ++i) {
+      var t = x[i];
+      x[i] = x[n - i - 1];
+      x[n - i - 1] = t;
+    }
+    return x;
   };
 
   LISP["number?"] = function(x) {
@@ -335,8 +360,12 @@
       return 't';
     if (typeof x == 'string')
       return inspect ? inspectString(x) : x;
-    if (x instanceof Array)
+    if (x instanceof Array) {
+      var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', "unquote-splicing": ',@' };
+      if (x.length == 2 && x[0] in abbrevTable)
+        return abbrevTable[x[0]] + LISP.makeString(x[1], inspect);
       return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
+    }
     if (x == null)  // null or undefined
       return '' + x;
     return x.toString(inspect);
@@ -364,7 +393,8 @@
       // Last argument for `apply` is expected as list (or nil).
       var last = arguments[arguments.length - 1];
       if (last !== LISP.nil)
-        params = params.concat(last.toArray());
+        //params = params.concat(last.toArray());
+        params = params.length > 0 ? params.concat(last) : last;
     }
     return fn.apply(null, params);
   };
@@ -529,26 +559,16 @@
     },
 
     readList: function(stream) {
-      var result = LISP.nil;
+      var result = [];
       for (;;) {
         var x = Reader.read(stream);
         if (x != null) {
-          result = LISP.cons(x, result);
+          result.push(x);
           continue;
         }
 
         if (stream.match(/^\s*\)/)) {  // Close paren.
-          return LISP['reverse!'](result);
-        }
-        if (stream.match(kReSingleDot)) {  // Dot.
-          var last = Reader.read(stream);
-          if (last != null) {
-            if (stream.match(/^\s*\)/)) {  // Close paren.
-              var reversed = LISP['reverse!'](result);
-              result.cdr = last;
-              return reversed;
-            }
-          }
+          return result.length === 0 ? LISP.nil : result;
         }
         // Error
         throw new LISP.NoCloseParenException();

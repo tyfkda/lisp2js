@@ -87,10 +87,10 @@
                (traverse-args (cdr s) scope)))))
 
 (defun traverse* (s scope)
-  (cond ((pair? s)   (let1 expanded (macroexpand s)
-                       (if (pair? expanded)
-                           (traverse-list expanded scope)
-                         (traverse* expanded scope))))
+  (cond ((vector? s)   (let1 expanded (macroexpand s)
+                         (if (pair? expanded)
+                             (traverse-list expanded scope)
+                           (traverse* expanded scope))))
         ((symbol? s) (vector ':REF s))
         (t           (vector ':CONST s))))
 

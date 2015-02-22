@@ -1,9 +1,10 @@
 
 ;; Reverse list and concatenate tail destructively.
 (defun nreconc (ls tail)
-  (let1 top (reverse! ls)
-    (set-cdr! ls tail)
-    top))
+  ;(let1 top (reverse! ls)
+  ;  (set-cdr! ls tail)
+  ;  top))
+  (append (reverse! ls) tail))
 
 (defun any (f ls)
   (cond ((null? ls) nil)
