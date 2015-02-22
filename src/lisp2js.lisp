@@ -252,15 +252,8 @@
   (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
     (let ((proper-params (if rest-pos
                              (take rest-pos params)
-                           ;;params))
-                           (if (or (null? params)
-                                   (proper-list? params))
-                               params
-                             (reverse! (reverse params)))))  ; Remove dotted part.
-          (rest (if rest-pos (and rest-pos (elt (+ rest-pos 1) params))
-                  (if (pair? params)
-                      (cdr (last-pair params))
-                    params))))
+                           params))
+          (rest (and rest-pos (elt (+ rest-pos 1) params))))
       (string-append "(function("
                      (string-join (map (lambda (x) (escape-symbol x))
                                        proper-params)
