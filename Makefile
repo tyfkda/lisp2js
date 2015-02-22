@@ -18,6 +18,11 @@ $(TMPFN):	$(SRCS)
 	  ./jslisp -c $$fn >> $@ ; \
 	done
 
+lisp2js-test.js:	$(SRCS) src/runtime/runtime.js
+	make $(TMPFN)
+	ruby -e 'marker = "/*==== EMBED COMPILED CODE HERE ====*/"; compiled_code = File.read("$(TMPFN)"); runtime = File.read("src/runtime/runtime.js"); print runtime.sub(marker) { marker + "\n" + compiled_code };' > $@
+	rm $(TMPFN)
+
 .PHONY:	test
 
 test:
