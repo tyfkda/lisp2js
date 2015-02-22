@@ -112,7 +112,7 @@
         ((eq? (car x) 'unquote-dot)
          (error ",.~S after `" (cadr x)))
         (else (let loop ((p x)
-                         (q '()))
+                         (q ()))
              (if (not (pair? p))
                  (cons 'append
                        (nreconc q (list (list 'quote p))))
@@ -195,7 +195,7 @@
 
 (defun bq-simplify-args (x)
   (let loop ((args (reverse (cdr x)))
-             (result '()))
+             (result ()))
     (if (not (null? args))
         (loop (cdr args)
               (cond ((not (pair? (car args)))
