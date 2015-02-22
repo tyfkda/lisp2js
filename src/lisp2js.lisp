@@ -33,11 +33,11 @@
          (traverse* x scope))
        args))
 
-(defmacro record (args param . body)
+(defmacro record (args param &body body)
   `(apply (lambda ,param ,@body)
           ,args))
 
-(defmacro record-case (x . clauses)
+(defmacro record-case (x &body clauses)
   (let1 value (gensym)
     `(let1 ,value ,x
        (case (car ,value)
@@ -59,28 +59,28 @@
   (record-case s
     ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
                        (else (vector ':CONST x))))
-    ((if p thn . els)  (vector ':IF
-                               (traverse* p scope)
-                               (traverse* thn scope)
-                               (if (null? els)
-                                   nil
-                                 (traverse* (car els) scope))))
+    ((if p thn &body els)  (vector ':IF
+                                   (traverse* p scope)
+                                   (traverse* thn scope)
+                                   (if (null? els)
+                                       nil
+                                     (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params . body)  (let ((new-scope (new-scope scope params)))
-                               (vector ':LAMBDA
-                                       new-scope
-                                       params
-                                       (traverse-args body new-scope))))
-    ((def name value . rest)  (vector ':DEF
-                                      (traverse* name scope)
-                                      (traverse* value scope)))
-    ((defun name params . body)  (vector ':DEF
-                                         (traverse* name scope)
-                                         (traverse* `(lambda ,params ,@body) scope)))
-    ((defmacro name params . body)  (vector ':DEFMACRO
-                                            name
-                                            `(lambda ,params ,@body)))
-    ((new klass . args)  (vector ':NEW klass (traverse-args args new-scope)))
+    ((lambda params &body body)  (let ((new-scope (new-scope scope params)))
+                                   (vector ':LAMBDA
+                                           new-scope
+                                           params
+                                           (traverse-args body new-scope))))
+    ((def name value)  (vector ':DEF
+                               (traverse* name scope)
+                               (traverse* value scope)))
+    ((defun name params &body body)  (vector ':DEF
+                                             (traverse* name scope)
+                                             (traverse* `(lambda ,params ,@body) scope)))
+    ((defmacro name params &body body)  (vector ':DEFMACRO
+                                                name
+                                                `(lambda ,params ,@body)))
+    ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
     (else (vector ':FUNCALL
                   (traverse* (car s) scope)
                   (traverse-args (cdr s) scope)))))
@@ -249,28 +249,26 @@
                  (compile* val scope)))
 
 (defun compile-lambda (params bodies base-scope extended-scope)
-  (let ((proper-params (if (or (null? params)
-                               (proper-list? params))
-                           params
-                         (reverse! (reverse params))))  ; Remove dotted part.
-        (rest (if (pair? params)
-                  (cdr (last-pair params))
-                params)))
-    (string-append "(function("
-                   (string-join (map (lambda (x) (escape-symbol x))
-                                     proper-params)
-                                ", ")
-                   "){"
-                   (if (null? rest)
-                       ""
-                     (string-append "var "
-                                    (symbol->string rest)
-                                    " = LISP._getRestArgs(arguments, "
-                                    (number->string (length proper-params))
-                                    "); "))
-                   "return ("
-                   (expand-body bodies extended-scope)
-                   ");})")))
+  (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
+    (let ((proper-params (if rest-pos
+                             (take rest-pos params)
+                           params))
+          (rest (and rest-pos (elt (+ rest-pos 1) params))))
+      (string-append "(function("
+                     (string-join (map (lambda (x) (escape-symbol x))
+                                       proper-params)
+                                  ", ")
+                     "){"
+                     (if (null? rest)
+                         ""
+                       (string-append "var "
+                                      (symbol->string rest)
+                                      " = LISP._getRestArgs(arguments, "
+                                      (number->string (length proper-params))
+                                      "); "))
+                     "return ("
+                     (expand-body bodies extended-scope)
+                     ");})"))))
 
 (defun compile-def (name value scope)
   (string-append (compile* name scope)
