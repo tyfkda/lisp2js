@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Scope
 
-(defun new-scope (parent-scope params)
+(defun create-scope (parent-scope params)
   (vector (dotted->proper params) nil parent-scope))
 
 (defun scope-param (scope)
@@ -66,7 +66,7 @@
                                        nil
                                      (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params &body body)  (let ((new-scope (new-scope scope params)))
+    ((lambda params &body body)  (let ((new-scope (create-scope scope params)))
                                    (vector ':LAMBDA
                                            new-scope
                                            params
@@ -326,7 +326,7 @@
     (else  (string-append "???" s "???"))))
 
 (defun compile (s)
-  (let* ((top-scope (new-scope nil ()))
+  (let* ((top-scope (create-scope nil ()))
          (tree (traverse* s top-scope)))
     ;;(write tree)
     (compile-new-scope top-scope
