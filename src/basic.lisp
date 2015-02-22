@@ -140,10 +140,6 @@
       (last-pair (cdr ls))
     ls))
 
-(defun proper-list? (ls)
-  (and (pair? ls)
-       (null? (cdr (last-pair ls)))))
-
 (defun member (x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)
@@ -192,7 +188,8 @@
     ls))
 
 (defun proper-list? (ls)
-  (null? (cdr (last-pair ls))))
+  (and (pair? ls)
+       (null? (cdr (last-pair ls)))))
 
 (defun dotted->proper (ls)
   (if (pair? ls)

@@ -29,6 +29,10 @@
 ;; pair
 (test "list is a pair" t (pair? (list 1 2 3)))
 
+(test "proper-list?" t (proper-list? (list 1 2 3)))
+(test "proper-list?" nil (proper-list? (list* 1 2 3)))
+(test "nil isnt proper-list" nil (proper-list? nil))
+
 ;; type
 (test "type of int" 'number (type 123))
 (test "type of float" 'number (type 1.23))
