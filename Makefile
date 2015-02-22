@@ -13,7 +13,7 @@ lisp2js.js:	$(SRCS) src/runtime/runtime.js
 	rm $(TMPFN)
 
 $(TMPFN):	$(SRCS)
-	rm -f $(TMPFN)
+	rm -f $@
 	for fn in $(SRCS) ; do \
 	  ./jslisp -c $$fn >> $@ ; \
 	done
