@@ -221,3 +221,29 @@
            (if (< i 0)
                acc
              (loop (- i 1) (cons (vector-ref vect i) acc)))))))
+
+(defun position-if (pred seq)
+    (let loop ((p seq)
+               (i 0))
+         (when p
+           (if (pred (car p))
+               i
+             (loop (cdr p) (+ i 1))))))
+
+(defun take (n ls)
+  (let loop ((n n)
+             (ls ls)
+             (acc nil))
+       (if (or (<= n 0)
+               (null? ls))
+           (reverse! acc)
+         (loop (- n 1) (cdr ls) (cons (car ls) acc)))))
+
+(defun drop (n ls)
+  (if (or (<= n 0)
+          (null? ls))
+      ls
+    (drop (- n 1) (cdr ls))))
+
+(defun elt (n ls)
+  (car (drop n ls)))
