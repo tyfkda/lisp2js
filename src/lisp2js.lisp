@@ -252,6 +252,8 @@
                  (compile* val scope)))
 
 (defun compile-lambda (params bodies base-scope extended-scope)
+  (unless (or (null? params) (pair? params))
+    (error "function parameters must be a list"))
   (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
     (let ((proper-params (if rest-pos
                              (take rest-pos params)
