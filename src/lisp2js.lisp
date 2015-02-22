@@ -33,11 +33,11 @@
          (traverse* x scope))
        args))
 
-(defmacro record (args param . body)
+(defmacro record (args param &body body)
   `(apply (lambda ,param ,@body)
           ,args))
 
-(defmacro record-case (x . clauses)
+(defmacro record-case (x &body clauses)
   (let1 value (gensym)
     `(let1 ,value ,x
        (case (car ,value)
@@ -59,28 +59,28 @@
   (record-case s
     ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
                        (else (vector ':CONST x))))
-    ((if p thn . els)  (vector ':IF
-                               (traverse* p scope)
-                               (traverse* thn scope)
-                               (if (null? els)
-                                   nil
-                                 (traverse* (car els) scope))))
+    ((if p thn &body els)  (vector ':IF
+                                   (traverse* p scope)
+                                   (traverse* thn scope)
+                                   (if (null? els)
+                                       nil
+                                     (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params . body)  (let ((new-scope (new-scope scope params)))
-                               (vector ':LAMBDA
-                                       new-scope
-                                       params
-                                       (traverse-args body new-scope))))
-    ((def name value . rest)  (vector ':DEF
-                                      (traverse* name scope)
-                                      (traverse* value scope)))
-    ((defun name params . body)  (vector ':DEF
-                                         (traverse* name scope)
-                                         (traverse* `(lambda ,params ,@body) scope)))
-    ((defmacro name params . body)  (vector ':DEFMACRO
-                                            name
-                                            `(lambda ,params ,@body)))
-    ((new klass . args)  (vector ':NEW klass (traverse-args args new-scope)))
+    ((lambda params &body body)  (let ((new-scope (new-scope scope params)))
+                                   (vector ':LAMBDA
+                                           new-scope
+                                           params
+                                           (traverse-args body new-scope))))
+    ((def name value)  (vector ':DEF
+                               (traverse* name scope)
+                               (traverse* value scope)))
+    ((defun name params &body body)  (vector ':DEF
+                                             (traverse* name scope)
+                                             (traverse* `(lambda ,params ,@body) scope)))
+    ((defmacro name params &body body)  (vector ':DEFMACRO
+                                                name
+                                                `(lambda ,params ,@body)))
+    ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
     (else (vector ':FUNCALL
                   (traverse* (car s) scope)
                   (traverse-args (cdr s) scope)))))
