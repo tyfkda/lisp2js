@@ -153,14 +153,14 @@
     return new LISP.Cons(car, cdr);
   };
   LISP.car = function(s) {
-    if (s === LISP.nil)
-      return s;
-    return s.car;
+    if (s instanceof LISP.Cons)
+      return s.car;
+    return s;
   };
   LISP.cdr = function(s) {
-    if (s === LISP.nil)
-      return s;
-    return s.cdr;
+    if (s instanceof LISP.Cons)
+      return s.cdr;
+    return LISP.nil;
   };
   LISP["set-car!"] = function(s, x) {
     return (s.car = x);

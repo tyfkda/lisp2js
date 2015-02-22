@@ -26,6 +26,13 @@
 (test "t isn't a symbol" nil (symbol? t))
 (test "others are symbol" t (symbol? 'others))
 
+;; cons
+(test "cons" '(1 . 2) (cons 1 2))
+(test "car" 1 (car '(1 . 2)))
+(test "cdr" 2 (cdr '(1 . 2)))
+(test "car-non-cons" 123 (car 123))
+(test "cdr-non-cons" nil (cdr 123))
+
 ;; pair
 (test "list is a pair" t (pair? (list 1 2 3)))
 

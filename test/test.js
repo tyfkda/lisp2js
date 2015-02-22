@@ -67,8 +67,6 @@
   test('quote', 123, '(quote 123)');
   test('quote', LISP.list(1, false, 3), '(quote (1 () 3))');
   test('cons', LISP.cons(1, 2), '(cons 1 2)');
-  test('car', 1, "(car '(1 . 2))");
-  test('cdr', 2, "(cdr '(1 . 2))");
   test('if-true', 2, '(if 1 2 3)');
   test('if-false', 3, '(if nil 2 3)');
   test('if-false2', false, '(if nil 2)');
