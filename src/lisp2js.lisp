@@ -249,28 +249,33 @@
                  (compile* val scope)))
 
 (defun compile-lambda (params bodies base-scope extended-scope)
-  (let ((proper-params (if (or (null? params)
-                               (proper-list? params))
-                           params
-                         (reverse! (reverse params))))  ; Remove dotted part.
-        (rest (if (pair? params)
-                  (cdr (last-pair params))
-                params)))
-    (string-append "(function("
-                   (string-join (map (lambda (x) (escape-symbol x))
-                                     proper-params)
-                                ", ")
-                   "){"
-                   (if (null? rest)
-                       ""
-                     (string-append "var "
-                                    (symbol->string rest)
-                                    " = LISP._getRestArgs(arguments, "
-                                    (number->string (length proper-params))
-                                    "); "))
-                   "return ("
-                   (expand-body bodies extended-scope)
-                   ");})")))
+  (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
+    (let ((proper-params (if rest-pos
+                             (take rest-pos params)
+                           ;;params))
+                           (if (or (null? params)
+                                   (proper-list? params))
+                               params
+                             (reverse! (reverse params)))))  ; Remove dotted part.
+          (rest (if rest-pos (and rest-pos (elt (+ rest-pos 1) params))
+                  (if (pair? params)
+                      (cdr (last-pair params))
+                    params))))
+      (string-append "(function("
+                     (string-join (map (lambda (x) (escape-symbol x))
+                                       proper-params)
+                                  ", ")
+                     "){"
+                     (if (null? rest)
+                         ""
+                       (string-append "var "
+                                      (symbol->string rest)
+                                      " = LISP._getRestArgs(arguments, "
+                                      (number->string (length proper-params))
+                                      "); "))
+                     "return ("
+                     (expand-body bodies extended-scope)
+                     ");})"))))
 
 (defun compile-def (name value scope)
   (string-append (compile* name scope)
