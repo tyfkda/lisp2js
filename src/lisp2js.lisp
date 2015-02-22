@@ -2,7 +2,8 @@
 ;; Scope
 
 (defun create-scope (parent-scope params)
-  (vector (dotted->proper params) nil parent-scope))
+  (vector (remove-if (lambda (x) (member x '(&rest &body))) params)
+          nil parent-scope))
 
 (defun scope-param (scope)
   (vector-ref scope 0))

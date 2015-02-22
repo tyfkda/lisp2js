@@ -247,3 +247,13 @@
 
 (defun elt (n ls)
   (car (drop n ls)))
+
+(defun remove-if (test seq)
+  (let loop ((seq seq)
+             (acc ()))
+       (if (null? seq)
+           (reverse! acc)
+         (loop (cdr seq)
+               (if (test (car seq))
+                   acc
+                 (cons (car seq) acc))))))
