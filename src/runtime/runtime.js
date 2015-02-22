@@ -522,6 +522,7 @@
 
   // Reader.
   LISP.NoCloseParenException = function() {}
+  LISP.IllegalSyntaxException = function() {}
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
   const kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])')
@@ -561,7 +562,7 @@
         return undefined
       if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
         return Reader.readSymbolOrNumber(m[1])
-      return undefined
+      throw new LISP.IllegalSyntaxException()
     }
 
     static readSymbolOrNumber(str) {

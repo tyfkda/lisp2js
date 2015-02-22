@@ -56,7 +56,7 @@
           // In REPL, if NoCloseParenException occurs,
           // a user keep typing so inputs should be kept.
         } else {
-          console.error(e)
+          console.error('Error: ' + e.toString())
           if (!isatty)
             process.exit(1)
           inputs.length = 0
