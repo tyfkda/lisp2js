@@ -249,7 +249,8 @@
                  (compile* val scope)))
 
 (defun compile-lambda (params bodies base-scope extended-scope)
-  (let ((proper-params (if (proper-list? params)
+  (let ((proper-params (if (or (null? params)
+                               (proper-list? params))
                            params
                          (reverse! (reverse params))))  ; Remove dotted part.
         (rest (if (pair? params)
