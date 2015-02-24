@@ -377,6 +377,19 @@
              (typeof GLOBAL !== 'undefined') ? GLOBAL : {}),
 
   LISP.HashTable = function() {};
+  LISP.HashTable.prototype = {
+    toString: function() {
+      var contents = '';
+      for (var k in this) {
+        if (!(this.hasOwnProperty(k)))
+          continue;
+        if (contents.length > 0)
+          contents += ', ';
+        contents += k + ':' + this[k];
+      }
+      return '#table<' + contents + '>';
+    },
+  };
 
   // Hash table.
   LISP["make-hash-table"] = function() {
