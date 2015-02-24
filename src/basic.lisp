@@ -38,7 +38,8 @@
       ()
     (let ((clause (car clauses))
           (rest (cdr clauses)))
-      (if (eq? (car clause) 'else)
+      (if (or (eq? (car clause) 'else)
+              (eq? (car clause) t))
           `(begin ,@(cdr clause))
         (if (null? (cdr clause))  ; cond ((foo))
             (let ((g (gensym)))
@@ -59,7 +60,8 @@
     `(let1 ,value ,x
        (cond
         ,@(map (lambda (clause)
-                 (cond ((eq? (car clause) 'else)
+                 (cond ((or (eq? (car clause) 'else)
+                            (eq? (car clause) t))
                         clause)
                        ((null? (cdar clause))
                         `((eq? ,value ',(caar clause)) ,@(cdr clause)))
@@ -85,8 +87,8 @@
 (defmacro begin (&body body)
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
-        (else `(let ()
-                 ,@body))))
+        (t `(let ()
+              ,@body))))
 
 (defmacro aif (expr thn &body els)
   `(let1 it ,expr
@@ -143,7 +145,7 @@
 (defun member (x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)
-        (else (member x (cdr ls)))))
+        (t (member x (cdr ls)))))
 
 (defun assoc (x ls)
   (if (null? ls) nil
@@ -159,8 +161,8 @@
 (defun append (ls &rest rest)
   (cond ((null? rest) ls)
         ((null? ls)   (apply append rest))
-        (else (cons (car ls)
-                    (apply append (cdr ls) rest)))))
+        (t (cons (car ls)
+                 (apply append (cdr ls) rest)))))
 
 (defun reverse (ls)
   (let loop ((ls ls)

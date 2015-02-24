@@ -8,12 +8,12 @@
 (defun any (f ls)
   (cond ((null? ls) nil)
         ((f (car ls)) t)
-        (else (any f (cdr ls)))))
+        (t (any f (cdr ls)))))
 
 (defun every (f ls)
   (cond ((null? ls) t)
         ((f (car ls)) (every f (cdr ls)))
-        (else nil)))
+        (t nil)))
 
 ;;; http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node367.html
 
@@ -111,21 +111,21 @@
          (error ",@~S after `" (cadr x)))
         ((eq? (car x) 'unquote-dot)
          (error ",.~S after `" (cadr x)))
-        (else (let loop ((p x)
-                         (q ()))
-             (if (not (pair? p))
-                 (cons 'append
-                       (nreconc q (list (list 'quote p))))
-               (if (eq? (car p) 'unquote)
-                   (begin (unless (null? (cddr p)) (error "Malformed ,~S" p))
-                          (cons 'append
-                                (nreconc q (list (cadr p)))))
-                 (begin (when (eq? (car p) 'unquote-splicing)
-                          (error "Dotted ,@~S" p))
-                        (when (eq? (car p) 'unquote-dot)
-                          (error "Dotted ,.~S" p))
-                        (loop (cdr p)
-                              (cons (bracket (car p)) q)))))))))
+        (t (let loop ((p x)
+                      (q ()))
+                (if (not (pair? p))
+                    (cons 'append
+                          (nreconc q (list (list 'quote p))))
+                  (if (eq? (car p) 'unquote)
+                      (begin (unless (null? (cddr p)) (error "Malformed ,~S" p))
+                             (cons 'append
+                                   (nreconc q (list (cadr p)))))
+                    (begin (when (eq? (car p) 'unquote-splicing)
+                             (error "Dotted ,@~S" p))
+                           (when (eq? (car p) 'unquote-dot)
+                             (error "Dotted ,.~S" p))
+                           (loop (cdr p)
+                                 (cons (bracket (car p)) q)))))))))
 
 ;;; This implements the bracket operator of the formal rules.
 
@@ -138,7 +138,7 @@
          (cadr x))
         ((eq? (car x) 'unquote-dot)
          (list *bq-clobberable* (cadr x)))
-        (else (list 'list (bq-process x)))))
+        (t (list 'list (bq-process x)))))
 
 ;;; This auxiliary function is like MAPCAR but has two extra
 ;;; purposes: (1) it handles dotted lists; (2) it tries to make
@@ -219,9 +219,9 @@
                                        result))
                     ((eq? (caar args) *bq-clobberable*)
                      (bq-attach-append 'append! (cadar args) result))
-                    (else (bq-attach-append 'append
-                                            (car args)
-                                            result))))
+                    (t (bq-attach-append 'append
+                                         (car args)
+                                         result))))
       result)))
 
 (defun null-or-quoted (x)
@@ -243,7 +243,7 @@
          (if (bq-splicing-frob item) (list op item) item))
         ((and (pair? result) (eq? (car result) op))
          (list* (car result) item (cdr result)))
-        (else (list op item result))))
+        (t (list op item result))))
 
 ;;; The effect of BQ-ATTACH-CONSES is to produce a form as if by
 ;;; `(LIST* ,@items ,result) but some simplifications are done
@@ -265,4 +265,4 @@
               (or (eq? (car result) 'list)
                   (eq? (car result) 'list*)))
          (cons (car result) (append items (cdr result))))
-        (else (cons 'list* (append items (list result))))))
+        (t (cons 'list* (append items (list result))))))
