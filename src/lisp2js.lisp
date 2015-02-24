@@ -72,6 +72,11 @@
                                            new-scope
                                            params
                                            (traverse-args body new-scope))))
+    ((^ params &body body)  (let ((new-scope (create-scope scope params)))
+                              (vector ':LAMBDA
+                                      new-scope
+                                      params
+                                      (traverse-args body new-scope))))
     ((def name value)  (vector ':DEF
                                (traverse* name scope)
                                (traverse* value scope)))
