@@ -13,9 +13,8 @@
       ,@(map cadr pairs))))
 
 (defmacro let1 (name value &body body)
-  `((^(,name)
-      ,@body)
-    ,value))
+  `(let ((,name ,value))
+     ,@body))
 
 (defmacro let* (pairs &body body)
   (if (null? pairs)
