@@ -3,14 +3,14 @@
                "http://www.example.com/"
              (car *argv*))))
   (let ((http (jsrequire "http")))
-    (let1 h (http.get url (lambda (res)
+    (let1 h (http.get url (^(res)
                             (res.setEncoding "utf8")
-                            (res.on "data" (lambda (chunk)
+                            (res.on "data" (^(chunk)
                                              (print chunk)))
-                            ;;(res.on "end" (lambda (res)
+                            ;;(res.on "end" (^(res)
                             ;;                ))
                             ))
-      (h.on "error" (lambda (e)
+      (h.on "error" (^(e)
                       (print e.message))))))
 
 #|

@@ -2,7 +2,7 @@
 ;; Scope
 
 (defun create-scope (parent-scope params)
-  (vector (remove-if (lambda (x) (member x '(&rest &body))) params)
+  (vector (remove-if (^(x) (member x '(&rest &body))) params)
           nil parent-scope))
 
 (defun scope-param (scope)
@@ -30,19 +30,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
 (defun traverse-args (args scope)
-  (map (lambda (x)
+  (map (^(x)
          (traverse* x scope))
        args))
 
 (defmacro record (args param &body body)
-  `(apply (lambda ,param ,@body)
+  `(apply (^ ,param ,@body)
           ,args))
 
 (defmacro record-case (x &body clauses)
   (let1 value (gensym)
     `(let1 ,value ,x
        (case (car ,value)
-         ,@(map (lambda (clause)
+         ,@(map (^(clause)
                   (if (eq? (car clause) t)
                       clause
                     (let1 key (caar clause)
@@ -67,20 +67,20 @@
                                        nil
                                      (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params &body body)  (let ((new-scope (create-scope scope params)))
-                                   (vector ':LAMBDA
-                                           new-scope
-                                           params
-                                           (traverse-args body new-scope))))
+    ((^ params &body body)  (let ((new-scope (create-scope scope params)))
+                              (vector ':LAMBDA
+                                      new-scope
+                                      params
+                                      (traverse-args body new-scope))))
     ((def name value)  (vector ':DEF
                                (traverse* name scope)
                                (traverse* value scope)))
     ((defun name params &body body)  (vector ':DEF
                                              (traverse* name scope)
-                                             (traverse* `(lambda ,params ,@body) scope)))
+                                             (traverse* `(^ ,params ,@body) scope)))
     ((defmacro name params &body body)  (vector ':DEFMACRO
                                                 name
-                                                `(lambda ,params ,@body)))
+                                                `(^ ,params ,@body)))
     ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
     (t (vector ':FUNCALL
                (traverse* (car s) scope)
@@ -109,7 +109,7 @@
   (scope-var? scope (get-receiver sym)))
 
 (defun expand-args (args scope)
-  (string-join (map (lambda (x) (compile* x scope))
+  (string-join (map (^(x) (compile* x scope))
                     args)
                ", "))
 
@@ -130,7 +130,7 @@
 
 (defun escape-string (s)
   (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
-                      (lambda (m) (escape-char (m)))))
+                      (^(m) (escape-char (m)))))
 
 (defun escape-sym-char (c)
   (string-append "$"
@@ -145,7 +145,7 @@
 
 (defun escape-symbol (sym)
   (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
-                      (lambda (m) (escape-sym-char (string-ref (m) 0)))))
+                      (^(m) (escape-sym-char (string-ref (m) 0)))))
 
 (defun compile-symbol (sym scope)
   (if (local-var? sym scope)
@@ -165,7 +165,7 @@
 
 (defun compile-vector (vect scope)
   (string-append "["
-                 (let1 v (vector-map (lambda (x)
+                 (let1 v (vector-map (^(x)
                                        (compile-quote x scope))
                                      vect)
                    (v.join ", "))  ;; TODO: Fix this not to use Array#join/JavaScript.
@@ -200,7 +200,7 @@
 
 (defun compile-binop (fn args scope)
   (string-append "("
-                 (string-join (map (lambda (x) (compile* x scope))
+                 (string-join (map (^(x) (compile* x scope))
                                    args)
                               (string-append " " (symbol->string fn) " "))
                  ")"))
@@ -255,13 +255,13 @@
 (defun compile-lambda (params bodies base-scope extended-scope)
   (unless (or (null? params) (pair? params))
     (error "function parameters must be a list"))
-  (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
+  (let1 rest-pos (position-if (^(sym) (member sym '(&rest &body))) params)
     (let ((proper-params (if rest-pos
                              (take rest-pos params)
                            params))
           (rest (and rest-pos (elt (+ rest-pos 1) params))))
       (string-append "(function("
-                     (string-join (map (lambda (x) (escape-symbol x))
+                     (string-join (map (^(x) (escape-symbol x))
                                        proper-params)
                                   ", ")
                      "){"
@@ -299,7 +299,7 @@
 (defun compile-new-scope (scope compiled-body)
   (aif (scope-get-var scope)
        (string-append "(function() { var "
-                      (string-join (map (lambda (x)
+                      (string-join (map (^(x)
                                           (string-append (escape-symbol (car x))
                                                          " = "
                                                          (compile* (cdr x) scope)))

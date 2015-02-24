@@ -3,17 +3,17 @@
       (let ((name pairs)
             (pairs (car body))
             (body (cdr body)))
-        `((lambda (,name)
-            (set! ,name (lambda ,(map car pairs)
-                          ,@body))
+        `((^(,name)
+            (set! ,name (^ ,(map car pairs)
+                           ,@body))
             (,name ,@(map cadr pairs)))
           nil))
-    `((lambda ,(map car pairs)
-        ,@body)
+    `((^ ,(map car pairs)
+         ,@body)
       ,@(map cadr pairs))))
 
 (defmacro let1 (name value &body body)
-  `((lambda (,name)
+  `((^(,name)
       ,@body)
     ,value))
 
@@ -58,7 +58,7 @@
   (let1 value (gensym)
     `(let1 ,value ,x
        (cond
-        ,@(map (lambda (clause)
+        ,@(map (^(clause)
                  (cond ((eq? (car clause) t)
                         clause)
                        ((null? (cdar clause))
