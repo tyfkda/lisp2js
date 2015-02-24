@@ -58,6 +58,8 @@
   test('positive number', 123, '+123');
   test('negative number', -123, '-123');
   test('nil', LISP.nil, '()');
+  test('nil2', LISP.nil, 'nil');
+  test('t', LISP.t, 't');
   test('single element list', LISP.cons(1, LISP.nil), '(1)');
   test('multiple elements list', LISP.cons(1, LISP.cons(2, LISP.cons(3, LISP.nil))), '(1 2 3)');
   test('dotted pair', LISP.cons(1, LISP.cons(2, 3)), '(1 2 . 3)');

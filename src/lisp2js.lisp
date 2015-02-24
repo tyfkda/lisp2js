@@ -183,6 +183,7 @@
         ((vector? s) (compile-vector s scope))
         ((regexp? s) (compile-regexp s))
         ((null? s)   "LISP.nil")
+        ((eq? s t)   "LISP.t")
         (else (error (string-append "compile-literal: [" s "]")))))
 
 (defun unary-op? (sym)

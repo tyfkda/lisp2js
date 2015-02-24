@@ -519,6 +519,10 @@
     },
 
     readSymbolOrNumber: function(str) {
+      if (str === 'nil')
+        return LISP.nil;
+      if (str === 't')
+        return LISP.t;
       if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
         return parseFloat(str);
       return LISP.intern(str);
