@@ -82,12 +82,6 @@
             (if ,g ,g
               (or ,@(cdr args)))))))
 
-(defmacro begin (&body body)
-  (cond ((null? body) nil)
-        ((null? (cdr body)) (car body))
-        (t `(let ()
-              ,@body))))
-
 (defmacro do (&body body)
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
