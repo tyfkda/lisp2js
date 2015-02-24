@@ -25,7 +25,7 @@
 (defun scope-var? (scope x)
   (cond ((null? scope) nil)
         ((member x (scope-param scope)) t)
-        (else (scope-var? (scope-outer scope) x))))
+        (t (scope-var? (scope-outer scope) x))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
@@ -43,7 +43,7 @@
     `(let1 ,value ,x
        (case (car ,value)
          ,@(map (lambda (clause)
-                  (if (eq? (car clause) 'else)
+                  (if (eq? (car clause) t)
                       clause
                     (let1 key (caar clause)
                       `((,key)
@@ -59,7 +59,7 @@
 (defun traverse-list (s scope)
   (record-case s
     ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
-                       (else (vector ':CONST x))))
+                       (t (vector ':CONST x))))
     ((if p thn &body els)  (vector ':IF
                                    (traverse* p scope)
                                    (traverse* thn scope)
@@ -82,9 +82,9 @@
                                                 name
                                                 `(lambda ,params ,@body)))
     ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
-    (else (vector ':FUNCALL
-                  (traverse* (car s) scope)
-                  (traverse-args (cdr s) scope)))))
+    (t (vector ':FUNCALL
+               (traverse* (car s) scope)
+               (traverse-args (cdr s) scope)))))
 
 (defun traverse* (s scope)
   (cond ((pair? s)   (let1 expanded (macroexpand s)
@@ -92,7 +92,7 @@
                            (traverse-list expanded scope)
                          (traverse* expanded scope))))
         ((symbol? s) (vector ':REF s))
-        (else        (vector ':CONST s))))
+        (t           (vector ':CONST s))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compiler
@@ -184,7 +184,7 @@
         ((regexp? s) (compile-regexp s))
         ((null? s)   "LISP.nil")
         ((eq? s t)   "LISP.t")
-        (else (error (string-append "compile-literal: [" s "]")))))
+        (t (error (string-append "compile-literal: [" s "]")))))
 
 (defun unary-op? (sym)
   (member sym '(+ -)))
@@ -222,7 +222,7 @@
               ((and (unary-op? fnsym)
                     (null? (cdr args)))
                (compile-unary-op fnsym (car args) scope))
-              (else (do-compile-funcall fn args scope))))
+              (t (do-compile-funcall fn args scope))))
     (do-compile-funcall fn args scope)))
 
 (defun compile-quote (x scope)
@@ -329,7 +329,7 @@
     ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
                                        (vector-ref s 2)))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
-    (else  (string-append "???" s "???"))))
+    (t  (string-append "???" s "???"))))
 
 (defun compile (s)
   (let* ((top-scope (create-scope nil ()))
