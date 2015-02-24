@@ -68,7 +68,7 @@
 
 (defmacro and (&rest args)
   (if (null? args)
-      't  ; (and) = true
+      t  ; (and) = true
     (if (null? (cdr args))
         (car args)
       `(if ,(car args)
