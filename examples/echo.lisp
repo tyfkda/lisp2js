@@ -2,6 +2,6 @@
   (let loop ((ls *argv*))
        (print (car ls))
        (aif (cdr ls)
-            (begin (print " ")
-                   (loop it)))))
+            (do (print " ")
+                (loop it)))))
 (print "\n")
