@@ -19,19 +19,19 @@
 
 (defmacro let* (pairs &body body)
   (if (null? pairs)
-      `(begin ,@body)
+      `(do ,@body)
     `(let1 ,(caar pairs) ,(cadar pairs)
        (let* ,(cdr pairs)
          ,@body))))
 
 (defmacro when (pred &body body)
   `(if ,pred
-       (begin ,@body)))
+       (do ,@body)))
 
 (defmacro unless (pred &body body)
   `(if ,pred
        nil
-     (begin ,@body)))
+     (do ,@body)))
 
 (defmacro cond (&body clauses)
   (if (null? clauses)
@@ -39,7 +39,7 @@
     (let ((clause (car clauses))
           (rest (cdr clauses)))
       (if (eq? (car clause) t)
-          `(begin ,@(cdr clause))
+          `(do ,@(cdr clause))
         (if (null? (cdr clause))  ; cond ((foo))
             (let ((g (gensym)))
               `(let ((,g ,(car clause)))
@@ -51,7 +51,7 @@
                    (if ,g (,(caddr clause) ,g)
                      (cond ,@rest))))
             `(if ,(car clause)  ; otherwise
-                 (begin ,@(cdr clause))
+                 (do ,@(cdr clause))
                (cond ,@rest))))))))
 
 (defmacro case (x &body clauses)
@@ -82,7 +82,7 @@
             (if ,g ,g
               (or ,@(cdr args)))))))
 
-(defmacro begin (&body body)
+(defmacro do (&body body)
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
         (t `(let ()
@@ -178,8 +178,8 @@
       (let loop ((p args)
                  (q (cdr args)))
         (if (null? (cdr q))
-            (begin (set-cdr! p (car q))
-                   args)
+            (do (set-cdr! p (car q))
+                args)
           (loop q (cdr q)))))))
 
 (defun last-pair (ls)
@@ -208,9 +208,9 @@
     (let loop ((i 0))
       (if (>= i len)
           new-vect
-        (begin (vector-set! new-vect i
-                            (proc (vector-ref vect i)))
-               (loop (+ i 1)))))))
+        (do (vector-set! new-vect i
+                         (proc (vector-ref vect i)))
+            (loop (+ i 1)))))))
 
 (defun vector->list (vect)
   (let1 n (vector-length vect)

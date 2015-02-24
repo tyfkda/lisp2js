@@ -117,15 +117,15 @@
                     (cons 'append
                           (nreconc q (list (list 'quote p))))
                   (if (eq? (car p) 'unquote)
-                      (begin (unless (null? (cddr p)) (error "Malformed ,~S" p))
-                             (cons 'append
-                                   (nreconc q (list (cadr p)))))
-                    (begin (when (eq? (car p) 'unquote-splicing)
-                             (error "Dotted ,@~S" p))
-                           (when (eq? (car p) 'unquote-dot)
-                             (error "Dotted ,.~S" p))
-                           (loop (cdr p)
-                                 (cons (bracket (car p)) q)))))))))
+                      (do (unless (null? (cddr p)) (error "Malformed ,~S" p))
+                          (cons 'append
+                                (nreconc q (list (cadr p)))))
+                    (do (when (eq? (car p) 'unquote-splicing)
+                          (error "Dotted ,@~S" p))
+                        (when (eq? (car p) 'unquote-dot)
+                          (error "Dotted ,.~S" p))
+                        (loop (cdr p)
+                              (cons (bracket (car p)) q)))))))))
 
 ;;; This implements the bracket operator of the formal rules.
 
