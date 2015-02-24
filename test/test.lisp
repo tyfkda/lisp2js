@@ -41,6 +41,8 @@
 (test "nil isnt proper-list" nil (proper-list? nil))
 
 ;; type
+(test "type of nil" 'bool (type nil))
+(test "type of t" 'bool (type t))
 (test "type of int" 'number (type 123))
 (test "type of float" 'number (type 1.23))
 (test "type of pair" 'pair (type '(1 2 3)))
