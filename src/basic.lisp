@@ -88,6 +88,12 @@
         (t `(let ()
               ,@body))))
 
+(defmacro do (&body body)
+  (cond ((null? body) nil)
+        ((null? (cdr body)) (car body))
+        (t `(let ()
+              ,@body))))
+
 (defmacro aif (expr thn &body els)
   `(let1 it ,expr
      (if it ,thn ,@els)))
