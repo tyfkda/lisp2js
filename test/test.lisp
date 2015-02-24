@@ -53,6 +53,10 @@
 (test "eq? vector" nil (eq? #(1 2 3) #(1 2 3)))
 (test "equal? vector" t (equal? #(1 2 3) #(1 2 3)))
 
+;; length
+(test "length" 3 (length '(1 2 3)))
+(test "length-dotted" 2 (length '(1 2 . 3)))
+
 ;; vector
 (test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
 
