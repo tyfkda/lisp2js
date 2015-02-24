@@ -57,6 +57,11 @@
 (test "length" 3 (length '(1 2 3)))
 (test "length-dotted" 2 (length '(1 2 . 3)))
 
+;; last-pair
+(test "last-pair" '(3) (last-pair '(1 2 3)))
+(test "last-pair-dotted" '(2 . 3) (last-pair '(1 2 . 3)))
+(test "last-pair-atom" 123 (last-pair 123))
+
 ;; vector
 (test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
 
