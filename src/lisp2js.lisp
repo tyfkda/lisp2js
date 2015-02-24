@@ -67,11 +67,6 @@
                                        nil
                                      (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params &body body)  (let ((new-scope (create-scope scope params)))
-                                   (vector ':LAMBDA
-                                           new-scope
-                                           params
-                                           (traverse-args body new-scope))))
     ((^ params &body body)  (let ((new-scope (create-scope scope params)))
                               (vector ':LAMBDA
                                       new-scope
