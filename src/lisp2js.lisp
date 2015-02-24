@@ -268,7 +268,7 @@
                      (if (null? rest)
                          ""
                        (string-append "var "
-                                      (symbol->string rest)
+                                      (escape-symbol rest)
                                       " = LISP._getRestArgs(arguments, "
                                       (number->string (length proper-params))
                                       "); "))
