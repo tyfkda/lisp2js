@@ -67,4 +67,10 @@
 ;; vector
 (test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
 
+;; eval
+(test "simple-eval" 6 (eval '(+ 1 2 3)))
+(test "eval-can't-see-local" 1 (begin (def x 1)
+                                      (let ((x 2))
+                                        (eval 'x))))
+
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")
