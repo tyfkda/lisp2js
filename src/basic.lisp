@@ -38,8 +38,7 @@
       ()
     (let ((clause (car clauses))
           (rest (cdr clauses)))
-      (if (or (eq? (car clause) 'else)
-              (eq? (car clause) t))
+      (if (eq? (car clause) t)
           `(begin ,@(cdr clause))
         (if (null? (cdr clause))  ; cond ((foo))
             (let ((g (gensym)))
@@ -60,12 +59,11 @@
     `(let1 ,value ,x
        (cond
         ,@(map (lambda (clause)
-                 (cond ((or (eq? (car clause) 'else)
-                            (eq? (car clause) t))
+                 (cond ((eq? (car clause) t)
                         clause)
                        ((null? (cdar clause))
                         `((eq? ,value ',(caar clause)) ,@(cdr clause)))
-                       (else `((member ,value ',(car clause)) ,@(cdr clause)))))
+                       (t `((member ,value ',(car clause)) ,@(cdr clause)))))
                clauses)))))
 
 (defmacro and (&rest args)

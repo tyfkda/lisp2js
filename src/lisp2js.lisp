@@ -43,8 +43,7 @@
     `(let1 ,value ,x
        (case (car ,value)
          ,@(map (lambda (clause)
-                  (if (or (eq? (car clause) 'else)
-                          (eq? (car clause) t))
+                  (if (eq? (car clause) t)
                       clause
                     (let1 key (caar clause)
                       `((,key)
