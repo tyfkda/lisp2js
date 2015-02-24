@@ -13,6 +13,8 @@
 (test "not-t" nil (not t))
 
 (test "do" 3 (do 1 2 3))
+(test "single-do" 1 (do 1))
+(test "empty-do" () (do))
 
 ;; nil
 (test "nil isn't symbol" nil (symbol? nil))
