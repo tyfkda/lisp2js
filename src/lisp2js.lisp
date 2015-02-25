@@ -2,8 +2,9 @@
 ;; Scope
 
 (defun create-scope (parent-scope params)
-  (vector (remove-if (^(x) (member x '(&rest &body))) params)
-          nil parent-scope))
+  (vector (remove-if (^(x) (member x '(&rest &body))) params)  ;; 0: params
+          nil             ; 1: added var (e.g. quoted values)
+          parent-scope))  ; 2: parent scope
 
 (defun scope-param (scope)
   (vector-ref scope 0))
