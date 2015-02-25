@@ -91,6 +91,10 @@
   `(let1 it ,expr
      (if it ,thn ,@els)))
 
+(defmacro awhen (expr &body body)
+  `(aif ,expr
+        (do ,@body)))
+
 (defmacro awhile (expr &body body)
   (let ((loop (gensym)))
     `(let ,loop ()
@@ -256,3 +260,15 @@
                (if (test (car seq))
                    acc
                  (cons (car seq) acc))))))
+
+
+
+(defmacro dolist (pair &body body)
+  (let ((i (car pair))
+        (loop (gensym))
+        (ls (gensym)))
+    `(let ,loop ((,ls ,(cadr pair)))
+          (let1 ,i (car ,ls)
+            (when ,i
+              ,@body
+              (,loop (cdr ,ls)))))))
