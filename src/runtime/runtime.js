@@ -689,6 +689,23 @@
       return stream;
     };
 
+    LISP.load = function(fileName) {
+      var stream = LISP.open(fileName);
+      if (!stream) {
+        return LISP.error('Cannot open [' + fileName + ']');
+      }
+
+      var result;
+      for (;;) {
+        var s = LISP.read(stream);
+        if (s == null)
+          break;
+        result = LISP.eval(s);
+      }
+      LISP.close(stream);
+      return result;
+    };
+
     // System
     LISP.exit = function(code) {
       process.exit(code);
