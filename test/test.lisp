@@ -79,4 +79,9 @@
                                    (let ((x 2))
                                      (eval 'x))))
 
+;; macro
+(defmacro foo (x) `(+ ,x 1))
+(test "local overcome macro" 222 (do (let ((foo (^(x) (* x 2))))
+                                       (foo 111))))
+
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")

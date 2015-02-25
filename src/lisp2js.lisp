@@ -87,10 +87,13 @@
                (traverse-args (cdr s) scope)))))
 
 (defun traverse* (s scope)
-  (cond ((pair? s)   (let1 expanded (macroexpand s)
-                       (if (pair? expanded)
-                           (traverse-list expanded scope)
-                         (traverse* expanded scope))))
+  (cond ((pair? s)   (if (local-var? (car s) scope)
+                         ;; Symbol is defined in scope, so it isn't macro.
+                         (traverse-list s scope)
+                       (let1 expanded (macroexpand s)
+                         (if (pair? expanded)
+                             (traverse-list expanded scope)
+                           (traverse* expanded scope)))))
         ((symbol? s) (vector ':REF s))
         (t           (vector ':CONST s))))
 
@@ -106,7 +109,8 @@
       sym)))
 
 (defun local-var? (sym scope)
-  (scope-var? scope (get-receiver sym)))
+  (and (symbol? sym)
+       (scope-var? scope (get-receiver sym))))
 
 (defun expand-args (args scope)
   (string-join (map (^(x) (compile* x scope))
