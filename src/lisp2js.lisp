@@ -57,6 +57,12 @@
               (map traverse-quoted-value (dotted->proper x)))
     (vector ':CONST x)))
 
+(defun confirm-valid-params (params)
+  (when params
+    (if (symbol? (car params))
+        (confirm-valid-params (cdr params))
+      (compile-error "function parameter must be symbol, but" (car params)))))
+
 (defun traverse-list (s scope)
   (record-case s
     ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
@@ -68,11 +74,12 @@
                                        nil
                                      (traverse* (car els) scope))))
     ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
-    ((^ params &body body)  (let ((new-scope (create-scope scope params)))
-                              (vector ':LAMBDA
-                                      new-scope
-                                      params
-                                      (traverse-args body new-scope))))
+    ((^ params &body body)  (do (confirm-valid-params params)
+                                (let ((new-scope (create-scope scope params)))
+                                  (vector ':LAMBDA
+                                          new-scope
+                                          params
+                                          (traverse-args body new-scope)))))
     ((def name value)  (vector ':DEF
                                (traverse* name scope)
                                (traverse* value scope)))
@@ -335,6 +342,9 @@
                                        (vector-ref s 2)))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     (t  (string-append "???" s "???"))))
+
+(defun compile-error (&rest args)
+  (error args))
 
 (defun compile (s)
   (let* ((top-scope (create-scope nil ()))

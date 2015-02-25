@@ -96,6 +96,7 @@
 
   // Fail cases
   fail('invalid-apply', '(1 2 3)');
+  fail('invalid-param', '(^(nil t 1) 2)');
 
   print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m");
 })();
