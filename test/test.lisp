@@ -69,6 +69,10 @@
 ;; vector
 (test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
 
+;; arithmetic operations
+(test "+" 6 (+ 1 2 3))
+(test "overwrite-inlined-function" '(1 2 3) (let ((+ list)) (+ 1 2 3)))
+
 ;; eval
 (test "simple-eval" 6 (eval '(+ 1 2 3)))
 (test "eval-can't-see-local" 1 (do (def x 1)
