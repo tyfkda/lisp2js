@@ -650,21 +650,32 @@
         this.fd = null;
         this.lines.length = this.index = 0;
         this.str = null;
+        this.chomped = false;
       };
       FileStream.prototype.readLine = function() {
         for (;;) {
-          if (this.lines.length > this.index)
-            return this.lines[this.index++];
+          var left = '';
+          if (this.index < this.lines.length) {
+            if (this.index < this.lines.length - 1 || !this.chomped)
+              return this.lines[this.index++];
+            if (this.chomped)
+              left = this.lines[this.index];
+          }
 
           if (this.fd == null)
             return LISP.nil;
           var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
           if (n <= 0)
             return null;
-          var str = buffer.slice(0, n).toString().split('\n');
-          if (str.length > 0 && str[str.length - 1] === '\n')
-            str = str.slice(0, str.length - 1);
-          this.lines = buffer.slice(0, n).toString().split('\n');
+          var string = left + buffer.slice(0, n).toString();
+          this.chomped = false;
+          if (string.length > 0) {
+            if (string[string.length - 1] != '\n')
+              this.chomped = true;
+            else
+              string = string.slice(0, string.length - 1);  // Remove last '\n' to avoid last empty line.
+          }
+          this.lines = string.split('\n');
           this.index = 0;
         }
       };
