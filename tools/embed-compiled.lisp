@@ -1,0 +1,22 @@
+(defun cat (stream pat embed)
+  (awhile (read-line stream)
+    (print it)
+    (print "\n")
+    (when (rxmatch pat it)
+      (print embed)
+      (print "\n"))))
+
+(defun read-all (fn)
+  (awhen (open fn)
+    (let1 stream it
+      (let loop ((acc ()))
+           (aif (read-line stream)
+                (loop (cons it acc))
+             (do (close stream)
+                 (reverse! acc)))))))
+
+(defun main (argv)
+  (when (null? (cdr argv))
+      (error "argv < 1"))
+  (let1 compiled (string-join (read-all (cadr argv)) "\n")
+    (cat *stdin* #/EMBED COMPILED CODE HERE/ compiled)))
