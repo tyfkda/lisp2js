@@ -2,4 +2,6 @@ sudo: false
 language: node_js
 node_js:
   - 0.12
-script: "make test"
+before_script:
+    - touch src/lisp2js.lisp
+script: "make && make test"
