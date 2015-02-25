@@ -52,6 +52,10 @@
 (test "type of vector" 'vector (type #(1 2 3)))
 (test "type of table" 'table (type (make-hash-table)))
 
+;; lambda
+(test "lambda" 123 ((^() 123)))
+(test "empty-lambda" nil ((^())))
+
 ;; equal?
 (test "eq? string" t (eq? "123" "123"))
 (test "eq? vector" nil (eq? #(1 2 3) #(1 2 3)))
