@@ -622,13 +622,17 @@
     },
   };
 
-  readTable["'"] = function(stream, c) {
+  LISP['set-macro-character'] = function(c, fn) {
+    readTable[c] = fn;
+  };
+
+  LISP['set-macro-character']("'", function(stream, c) {
     return LISP.list(LISP.intern('quote'), Reader.read(stream));
-  };
-  readTable['`'] = function(stream, c) {
+  });
+  LISP['set-macro-character']('`', function(stream, c) {
     return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
-  };
-  readTable[','] = function(stream, c) {
+  });
+  LISP['set-macro-character'](',', function(stream, c) {
     var c = stream.peek();
     var keyword = 'unquote';
     if (c == '@') {
@@ -636,7 +640,7 @@
       stream.getc();
     }
     return LISP.list(LISP.intern(keyword), Reader.read(stream));
-  };
+  });
 
   LISP.read = function(stream) {
     return Reader.read(stream || LISP['*stdin*']);
