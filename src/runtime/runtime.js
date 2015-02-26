@@ -462,14 +462,23 @@
   };
   Stream.prototype = {
     close: function() {},
+    peek: function() {
+      var result = this.fetch();
+      if (result == null)
+        return result;
+      return this.str[0];
+    },
+    getc: function() {
+      var c = this.peek();
+      if (c == null)
+        return c;
+      this.str = this.str.slice(1);
+      return c;
+    },
     match: function(regexp, keep) {
-      if (this.str == null)
-        return null;
-
-      if (this.str === '') {
-        if ((this.str = this.readLine()) == null)
-          return undefined;
-      }
+      var result = this.fetch();
+      if (result == null)
+        return result;
 
       var m = this.str.match(regexp);
       if (m && !keep)
@@ -483,6 +492,16 @@
       var result = this.str || this.readLine();
       this.str = null;
       return result;
+    },
+    fetch: function() {
+      if (this.str == null)
+        return null;
+
+      if (this.str === '') {
+        if ((this.str = this.readLine()) == null)
+          return undefined;
+      }
+      return this.str;
     },
   };
 
@@ -503,6 +522,8 @@
   var kReSingleDot = RegExp("^\\.(?=[" + kDelimitors + "])");
   var kReSymbolOrNumber = RegExp("^([^" + kDelimitors + "]+)");
 
+  var readTable = {};
+
   var Reader = {
     read: function(stream) {
       do {
@@ -510,19 +531,17 @@
           return null;
       } while (stream.match(/^\s+/))
 
+      var c = stream.peek();
+      if (c in readTable)
+        return readTable[c](stream, stream.getc());
+
       var m;
       if (stream.match(/^\(/))  // Left paren '('.
         return Reader.readList(stream);
       if (stream.match(/^;[^\n]*\n?/))  // Line comment.
         return Reader.read(stream);
-      if (stream.match(/^'/))  // quote.
-        return Reader.readQuote(stream);
       if (m = stream.match(/^"((\\.|[^"\\])*)"/))  // string.
         return Reader.unescape(m[1]);
-      if (stream.match(/^`/))  // quasiquote.
-        return Reader.readQuasiQuote(stream);
-      if (m = stream.match(/^,(@?)/))  // unquote or unquote-splicing.
-        return Reader.readUnquote(stream, m[1]);
       if (stream.match(/^#\(/))  // vector.
         return Reader.readVector(stream);
       if (m = stream.match(/^#\/([^\/]*)\//))  // regexp TODO: Implement properly.
@@ -590,19 +609,6 @@
       }
     },
 
-    readQuote: function(stream) {
-      return LISP.list(LISP.intern('quote'), Reader.read(stream));
-    },
-
-    readQuasiQuote: function(stream) {
-      return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
-    },
-
-    readUnquote: function(stream, splicing) {
-      var keyword = splicing === '@' ? 'unquote-splicing' : 'unquote';
-      return LISP.list(LISP.intern(keyword), Reader.read(stream));
-    },
-
     unescape: function(str) {
       return str.replace(/(\\x[0-9a-fA-F]{2})/g, function(match) {
         return eval('"' + match + '"');
@@ -615,6 +621,26 @@
       });
     },
   };
+
+  LISP['set-macro-character'] = function(c, fn) {
+    readTable[c] = fn;
+  };
+
+  LISP['set-macro-character']("'", function(stream, c) {
+    return LISP.list(LISP.intern('quote'), Reader.read(stream));
+  });
+  LISP['set-macro-character']('`', function(stream, c) {
+    return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
+  });
+  LISP['set-macro-character'](',', function(stream, c) {
+    var c = stream.peek();
+    var keyword = 'unquote';
+    if (c == '@') {
+      keyword = 'unquote-splicing';
+      stream.getc();
+    }
+    return LISP.list(LISP.intern(keyword), Reader.read(stream));
+  });
 
   LISP.read = function(stream) {
     return Reader.read(stream || LISP['*stdin*']);
