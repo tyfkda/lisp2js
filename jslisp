@@ -102,11 +102,15 @@
   // Process command line argument as a script file.
   try {
     LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1));
-    var text = fs.readFileSync(process.argv[index], 'utf-8');
-    runCodes(text, compileOnly);
     var status = 0;
-    if ('main' in LISP)
-      status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']));
+    if (compileOnly) {
+      var text = fs.readFileSync(process.argv[index], 'utf-8');
+      runCodes(text, compileOnly);
+    } else {
+      LISP.load(process.argv[index]);
+      if ('main' in LISP)
+        status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']));
+    }
     if (status)
       process.exit(status);
   } catch(e) {
