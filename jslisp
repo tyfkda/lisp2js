@@ -45,7 +45,7 @@
           // Otherwise input should be consumed.
           inputs = [];
           if (isatty)
-            console.log(LISP.makeString(result, 10));
+            console.log(LISP['x->string'](result, 10));
         }
         if (isatty)
           process.stdout.write(prompt1);

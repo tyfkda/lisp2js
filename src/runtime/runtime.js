@@ -20,6 +20,20 @@
     return array;
   };
 
+  function makeString(x, inspect) {
+    if (x === LISP.nil)
+      return 'nil';
+    if (x === LISP.t)
+      return 't';
+    if (typeof x == 'string')
+      return inspect ? inspectString(x) : x;
+    if (x instanceof Array)
+      return '#(' + x.map(function(v) { return makeString(v, inspect) }).join(' ') + ')';
+    if (x == null)  // null or undefined
+      return '' + x;
+    return x.toString(inspect);
+  };
+
   LISP.nil = false;
   LISP.t = true;
 
@@ -128,7 +142,7 @@
       return function(inspect) {
         if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
             this.car.name in abbrevTable) {
-          return abbrevTable[this.car.name] + LISP.makeString(this.cdr.car, inspect);
+          return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect);
         }
 
         var ss = [];
@@ -136,12 +150,12 @@
         var p;
         for (p = this; p instanceof LISP.Cons; p = p.cdr) {
           ss.push(separator);
-          ss.push(LISP.makeString(p.car, inspect));
+          ss.push(makeString(p.car, inspect));
           separator = " ";
         }
         if (p !== LISP.nil) {
           ss.push(" . ");
-          ss.push(LISP.makeString(p, inspect));
+          ss.push(makeString(p, inspect));
         }
         ss.push(")");
         return ss.join("");
@@ -334,31 +348,19 @@
     return '"' + str.replace(/[\\\t\n"]/g, function(m) { return kEscapeCharTable[m]; }) + '"';
   };
 
-  LISP.makeString = function(x, inspect) {
-    if (x === LISP.nil)
-      return 'nil';
-    if (x === LISP.t)
-      return 't';
-    if (typeof x == 'string')
-      return inspect ? inspectString(x) : x;
-    if (x instanceof Array)
-      return '#(' + x.map(function(v) { return LISP.makeString(v, inspect) }).join(' ') + ')';
-    if (x == null)  // null or undefined
-      return '' + x;
-    return x.toString(inspect);
-  };
+  LISP['x->string'] = makeString;
   LISP.print = function(x) {
-    LISP._output(LISP.makeString(x));
+    LISP._output(makeString(x));
     return x;
   };
   LISP.puts = function(x) {
-    LISP._output(LISP.makeString(x));
+    LISP._output(makeString(x));
     if (typeof(process) !== 'undefined')
       LISP._output('\n');
     return x;
   };
   LISP.write = function(x) {
-    LISP._output(LISP.makeString(x, 10));  // 10 means true, and it is used as radix.
+    LISP._output(makeString(x, 10));  // 10 means true, and it is used as radix.
     return x;
   };
 
