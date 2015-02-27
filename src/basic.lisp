@@ -261,7 +261,16 @@
                    acc
                  (cons (car seq) acc))))))
 
-
+(defmacro dotimes (params &body body)
+  (let ((i (car params))
+        (limit (gensym))
+        (loop (gensym)))
+    `(let1 ,limit ,(cadr params)
+       (let ,loop ((,i 0))
+            (if (< ,i ,limit)
+                (do ,@body
+                    (,loop (+ ,i 1)))
+              ,(caddr params))))))
 
 (defmacro dolist (pair &body body)
   (let ((i (car pair))
