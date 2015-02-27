@@ -40,6 +40,7 @@
   LISP["*macro-table*"] = {};
   LISP["register-macro"] = function(name, func) {
     LISP['*macro-table*'][name] = func;
+    return name;
   };
   LISP["do-compile-defmacro"] = function(name, exp) {
     var compiled = LISP.compile(exp);

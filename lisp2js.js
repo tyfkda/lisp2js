@@ -40,6 +40,7 @@
   LISP["*macro-table*"] = {};
   LISP["register-macro"] = function(name, func) {
     LISP['*macro-table*'][name] = func;
+    return name;
   };
   LISP["do-compile-defmacro"] = function(name, exp) {
     var compiled = LISP.compile(exp);
@@ -793,6 +794,7 @@ LISP.take = (function(n, ls){return ((function(loop){return (loop = (function(n,
 LISP.drop = (function(n, ls){return ((LISP.isTrue((function(__9){return ((LISP.isTrue(__9) ? (__9) : ((function(__10){return ((LISP.isTrue(__10) ? (__10) : (LISP.nil)));})(LISP["null?"](ls)))));})(LISP["<="](n, 0))) ? (ls) : (LISP.drop((n - 1), LISP.cdr(ls)))));});
 LISP.elt = (function(n, ls){return (LISP.car(LISP.drop(n, ls)));});
 LISP["remove-if"] = (function(test, seq){return ((function(loop){return (loop = (function(seq, acc){return ((LISP.isTrue(LISP["null?"](seq)) ? (LISP["reverse!"](acc)) : (loop(LISP.cdr(seq), (LISP.isTrue(test(LISP.car(seq))) ? (acc) : (LISP.cons(LISP.car(seq), acc)))))));}), loop(seq, LISP.nil));})(LISP.nil));});
+LISP['register-macro'](LISP.intern("dotimes"), (function(params){var body = LISP._getRestArgs(arguments, 1); return ((function() { var __11 = LISP.list(0), __12 = LISP.list(1); return (function(i, limit, loop){return (LISP.list(LISP.intern("let1"), limit, LISP.cadr(params), LISP.list(LISP.intern("let"), loop, LISP.list(LISP["list*"](i, __11)), LISP.list(LISP.intern("if"), LISP.list(LISP.intern("<"), i, limit), LISP["list*"](LISP.intern("do"), LISP.append(body, LISP.list(LISP.list(loop, LISP["list*"](LISP.intern("+"), i, __12))))), LISP.caddr(params)))));}); })()(LISP.car(params), LISP.gensym(), LISP.gensym()));}));
 LISP['register-macro'](LISP.intern("dolist"), (function(pair){var body = LISP._getRestArgs(arguments, 1); return ((function(i, loop, ls){return (LISP.list(LISP.intern("let"), loop, LISP.list(LISP.list(ls, LISP.cadr(pair))), LISP.list(LISP.intern("let1"), i, LISP.list(LISP.intern("car"), ls), LISP["list*"](LISP.intern("when"), i, LISP.append(body, LISP.list(LISP.list(loop, LISP.list(LISP.intern("cdr"), ls))))))));})(LISP.car(pair), LISP.gensym(), LISP.gensym()));}));
 LISP.nreconc = (function(ls, tail){return ((function(top){return (LISP["set-cdr!"](ls, tail), top);})(LISP["reverse!"](ls)));});
 LISP.any = (function(f, ls){return ((LISP.isTrue(LISP["null?"](ls)) ? (LISP.nil) : ((LISP.isTrue(f(LISP.car(ls))) ? (LISP.t) : (LISP.any(f, LISP.cdr(ls)))))));});
