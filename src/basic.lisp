@@ -281,3 +281,10 @@
             (when ,i
               ,@body
               (,loop (cdr ,ls)))))))
+
+(defmacro labels (lss &body body)
+  `(let ,(map (^(ls) (car ls)) lss)
+     ,@(map (^(ls)
+              `(set! ,(car ls) (^ ,@(cdr ls))))
+            lss)
+     ,@body))
