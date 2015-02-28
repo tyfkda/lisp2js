@@ -136,9 +136,8 @@
   (hash-table-put! table "\n" "\\n")
   (hash-table-put! table "\"" "\\\"")
   (defun escape-char (c)
-    (aif (hash-table-get table c)
-         it
-      c)))
+    (or (hash-table-get table c)
+        c)))
 
 (defun escape-string (s)
   (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
