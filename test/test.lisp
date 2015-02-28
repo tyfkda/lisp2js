@@ -5,5 +5,5 @@
              (actual-value ,actual))
          (if (equal? expect-value actual-value)
              (print "ok\n")
-           (do (print (string-append "ERROR [" expect-value "] expected, but [" actual-value "]\n"))
+           (do (print (string-append "ERROR [" (x->string expect-value) "] expected, but [" (x->string actual-value) "]\n"))
                (exit 1))))))
