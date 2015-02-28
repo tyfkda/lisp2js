@@ -75,12 +75,12 @@
          nil))))
 
 (defmacro or (&rest args)
-  (and (not (null? args))
-       (let1 g (gensym)
-         `(let1 ,g ,(car args)
-            (if ,g ,g
-              (or ,@(cdr args)))))))
-
+  (if (null? (cdr args))
+      (car args)
+    (let1 g (gensym)
+      `(let1 ,g ,(car args)
+         (if ,g ,g
+           (or ,@(cdr args)))))))
 (defmacro do (&body body)
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
