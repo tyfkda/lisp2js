@@ -9,13 +9,19 @@
   <body>
     <h1>JsLisp test</h1>
 
-    <!-- You can access lisp function under `LISP` and can call it. -->
-    <form onsubmit="print('fib(' + this.num.value + ') = ' + LISP.fib(parseInt(this.num.value))); return false;">
-      Fib <input id="num" type="number" min="0" value="30">
-      <input type="submit">
+    <form onsubmit="compileAndRun(this.exp.value); return false;">
+      <textarea id="exp" cols="80" rows="8" style="font-size:14px; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+(defun fact (n)
+  (if (&lt;= n 1)
+      1
+    (* n (fact (- n 1)))))
+
+(fact 10)
+</textarea>
+      <input type="submit" value="Compile & run">
     </form>
 
-    <h3>Result</h3>
+    <h3>Output</h3>
     <div id="terminal">
     </div>
 
@@ -29,6 +35,18 @@
       }
       // Intercept Lisp output.
       LISP._output = print;
+
+      function compileAndRun(code) {
+        var stream = new LISP.StrStream(code);
+        for (;;) {
+          var s = LISP.read(stream);
+          if (s === undefined)
+            break;
+          var compiled = LISP.compile(s);
+          var result = eval(compiled);
+          print(compiled + ' ==> ' + result);
+        }
+      }
     </script>
 
     <script src="jslisp.js">
@@ -37,19 +55,10 @@
     </script>
 
     <script src="jslisp.js">
-;; Calculate Fibonacci number
-(defun fib (n)
-  (if (< n 2)
-      n
-    (+ (fib (- n 1))
-       (fib (- n 2)))))
-    </script>
-
-    <script src="jslisp.js">
 ;; Call JavaScript function
 ;; `JS` is JavaScript global hash table.
 ;; Can access with 'dot'
-(JS.alert "Welcome to JsLisp!")
+(JS.alert "Input expression and press [Compile & run] button")
     </script>
   </body>
 </html>
