@@ -8,9 +8,9 @@
 (function() {
   // Run Lisp codes.
   var runCodes = function(codes) {
-    var reader = new LISP.Reader(codes);
+    var stream = new LISP.StrStream(codes);
     for (;;) {
-      var s = reader.read();
+      var s = LISP.read(stream);
       if (s === undefined)
         break;
       LISP.eval(s);
