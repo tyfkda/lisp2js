@@ -17,8 +17,8 @@ $(function() {
   function onenter(code) {
     var s;
     try {
-      var reader = new LISP.Reader(code);
-      s = reader.read();
+      var stream = new LISP.StrStream(code);
+      s = LISP.read(stream);
     } catch (e) {
       if (e instanceof LISP.NoCloseParenException) {
         cm.execCommand('indentAuto');
@@ -40,7 +40,7 @@ $(function() {
     var org = txt.html();
     var _new = ('<div class="float: left"><pre class="code" style="float: left">' + code + '</pre></div>' +
                 '<div style="clear: both"></div>' +
-                LISP.makeString(result, 10) + '<br>');
+                LISP['x->string'](result, 10) + '<br>');
 
     var nss = '';
     txt.html(org + _new + prompt);

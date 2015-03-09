@@ -48,10 +48,10 @@
   (let ((img (new Image)))
     (set! img.src "smile.png")
     (set! img.onload
-          (lambda ()
+          (^()
             (let ((x 0)
                   (draw nil))
-              (set! draw (lambda ()
+              (set! draw (^()
                            ;; Fill background.
                            (set! context.fillStyle "rgb(0, 0, 255)")
                            (context.fillRect 0 0 400 400)
@@ -65,10 +65,10 @@
                            (context.stroke)
 
                            (context.drawImage img x
-                                                  (* (- 400 img.height) 0.5))
+                                              (* (- 400 img.height) 0.5))
 
                            (set! x (let ((nextx (+ x 1)))
-                                     (if (> nextx canvas.width) 0 nextx)))
+                                     (if (&gt; nextx canvas.width) 0 nextx)))
 
                            (JS.window.requestAnimationFrame draw)))
 

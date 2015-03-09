@@ -9,22 +9,48 @@
   <body>
     <h1>JsLisp test</h1>
 
-    <p>
-      Try <a href="repl/index.html">REPL</a>
-    </p>
+    <form onsubmit="compileAndRun(this.exp.value); return false;">
+      <textarea id="exp" cols="80" rows="8" style="font-size:14px; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+(defun fact (n)
+  (if (&lt;= n 1)
+      1
+    (* n (fact (- n 1)))))
 
-    <h3>Result</h3>
+(fact 10)
+</textarea>
+      <input type="submit" value="Compile & run">
+    </form>
+
+    <h3>Output</h3>
     <div id="terminal">
     </div>
+
+    <p>
+      Also try <a href="repl/index.html">REPL</a>
+    </p>
 
     <script type="text/javascript" src="js/lisp2js.js"></script>
     <script type="text/javascript">
       // Steal Lisp output.
-      LISP._output = function(str) {
+      function print(str) {
         var terminalNode = document.getElementById('terminal');
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         terminalNode.appendChild(div);
+      }
+      // Intercept Lisp output.
+      LISP._output = print;
+
+      function compileAndRun(code) {
+        var stream = new LISP.StrStream(code);
+        for (;;) {
+          var s = LISP.read(stream);
+          if (s === undefined)
+            break;
+          var compiled = LISP.compile(s);
+          var result = eval(compiled);
+          print(compiled + ' ==> ' + result);
+        }
       }
     </script>
 
@@ -34,23 +60,10 @@
     </script>
 
     <script src="jslisp.js">
-;; Calculate Fibonacci number
-(define (fib n)
-  (if (< n 2)
-      n
-    (+ (fib (- n 1))
-       (fib (- n 2)))))
-
-(print (+ "fib30 = " (fib 30)))
-    </script>
-
-    <script src="jslisp.js">
 ;; Call JavaScript function
 ;; `JS` is JavaScript global hash table.
-(define-macro (jscall name . args)
-  `((hash-table-get JS ,(symbol->string name))
-    ,@args))
-(jscall alert "Hello, JsLisp!")
+;; Can access with 'dot'
+(JS.alert "Input expression and press [Compile & run] button")
     </script>
   </body>
 </html>
