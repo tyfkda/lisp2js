@@ -27,7 +27,7 @@
         div.appendChild(document.createTextNode(str));
         terminalNode.appendChild(div);
       }
-      // Steal Lisp output.
+      // Intercept Lisp output.
       LISP._output = print;
     </script>
 
