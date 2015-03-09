@@ -1,12 +1,15 @@
 all:	test
 
-test:	read-test inside-test js-test example-test
+test:	read-test basic-test compiler-test js-test example-test
 
 read-test:
 	node read-test.js
 
-inside-test:
-	../jslisp test.lisp
+basic-test:
+	../jslisp basic-test.lisp
+
+compiler-test:
+	../jslisp compiler-test.lisp
 
 js-test:
 	node ./test.js

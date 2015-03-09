@@ -28,6 +28,10 @@
         ((member x (scope-param scope)) t)
         (t (scope-var? (scope-outer scope) x))))
 
+(defun local-var? (scope sym)
+  (and (symbol? sym)
+       (scope-var? scope (get-receiver sym))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
 (defun traverse-args (args scope)
@@ -95,7 +99,7 @@
                (traverse-args (cdr s) scope)))))
 
 (defun traverse* (s scope)
-  (cond ((pair? s)   (if (local-var? (car s) scope)
+  (cond ((pair? s)   (if (local-var? scope (car s))
                          ;; Symbol is defined in scope, so it isn't macro.
                          (traverse-list s scope)
                        (let1 expanded (macroexpand s)
@@ -115,10 +119,6 @@
     (aif (string-scan s ".")
          (intern (substring s 0 it))
       sym)))
-
-(defun local-var? (sym scope)
-  (and (symbol? sym)
-       (scope-var? scope (get-receiver sym))))
 
 (defun expand-args (args scope)
   (string-join (map (^(x) (compile* x scope))
@@ -159,7 +159,7 @@
                       (^(m) (escape-sym-char (string-ref (m) 0)))))
 
 (defun compile-symbol (sym scope)
-  (if (local-var? sym scope)
+  (if (local-var? scope sym)
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
       (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
@@ -224,7 +224,7 @@
 
 (defun compile-funcall (fn args scope)
   (if (and (eq? (vector-ref fn 0) ':REF)
-           (not (local-var? (vector-ref fn 1) scope))
+           (not (local-var? scope (vector-ref fn 1)))
            (not (null? args)))
       (let1 fnsym (vector-ref fn 1)
         (cond ((and (binop? fnsym)
