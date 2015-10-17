@@ -462,6 +462,7 @@
   // Stream.
   var Stream = function() {
     this.str = '';
+    this.lineNo = 0;
   };
   Stream.prototype = {
     close: function() {},
@@ -503,6 +504,7 @@
       if (this.str === '') {
         if ((this.str = this.readLine()) == null)
           return undefined;
+        ++this.lineNo;
       }
       return this.str;
     },
@@ -511,6 +513,7 @@
   var StrStream = function(str) {
     Stream.call(this);
     this.str = str;
+    this.lineNo = 1;
   };
   StrStream.prototype = Object.create(Stream.prototype);
   StrStream.prototype.readLine = function() {
@@ -665,9 +668,10 @@
     LISP.FileStream = (function() {
       var BUFFER_SIZE = 4096;
       var buffer = new Buffer(BUFFER_SIZE);
-      var FileStream = function(fd) {
+      var FileStream = function(fd, path) {
         Stream.call(this);
         this.fd = fd;
+        this.path = path;
         this.lines = [];
         this.index = 0;
       };
@@ -711,14 +715,14 @@
       return FileStream;
     })();
 
-    LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd);
-    LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd);
-    LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd);
+    LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd, '*stdin*');
+    LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*');
+    LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd, '*stderr*');
 
     LISP.open = function(path, flag) {
       try {
         var fd = fs.openSync(path, flag || 'r');
-        return new LISP.FileStream(fd);
+        return new LISP.FileStream(fd, path);
       } catch (e) {
         return LISP.nil;
       }
