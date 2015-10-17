@@ -40,7 +40,9 @@
       inputs.push(chunk);
       try {
         var code = inputs.join('');
-        if (!code.match(/^\s*$/)) {
+        if (code.match(/^\s*$/)) {
+          inputs = [];
+        } else {
           var result = runCodes(code, compileOnly);
           // Otherwise input should be consumed.
           inputs = [];
