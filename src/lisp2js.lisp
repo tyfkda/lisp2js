@@ -134,13 +134,13 @@
   (hash-table-put! table "\\" "\\\\")
   (hash-table-put! table "\t" "\\t")
   (hash-table-put! table "\n" "\\n")
-  (hash-table-put! table "\"" "\\\"")
+  (hash-table-put! table "'" "\\'")
   (defun escape-char (c)
     (or (hash-table-get table c)
         c)))
 
 (defun escape-string (s)
-  (regexp-replace-all #/[\\\t\n"]/ s  ;" <= Prevent Github source highlight to leak string literal...
+  (regexp-replace-all #/[\\\t\n']/ s
                       (^(m) (escape-char (m)))))
 
 (defun escape-sym-char (c)
@@ -165,14 +165,14 @@
       (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
           (string-append "LISP."
                          s)
-        (string-append "LISP[\""
+        (string-append "LISP['"
                        (escape-string s)
-                       "\"]")))))
+                       "']")))))
 
 (defun compile-string (str)
-  (string-append "\""
+  (string-append "'"
                  (escape-string str)
-                 "\""))
+                 "'"))
 
 (defun compile-vector (vect scope)
   (string-append "["
@@ -242,9 +242,9 @@
                        ',(cdr x))
                 scope)
     (if (symbol? x)
-        (string-append "LISP.intern(\""
+        (string-append "LISP.intern('"
                        (escape-string (symbol->string x))
-                       "\")")
+                       "')")
       (compile-literal x scope))))
 
 (defun compile-if (pred-node then-node else-node scope)

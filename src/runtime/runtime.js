@@ -51,20 +51,20 @@
                    console.log(str);
                  });
 
-  LISP["*macro-table*"] = {};
-  LISP["register-macro"] = function(name, func) {
+  LISP['*macro-table*'] = {};
+  LISP['register-macro'] = function(name, func) {
     LISP['*macro-table*'][name] = func;
     return name;
   };
-  LISP["do-compile-defmacro"] = function(name, exp) {
+  LISP['do-compile-defmacro'] = function(name, exp) {
     var compiled = LISP.compile(exp);
-    return ("LISP['register-macro'](LISP.intern(\"" +
+    return ("LISP['register-macro'](LISP.intern('" +
             LISP['escape-string'](LISP['symbol->string'](name)) +
-            "\"), " +
+            "'), " +
             compiled +
-            ")");
+            ')');
   };
-  LISP["macroexpand-1"] = function(s) {
+  LISP['macroexpand-1'] = function(s) {
     if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
       return s;
     var macrofn = LISP['*macro-table*'][s.car];
@@ -89,12 +89,12 @@
     },
   };
 
-  LISP["symbol->string"] = function(x) {
+  LISP['symbol->string'] = function(x) {
     return x.name;
   };
   var __gensymIndex = 0;
   LISP.gensym = function() {
-    return LISP.intern("__" + (++__gensymIndex));
+    return LISP.intern('__' + (++__gensymIndex));
   };
 
   LISP.$$symbolTable = {};  // key(string) => Symbol object
@@ -103,7 +103,7 @@
       return LISP.$$symbolTable[name];
     return LISP.$$symbolTable[name] = new LISP.Symbol(name);
   };
-  LISP["symbol?"] = function(x) {
+  LISP['symbol?'] = function(x) {
     return jsBoolToS(x instanceof LISP.Symbol);
   };
   LISP.type = function(x) {
@@ -126,7 +126,7 @@
     return LISP.intern(type);
   };
 
-  LISP["eq?"] = function(x, y) {
+  LISP['eq?'] = function(x, y) {
     return jsBoolToS(x === y);
   };
 
@@ -138,7 +138,7 @@
 
   LISP.Cons.prototype = {
     toString: (function() {
-      var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', "unquote-splicing": ',@' };
+      var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
       return function(inspect) {
         if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
             this.car.name in abbrevTable) {
@@ -146,19 +146,19 @@
         }
 
         var ss = [];
-        var separator = "(";
+        var separator = '(';
         var p;
         for (p = this; p instanceof LISP.Cons; p = p.cdr) {
           ss.push(separator);
           ss.push(makeString(p.car, inspect));
-          separator = " ";
+          separator = ' ';
         }
         if (p !== LISP.nil) {
-          ss.push(" . ");
+          ss.push(' . ');
           ss.push(makeString(p, inspect));
         }
-        ss.push(")");
-        return ss.join("");
+        ss.push(')');
+        return ss.join('');
       };
     })(),
     toArray: function() {
@@ -182,14 +182,14 @@
       return s.cdr;
     return LISP.nil;
   };
-  LISP["set-car!"] = function(s, x) {
+  LISP['set-car!'] = function(s, x) {
     return (s.car = x);
   };
-  LISP["set-cdr!"] = function(s, x) {
+  LISP['set-cdr!'] = function(s, x) {
     return (s.cdr = x);
   };
 
-  LISP["pair?"] = function(x) {
+  LISP['pair?'] = function(x) {
     return jsBoolToS(x instanceof LISP.Cons);
   };
   LISP.list = function() {
@@ -198,7 +198,7 @@
       result = LISP.cons(arguments[i], result);
     return result;
   };
-  LISP["reverse!"] = function(x) {
+  LISP['reverse!'] = function(x) {
     var rev = LISP.nil;
     for (var ls = x; LISP['pair?'](ls, LISP.nil); ) {
       var d = ls.cdr;
@@ -209,13 +209,13 @@
     return rev;
   };
 
-  LISP["number?"] = function(x) {
+  LISP['number?'] = function(x) {
     return jsBoolToS(typeof x === 'number');
   };
-  LISP["number->string"] = function(x, n) {
+  LISP['number->string'] = function(x, n) {
     return x.toString(n);
   };
-  LISP["+"] = function() {
+  LISP['+'] = function() {
     if (arguments.length == 0)
       return 0;
     var result = arguments[0];
@@ -223,7 +223,7 @@
       result += arguments[i];
     return result;
   };
-  LISP["*"] = function() {
+  LISP['*'] = function() {
     if (arguments.length == 0)
       return 1;
     var result = arguments[0];
@@ -231,7 +231,7 @@
       result *= arguments[i];
     return result;
   };
-  LISP["-"] = function() {
+  LISP['-'] = function() {
     if (arguments.length == 0)
       return 0;
     var result = arguments[0];
@@ -241,7 +241,7 @@
       result -= arguments[i];
     return result;
   };
-  LISP["/"] = function() {
+  LISP['/'] = function() {
     if (arguments.length == 0)
       return 1;
     var result = arguments[0];
@@ -251,7 +251,7 @@
       result /= arguments[i];
     return result;
   };
-  LISP["%"] = function() {
+  LISP['%'] = function() {
     if (arguments.length == 0)
       return 0;
     var result = arguments[0];
@@ -261,7 +261,7 @@
       result %= arguments[i];
     return result;
   };
-  LISP["<"] = function() {
+  LISP['<'] = function() {
     if (arguments.length > 0) {
       var value = arguments[0];
       for (var i = 1; i < arguments.length; ++i) {
@@ -273,7 +273,7 @@
     }
     return LISP.t;
   };
-  LISP[">"] = function() {
+  LISP['>'] = function() {
     if (arguments.length > 0) {
       var value = arguments[0];
       for (var i = 1; i < arguments.length; ++i) {
@@ -285,7 +285,7 @@
     }
     return LISP.t;
   };
-  LISP["<="] = function() {
+  LISP['<='] = function() {
     if (arguments.length > 0) {
       var value = arguments[0];
       for (var i = 1; i < arguments.length; ++i) {
@@ -297,7 +297,7 @@
     }
     return LISP.t;
   };
-  LISP[">="] = function() {
+  LISP['>='] = function() {
     if (arguments.length > 0) {
       var value = arguments[0];
       for (var i = 1; i < arguments.length; ++i) {
@@ -311,35 +311,35 @@
   };
 
   // String.
-  LISP["string?"] = function(x) {
+  LISP['string?'] = function(x) {
     return jsBoolToS(typeof x === 'string');
   };
-  LISP["string=?"] = function(x, y) {
+  LISP['string=?'] = function(x, y) {
     return jsBoolToS(x === y);
   };
-  LISP["string-append"] = function() {
+  LISP['string-append'] = function() {
     return arguments2Array(arguments, 0).join('');
   };
-  LISP["string-join"] = function(list, separator) {
+  LISP['string-join'] = function(list, separator) {
     if (list === LISP.nil)
       return '';
     return list.toArray().join(separator);
   };
-  LISP["string-length"] = function(str) {
+  LISP['string-length'] = function(str) {
     return str.length;
   };
-  LISP["string-ref"] = function(str, index) {
+  LISP['string-ref'] = function(str, index) {
     return str[index];
   };
   LISP.substring = function(str, start, end) {
     return str.slice(start, end);
   };
-  LISP["string-scan"] = function(str, item) {
+  LISP['string-scan'] = function(str, item) {
     var index = str.indexOf(item);
     return index >= 0 ? index : LISP.nil;
   };
 
-  LISP["char->integer"] = function(char, index) {
+  LISP['char->integer'] = function(char, index) {
     return char.charCodeAt(index);
   };
 
@@ -395,21 +395,21 @@
   };
 
   // Hash table.
-  LISP["make-hash-table"] = function() {
+  LISP['make-hash-table'] = function() {
     return new LISP.HashTable();
   };
-  LISP["hash-table?"] = function(x) {
+  LISP['hash-table?'] = function(x) {
     return x instanceof LISP.HashTable;
   };
-  LISP["hash-table-exists?"] = function(hash, x) {
+  LISP['hash-table-exists?'] = function(hash, x) {
     return x in hash ? LISP.t : LISP.nil;
   };
-  LISP["hash-table-get"] = function(hash, x) {
+  LISP['hash-table-get'] = function(hash, x) {
     if (x in hash)
       return hash[x];
     return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil;
   };
-  LISP["hash-table-put!"] = function(hash, x, value) {
+  LISP['hash-table-put!'] = function(hash, x, value) {
     return hash[x] = value;
   };
 
@@ -417,7 +417,7 @@
   LISP.vector = function() {
     return arguments2Array(arguments, 0);
   };
-  LISP["make-vector"] = function(count, value) {
+  LISP['make-vector'] = function(count, value) {
     if (value === undefined)
       value = LISP.nil;
     var vector = new Array(count);
@@ -425,27 +425,27 @@
       vector[i] = value;
     return vector;
   };
-  LISP["vector?"] = function(x) {
+  LISP['vector?'] = function(x) {
     return jsBoolToS(x instanceof Array);
   };
-  LISP["vector-length"] = function(vector) {
+  LISP['vector-length'] = function(vector) {
     return vector.length;
   };
-  LISP["vector-ref"] = function(vector, index) {
+  LISP['vector-ref'] = function(vector, index) {
     return vector[index];
   };
-  LISP["vector-set!"] = function(vector, index, value) {
+  LISP['vector-set!'] = function(vector, index, value) {
     return vector[index] = value;
   };
 
   // Regexp.
-  LISP["regexp?"] = function(x) {
+  LISP['regexp?'] = function(x) {
     return jsBoolToS(x instanceof RegExp);
   };
   LISP.rxmatch = function(re, str) {
     return jsBoolToS(re.exec(str));
   };
-  LISP["regexp-replace-all"] = function(re, str, fn) {
+  LISP['regexp-replace-all'] = function(re, str, fn) {
     if (!re.global)
       re = eval(re.toString() + 'g')
     return str.replace(re, function (match) {
@@ -454,7 +454,7 @@
       });
     });
   };
-  LISP["regexp->string"] = function(x) {
+  LISP['regexp->string'] = function(x) {
     var s = x.toString();
     return s.slice(1, s.length - 1);
   };
@@ -521,9 +521,9 @@
   // Reader.
   LISP.NoCloseParenException = function() {};
 
-  var kDelimitors = "\\s(){}\\[\\]'`,;#\"";
-  var kReSingleDot = RegExp("^\\.(?=[" + kDelimitors + "])");
-  var kReSymbolOrNumber = RegExp("^([^" + kDelimitors + "]+)");
+  var kDelimitors = '\\s(){}\\[\\]\'`,;#"';
+  var kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])');
+  var kReSymbolOrNumber = RegExp('^([^' + kDelimitors + ']+)');
 
   var readTable = {};
 
@@ -649,7 +649,7 @@
     return Reader.read(stream || LISP['*stdin*']);
   };
 
-  LISP["read-from-string"] = function(str) {
+  LISP['read-from-string'] = function(str) {
     return Reader.read(new StrStream(str));
   };
 
@@ -660,7 +660,7 @@
 
   // For node JS.
   if (typeof process !== 'undefined') {
-    var fs = require("fs");
+    var fs = require('fs');
 
     LISP.FileStream = (function() {
       var BUFFER_SIZE = 4096;
