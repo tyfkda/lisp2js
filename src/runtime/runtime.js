@@ -213,7 +213,7 @@
   };
   LISP['reverse!'] = function(x) {
     var rev = LISP.nil;
-    for (var ls = x; LISP['pair?'](ls, LISP.nil); ) {
+    for (var ls = x; LISP['pair?'](ls); ) {
       var d = ls.cdr;
       ls.cdr = rev;
       rev = ls;
