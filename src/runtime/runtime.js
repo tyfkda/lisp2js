@@ -139,9 +139,14 @@
   };
 
   // Cons cell.
-  LISP.Cons = function(car, cdr) {
+  LISP.Cons = function(car, cdr, lineNo, path) {
     this.car = car;
     this.cdr = cdr;
+
+    if (lineNo != null) {
+      this.lineNo = lineNo;
+      this.path = path;
+    }
   };
 
   LISP.Cons.prototype = {
@@ -584,7 +589,7 @@
       for (;;) {
         var x = Reader.read(stream);
         if (x != null) {
-          result = LISP.cons(x, result);
+          result = new LISP.Cons(x, result, stream.lineNo, stream.path);
           continue;
         }
 
