@@ -1,5 +1,13 @@
-(function(LISP) {
+(function(scope, val) {
   'use strict';
+  if (typeof module !== 'undefined')
+    module.exports = val;
+  else
+    scope.LISP = val;
+})(this, (function() {
+  'use strict';
+
+  var LISP = {};
 
   // Convert JS array into Lisp list.
   var arrayToList = function(array) {
@@ -45,11 +53,11 @@
     return arrayToList(Array.prototype.slice.call(args, start));
   };
   LISP._output = (typeof(process) !== 'undefined'
-                 ? function(str) {  // for node.js.
-                   process.stdout.write(str);
-                 } : function(str) {  // for browser.
-                   console.log(str);
-                 });
+                  ? function(str) {  // for node.js.
+                    process.stdout.write(str);
+                  } : function(str) {  // for browser.
+                    console.log(str);
+                  });
 
   LISP['*macro-table*'] = {};
   LISP['register-macro'] = function(name, func) {
@@ -864,4 +872,6 @@ LISP['compile-new-scope'] = (function(scope, compiled$2dbody){return ((function(
 LISP['compile*'] = (function(s, scope){return ((function(__10){return ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':CONST'))) ? (LISP['compile-quote'](LISP['vector-ref'](s, 1), scope)) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':REF'))) ? (LISP['compile-symbol'](LISP['vector-ref'](s, 1), scope)) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':IF'))) ? ((function(p, thn, els){return (LISP['compile-if'](p, thn, els, scope));})(LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2), LISP['vector-ref'](s, 3))) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':FUNCALL'))) ? (LISP['compile-funcall'](LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2), scope)) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':SET!'))) ? (LISP['compile-set!'](LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2), scope)) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':LAMBDA'))) ? ((function(extended$2dscope, params, body){return (LISP['compile-new-scope'](extended$2dscope, LISP['compile-lambda'](params, body, scope, extended$2dscope)));})(LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2), LISP['vector-ref'](s, 3))) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':DEF'))) ? (LISP['compile-def'](LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2), scope)) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':DEFMACRO'))) ? (LISP['do-compile-defmacro'](LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2))) : ((LISP.isTrue(LISP['eq?'](__10, LISP.intern(':NEW'))) ? (LISP['compile-new'](LISP['vector-ref'](s, 1), LISP['vector-ref'](s, 2), scope)) : (LISP['string-append']('???', s, '???'))))))))))))))))))));})(LISP['vector-ref'](s, 0)));});
 LISP['compile-error'] = (function(){var args = LISP._getRestArgs(arguments, 0); return (LISP.error(args));});
 LISP.compile = (function(s){return ((function(top$2dscope){return ((function(tree){return (LISP['compile-new-scope'](top$2dscope, LISP['compile*'](tree, top$2dscope)));})(LISP['traverse*'](s, top$2dscope)));})(LISP['create-scope'](LISP.nil, LISP.nil)));});
-})(typeof exports !== 'undefined' ? exports : (this.LISP = {}));
+
+  return LISP;
+})());

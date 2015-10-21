@@ -1,5 +1,13 @@
-(function(LISP) {
+(function(scope, val) {
   'use strict';
+  if (typeof module !== 'undefined')
+    module.exports = val;
+  else
+    scope.LISP = val;
+})(this, (function() {
+  'use strict';
+
+  var LISP = {};
 
   // Convert JS array into Lisp list.
   var arrayToList = function(array) {
@@ -45,11 +53,11 @@
     return arrayToList(Array.prototype.slice.call(args, start));
   };
   LISP._output = (typeof(process) !== 'undefined'
-                 ? function(str) {  // for node.js.
-                   process.stdout.write(str);
-                 } : function(str) {  // for browser.
-                   console.log(str);
-                 });
+                  ? function(str) {  // for node.js.
+                    process.stdout.write(str);
+                  } : function(str) {  // for browser.
+                    console.log(str);
+                  });
 
   LISP['*macro-table*'] = {};
   LISP['register-macro'] = function(name, func) {
@@ -759,4 +767,6 @@
   }
 
   /*==== EMBED COMPILED CODE HERE ====*/
-})(typeof exports !== 'undefined' ? exports : (this.LISP = {}));
+
+  return LISP;
+})());
