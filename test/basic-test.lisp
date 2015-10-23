@@ -45,8 +45,8 @@
 (test "type of table" 'table (type (make-hash-table)))
 
 ;; lambda
-(test "lambda" 123 ((^() 123)))
-(test "empty-lambda" nil ((^())))
+(test "lambda" 123 ((lambda () 123)))
+(test "empty-lambda" nil ((lambda ())))
 
 ;; equal?
 (test "eq? string" t (eq? "123" "123"))
@@ -77,7 +77,7 @@
 
 ;; macro
 (defmacro foo (x) `(+ ,x 1))
-(test "local overcome macro" 222 (do (let ((foo (^(x) (* x 2))))
+(test "local overcome macro" 222 (do (let ((foo (lambda (x) (* x 2))))
                                        (foo 111))))
 
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")
