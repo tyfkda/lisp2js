@@ -33,7 +33,7 @@ function run() {
 
 run 'hello' 'Hello, world!' '../examples/hello.lisp'
 run 'fib' '6765' '../examples/fib.lisp'
-run 'argv' '(foo bar baz)' '../examples/argv.lisp' foo bar baz
+run 'echo' 'foo bar baz' '../examples/echo.lisp' foo bar baz
 
 ################################################################
 # All tests succeeded.
