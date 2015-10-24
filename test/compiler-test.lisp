@@ -26,3 +26,6 @@
 (test "escape-char[\"]" "\\\"" (escape-char "\""))
 
 (test "escape-sym-char[-]" "$2d" (escape-sym-char "-"))
+
+;; Finish!
+(print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")

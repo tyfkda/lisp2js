@@ -562,6 +562,10 @@
   var kDelimitors = '\\s(){}\\[\\]\'`,;#"';
   var kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])');
   var kReSymbolOrNumber = RegExp('^([^' + kDelimitors + ']+)');
+  var kReadUnescapeTable = {
+    't': '\t',
+    'n': '\n',
+  };
 
   var readTable = {};
 
@@ -653,14 +657,12 @@
     },
 
     unescape: function(str) {
-      return str.replace(/(\\x[0-9a-fA-F]{2})/g, function(match) {
-        return String.fromCharCode(parseInt(match, 16));
-      }).replace(/\\./g, function(match) {
-        switch (match[1]) {
-        case 't':  return '\t';
-        case 'n':  return '\n';
-        default:  return match[1];
-        }
+      return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, function(_1, _2, hex, c) {
+        if (hex)
+          return String.fromCharCode(parseInt(hex, 16));
+        if (c in kReadUnescapeTable)
+          return kReadUnescapeTable[c];
+        return c;
       });
     },
   };

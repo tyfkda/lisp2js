@@ -79,5 +79,5 @@
 (defmacro foo (x) `(+ ,x 1))
 (test "local overcome macro" 222 (do (let ((foo (lambda (x) (* x 2))))
                                        (foo 111))))
-
+;; Finish!
 (print "\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m\n")
