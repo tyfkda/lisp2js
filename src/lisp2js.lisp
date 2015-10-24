@@ -1,3 +1,10 @@
+
+(defun macroexpand (exp)
+  (let ((expanded (macroexpand-1 exp)))
+    (if (equal? expanded exp)
+        exp
+      (macroexpand expanded))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Scope
 
@@ -291,12 +298,6 @@
   (string-append (compile* name scope)
                  " = "
                  (compile* value scope)))
-
-(defun macroexpand (exp)
-  (let ((expanded (macroexpand-1 exp)))
-    (if (equal? expanded exp)
-        exp
-      (macroexpand expanded))))
 
 (defun compile-new (class-name args scope)
   (string-append "new "
