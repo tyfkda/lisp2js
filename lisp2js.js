@@ -1086,6 +1086,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP.list(LISP.intern("set!"), LISP.car(ls), LISP["list*"](LISP.intern("lambda"), LISP.cdr(ls)));
     }, lss), body));
   });
+  LISP.pairs = function (ls) {
+    return LISP.isTrue((function (__10) {
+      return LISP.isTrue(__10) ? __10 : LISP["null?"](LISP.cdr(ls));
+    })(LISP["null?"](ls))) ? LISP.nil : (function (loop) {
+      return loop = function (a, b, ls, acc) {
+        return LISP.isTrue(LISP["null?"](ls)) ? LISP["reverse!"](LISP.cons(LISP.cons(a, b), acc)) : loop(b, LISP.car(ls), LISP.cdr(ls), LISP.cons(LISP.cons(a, b), acc));
+      }, loop(LISP.car(ls), LISP.cadr(ls), LISP.cddr(ls), LISP.nil);
+    })(LISP.nil);
+  };
   LISP.nreconc = function (ls, tail) {
     return (function (top) {
       return LISP["set-cdr!"](ls, tail), top;
