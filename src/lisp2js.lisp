@@ -94,9 +94,6 @@
     ((def name value)  (vector ':DEF
                                (traverse* name scope)
                                (traverse* value scope)))
-    ((defun name params &body body)  (vector ':DEF
-                                             (traverse* name scope)
-                                             (traverse* `(lambda ,params ,@body) scope)))
     ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
     (t (vector ':FUNCALL
                (traverse* (car s) scope)

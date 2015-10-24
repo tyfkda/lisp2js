@@ -3,6 +3,9 @@
                   `(register-macro ',name
                                    (lambda ,params ,@body))))
 
+(defmacro defun (name params &body body)
+  `(def ,name (lambda ,params ,@body)))
+
 (defmacro let (pairs &body body)
   (if (symbol? pairs)  ; named-let
       (let ((name pairs)
