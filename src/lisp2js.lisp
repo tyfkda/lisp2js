@@ -101,7 +101,7 @@
 
 (defun traverse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))
-                         ;; Symbol is defined in scope, so it isn't macro.
+                         ;; Symbol is defined in the scope, so it isn't handled as a macro.
                          (traverse-list s scope)
                        (let1 expanded (macroexpand s)
                          (if (pair? expanded)
