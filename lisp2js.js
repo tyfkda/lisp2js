@@ -80,10 +80,10 @@
   };
 
   // Symbol.
-  LISP.Symbol = function(name) {
+  var Symbol = function(name) {
     this.name = name;
   };
-  LISP.Symbol.prototype = {
+  Symbol.prototype = {
     toString: function() {
       return this.name;
     },
@@ -92,20 +92,25 @@
   LISP['symbol->string'] = function(x) {
     return x.name;
   };
-  var __gensymIndex = 0;
-  LISP.gensym = function() {
-    return LISP.intern('__' + (++__gensymIndex));
+
+  LISP.intern = (function() {
+    var symbolTable = {};  // key(string) => Symbol object
+    return function(name) {
+      if (name in symbolTable)
+        return symbolTable[name];
+      return symbolTable[name] = new Symbol(name);
+    };
+  })();
+  LISP.gensym = (function() {
+    var index = 0;
+    return function() {
+      return LISP.intern('__' + (++index));
+    };
+  })();
+  LISP['symbol?'] = function(x) {
+    return jsBoolToS(x instanceof Symbol);
   };
 
-  LISP.$$symbolTable = {};  // key(string) => Symbol object
-  LISP.intern = function(name) {
-    if (name in LISP.$$symbolTable)
-      return LISP.$$symbolTable[name];
-    return LISP.$$symbolTable[name] = new LISP.Symbol(name);
-  };
-  LISP['symbol?'] = function(x) {
-    return jsBoolToS(x instanceof LISP.Symbol);
-  };
   LISP.type = function(x) {
     var type;
     if (x === LISP.nil || x === LISP.t)
@@ -113,7 +118,7 @@
     else {
       var type = typeof x;
       if (type === 'object') {
-        if (x instanceof LISP.Symbol)
+        if (x instanceof Symbol)
           type = 'symbol';
         else if (x instanceof LISP.Cons)
           type = 'pair';
