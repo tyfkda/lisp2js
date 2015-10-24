@@ -175,11 +175,6 @@
                  (escape-string (keyword->string keyword))
                  "\")"))
 
-(defun compile-string (str)
-  (string-append "\""
-                 (escape-string str)
-                 "\""))
-
 (defun compile-vector (vect scope)
   (string-append "["
                  (let1 v (vector-map (lambda (x)
@@ -197,7 +192,7 @@
   (cond ((number? s)  (number->string s))
         ((symbol? s)  (compile-symbol s scope))
         ((keyword? s) (compile-keyword s))
-        ((string? s)  (compile-string s))
+        ((string? s)  (x->string s t))
         ((vector? s)  (compile-vector s scope))
         ((regexp? s)  (compile-regexp s))
         ((null? s)    "LISP.nil")
