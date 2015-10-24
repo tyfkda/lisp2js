@@ -75,6 +75,7 @@
   test('complex string', 'foo bar\nbaz', '"foo bar\nbaz"');
   test('double quote in string', '"', '"\\""');
   test('escape character', '\x1b', '"\x1b"');
+  test('keyword', LISP['make-keyword']('keyword'), ':keyword');
 
   test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), "`abc");
   test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), ",abc");

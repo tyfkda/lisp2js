@@ -64,9 +64,9 @@
 
 (defun traverse-quoted-value (x)
   (if (pair? x)
-      (vector ':FUNCALL (vector ':REF (if (proper-list? x) 'list 'list*))
+      (vector :FUNCALL (vector :REF (if (proper-list? x) 'list 'list*))
               (map traverse-quoted-value (dotted->proper x)))
-    (vector ':CONST x)))
+    (vector :CONST x)))
 
 (defun confirm-valid-params (params)
   (when params
@@ -76,26 +76,26 @@
 
 (defun traverse-list (s scope)
   (record-case s
-    ((quote x)   (cond ((pair? x)  (vector ':REF (scope-add-var scope (traverse-quoted-value x))))
-                       (t (vector ':CONST x))))
-    ((if p thn &body els)  (vector ':IF
+    ((quote x)   (cond ((pair? x)  (vector :REF (scope-add-var scope (traverse-quoted-value x))))
+                       (t (vector :CONST x))))
+    ((if p thn &body els)  (vector :IF
                                    (traverse* p scope)
                                    (traverse* thn scope)
                                    (if (null? els)
                                        nil
                                      (traverse* (car els) scope))))
-    ((set! x v)  (vector ':SET! (traverse* x scope) (traverse* v scope)))
+    ((set! x v)  (vector :SET! (traverse* x scope) (traverse* v scope)))
     ((lambda params &body body)  (do (confirm-valid-params params)
                                      (let ((new-scope (create-scope scope params)))
-                                       (vector ':LAMBDA
+                                       (vector :LAMBDA
                                                new-scope
                                                params
                                                (traverse-args body new-scope)))))
-    ((def name value)  (vector ':DEF
+    ((def name value)  (vector :DEF
                                (traverse* name scope)
                                (traverse* value scope)))
-    ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
-    (t (vector ':FUNCALL
+    ((new klass &rest args)  (vector :NEW klass (traverse-args args new-scope)))
+    (t (vector :FUNCALL
                (traverse* (car s) scope)
                (traverse-args (cdr s) scope)))))
 
@@ -107,8 +107,8 @@
                          (if (pair? expanded)
                              (traverse-list expanded scope)
                            (traverse* expanded scope)))))
-        ((symbol? s) (vector ':REF s))
-        (t           (vector ':CONST s))))
+        ((symbol? s) (vector :REF s))
+        (t           (vector :CONST s))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compiler
@@ -170,6 +170,11 @@
                        (escape-string s)
                        "']")))))
 
+(defun compile-keyword (keyword)
+  (string-append "LISP['make-keyword']('"
+                 (escape-string (keyword->string keyword))
+                 "')"))
+
 (defun compile-string (str)
   (string-append "'"
                  (escape-string str)
@@ -189,13 +194,14 @@
                  "/"))
 
 (defun compile-literal (s scope)
-  (cond ((number? s) (number->string s))
-        ((symbol? s) (compile-symbol s scope))
-        ((string? s) (compile-string s))
-        ((vector? s) (compile-vector s scope))
-        ((regexp? s) (compile-regexp s))
-        ((null? s)   "LISP.nil")
-        ((eq? s t)   "LISP.t")
+  (cond ((number? s)  (number->string s))
+        ((symbol? s)  (compile-symbol s scope))
+        ((keyword? s) (compile-keyword s))
+        ((string? s)  (compile-string s))
+        ((vector? s)  (compile-vector s scope))
+        ((regexp? s)  (compile-regexp s))
+        ((null? s)    "LISP.nil")
+        ((eq? s t)    "LISP.t")
         (t (error (string-append "compile-literal: [" s "]")))))
 
 (defun unary-op? (sym)
@@ -224,7 +230,7 @@
                  ")"))
 
 (defun compile-funcall (fn args scope)
-  (if (and (eq? (vector-ref fn 0) ':REF)
+  (if (and (eq? (vector-ref fn 0) :REF)
            (not (local-var? scope (vector-ref fn 1)))
            (not (null? args)))
       (let1 fnsym (vector-ref fn 1)
@@ -238,15 +244,17 @@
     (do-compile-funcall fn args scope)))
 
 (defun compile-quote (x scope)
-  (if (pair? x)
-      (compile* `(cons ',(car x)
-                       ',(cdr x))
-                scope)
-    (if (symbol? x)
-        (string-append "LISP.intern('"
-                       (escape-string (symbol->string x))
-                       "')")
-      (compile-literal x scope))))
+  (cond ((pair? x)
+         (compile* `(cons ',(car x)
+                          ',(cdr x))
+                   scope))
+        ((symbol? x)
+         (string-append "LISP.intern('"
+                        (escape-string (symbol->string x))
+                        "')"))
+        ((keyword? x)
+         (compile-keyword x))
+        (t (compile-literal x scope))))
 
 (defun compile-if (pred-node then-node else-node scope)
   (string-append "(LISP.isTrue("

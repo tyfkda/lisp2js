@@ -111,6 +111,29 @@
     return jsBoolToS(x instanceof Symbol);
   };
 
+  var Keyword = function(name) {
+    this.name = name;
+  };
+  Keyword.prototype = {
+    toString: function(inspect) {
+      return inspect ? ':' + this.name : this.name;
+    },
+  };
+  LISP['make-keyword'] = (function() {
+    var keywordTable = {};  // key(string) => Keyword object
+    return function(name) {
+      if (name in keywordTable)
+        return keywordTable[name];
+      return keywordTable[name] = new Keyword(name);
+    };
+  })();
+  LISP['keyword?'] = function(x) {
+    return jsBoolToS(x instanceof Keyword);
+  };
+  LISP['keyword->string'] = function(x) {
+    return x.name;
+  };
+
   LISP.type = function(x) {
     var type;
     if (x === LISP.nil || x === LISP.t)
@@ -120,6 +143,8 @@
       if (type === 'object') {
         if (x instanceof Symbol)
           type = 'symbol';
+        else if (x instanceof Keyword)
+          type = 'keyword';
         else if (x instanceof LISP.Cons)
           type = 'pair';
         else if (x instanceof Array)
@@ -576,6 +601,8 @@
         return LISP.nil;
       if (str === 't')
         return LISP.t;
+      if (str[0] === ':')
+        return LISP['make-keyword'](str.slice(1));
       if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
         return parseFloat(str);
       return LISP.intern(str);
