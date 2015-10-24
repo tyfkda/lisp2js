@@ -534,7 +534,7 @@
     },
     getLine: function() {
       var result = this.str || this.readLine();
-      this.str = null;
+      this.str = '';
       return result;
     },
     fetch: function() {
@@ -782,6 +782,9 @@
       if (!stream) {
         return LISP.error('Cannot open [' + fileName + ']');
       }
+
+      if (stream.match(/^#!/, true))
+        stream.getLine();  // Skip Shebang.
 
       var result;
       for (;;) {

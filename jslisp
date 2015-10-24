@@ -107,6 +107,9 @@
     var status = 0;
     if (compileOnly) {
       var text = fs.readFileSync(process.argv[index], 'utf-8');
+      var matchShebang = text.match(/^#!(.*)\n/);
+      if (matchShebang)
+        text = text.slice(matchShebang[0].length);
       runCodes(text, compileOnly);
     } else {
       LISP.load(process.argv[index]);
