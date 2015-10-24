@@ -199,7 +199,7 @@
         (t (error (string-append "compile-literal: [" s "]")))))
 
 (defun unary-op? (sym)
-  (member sym '(+ -)))
+  (member sym '(+ - ! ~)))
 
 (defun compile-unary-op (fn arg scope)
   (string-append "("
