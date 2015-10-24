@@ -135,13 +135,13 @@
   (hash-table-put! table "\\" "\\\\")
   (hash-table-put! table "\t" "\\t")
   (hash-table-put! table "\n" "\\n")
-  (hash-table-put! table "'" "\\'")
+  (hash-table-put! table "\"" "\\\"")
   (defun escape-char (c)
     (or (hash-table-get table c)
         c)))
 
 (defun escape-string (s)
-  (regexp-replace-all #/[\\\t\n']/ s
+  (regexp-replace-all #/[\\\t\n"]/ s  ;; "
                       (lambda (m) (escape-char (m)))))
 
 (defun escape-sym-char (c)
@@ -166,19 +166,19 @@
       (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
           (string-append "LISP."
                          s)
-        (string-append "LISP['"
+        (string-append "LISP[\""
                        (escape-string s)
-                       "']")))))
+                       "\"]")))))
 
 (defun compile-keyword (keyword)
-  (string-append "LISP['make-keyword']('"
+  (string-append "LISP[\"make-keyword\"](\""
                  (escape-string (keyword->string keyword))
-                 "')"))
+                 "\")"))
 
 (defun compile-string (str)
-  (string-append "'"
+  (string-append "\""
                  (escape-string str)
-                 "'"))
+                 "\""))
 
 (defun compile-vector (vect scope)
   (string-append "["
@@ -249,9 +249,9 @@
                           ',(cdr x))
                    scope))
         ((symbol? x)
-         (string-append "LISP.intern('"
+         (string-append "LISP.intern(\""
                         (escape-string (symbol->string x))
-                        "')"))
+                        "\")"))
         ((keyword? x)
          (compile-keyword x))
         (t (compile-literal x scope))))
