@@ -380,7 +380,12 @@
 
   var kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' };
   function inspectString(str) {
-    return '"' + str.replace(/[\\\t\n"]/g, function(m) { return kEscapeCharTable[m]; }) + '"';
+    var f = function(m) {
+      if (m in kEscapeCharTable)
+        return kEscapeCharTable[m];
+      return '\\x' + ('0' + m.charCodeAt(0).toString(16)).slice(-2);
+    };
+    return '"' + str.replace(/[\x00-\x1f"\\]/g, f) + '"';
   };
 
   LISP['x->string'] = makeString;
