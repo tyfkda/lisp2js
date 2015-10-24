@@ -64,14 +64,6 @@
     LISP['*macro-table*'][name] = func;
     return name;
   };
-  LISP['do-compile-defmacro'] = function(name, exp) {
-    var compiled = LISP.compile(exp);
-    return ("LISP['register-macro'](LISP.intern('" +
-            LISP['escape-string'](LISP['symbol->string'](name)) +
-            "'), " +
-            compiled +
-            ')');
-  };
   LISP['macroexpand-1'] = function(s) {
     if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
       return s;

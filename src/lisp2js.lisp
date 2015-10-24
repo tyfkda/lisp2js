@@ -97,9 +97,6 @@
     ((defun name params &body body)  (vector ':DEF
                                              (traverse* name scope)
                                              (traverse* `(lambda ,params ,@body) scope)))
-    ((defmacro name params &body body)  (vector ':DEFMACRO
-                                                name
-                                                `(lambda ,params ,@body)))
     ((new klass &rest args)  (vector ':NEW klass (traverse-args args new-scope)))
     (t (vector ':FUNCALL
                (traverse* (car s) scope)
@@ -338,8 +335,6 @@
                   (compile-new-scope extended-scope
                                      (compile-lambda params body scope extended-scope))))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
-    ((:DEFMACRO)  (do-compile-defmacro (vector-ref s 1)
-                                       (vector-ref s 2)))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     (t  (string-append "???" s "???"))))
 
