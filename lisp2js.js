@@ -59,15 +59,15 @@
                     console.log(str);
                   });
 
-  LISP['*macro-table*'] = {};
+  var macroTable = {};
   LISP['register-macro'] = function(name, func) {
-    LISP['*macro-table*'][name] = func;
+    macroTable[name] = func;
     return name;
   };
   LISP['macroexpand-1'] = function(s) {
-    if (!LISP['pair?'](s) || !(s.car in LISP['*macro-table*']))
+    if (!LISP['pair?'](s) || !(s.car in macroTable))
       return s;
-    var macrofn = LISP['*macro-table*'][s.car];
+    var macrofn = macroTable[s.car];
     return LISP.apply(macrofn, s.cdr);
   };
 
