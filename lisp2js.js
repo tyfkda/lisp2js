@@ -825,6 +825,7 @@ LISP.length = (function(ls){return ((function(loop){return (loop = (function(ls,
 LISP['last-pair'] = (function(ls){return ((LISP.isTrue(LISP['pair?'](LISP.cdr(ls))) ? (LISP['last-pair'](LISP.cdr(ls))) : (ls)));});
 LISP.member = (function(x, ls){return ((LISP.isTrue(LISP['null?'](ls)) ? (LISP.nil) : ((LISP.isTrue(LISP['eq?'](x, LISP.car(ls))) ? (ls) : (LISP.member(x, LISP.cdr(ls)))))));});
 LISP.assoc = (function(x, ls){return ((LISP.isTrue(LISP['null?'](ls)) ? (LISP.nil) : ((LISP.isTrue(LISP['eq?'](x, LISP.caar(ls))) ? (LISP.car(ls)) : (LISP.assoc(x, LISP.cdr(ls)))))));});
+LISP.acons = (function(key, datum, alist){return (LISP.cons(LISP.cons(key, datum), alist));});
 LISP.map = (function(f, ls){return ((LISP.isTrue(LISP['null?'](ls)) ? (LISP.nil) : (LISP.cons(f(LISP.car(ls)), LISP.map(f, LISP.cdr(ls))))));});
 LISP.append = (function(ls){var rest = LISP._getRestArgs(arguments, 1); return ((LISP.isTrue(LISP['null?'](rest)) ? (ls) : ((LISP.isTrue(LISP['null?'](ls)) ? (LISP.apply(LISP.append, rest)) : (LISP.cons(LISP.car(ls), LISP.apply(LISP.append, LISP.cdr(ls), rest)))))));});
 LISP.reverse = (function(ls){return ((function(loop){return (loop = (function(ls, acc){return ((LISP.isTrue(LISP['pair?'](ls)) ? (loop(LISP.cdr(ls), LISP.cons(LISP.car(ls), acc))) : (acc)));}), loop(ls, LISP.nil));})(LISP.nil));});

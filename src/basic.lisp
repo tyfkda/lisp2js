@@ -162,6 +162,9 @@
     (if (eq? x (caar ls)) (car ls)
       (assoc x (cdr ls)))))
 
+(defun acons (key datum alist)
+  (cons (cons key datum) alist))
+
 (defun map (f ls)
   (if (null? ls)
       ()
