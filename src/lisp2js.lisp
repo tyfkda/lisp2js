@@ -336,7 +336,7 @@
                                      (compile-lambda params body scope extended-scope))))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
-    (t  (string-append "???" s "???"))))
+    (t  (compile-error "Unknown AST node:" s))))
 
 (defun compile-error (&rest args)
   (error args))
