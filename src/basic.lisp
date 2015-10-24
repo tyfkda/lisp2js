@@ -81,6 +81,7 @@
       `(let1 ,g ,(car args)
          (if ,g ,g
            (or ,@(cdr args)))))))
+
 (defmacro do (&body body)
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
