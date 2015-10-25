@@ -39,6 +39,14 @@
   (and (symbol? sym)
        (scope-var? scope (get-receiver sym))))
 
+;; Get symbol which sits on the top of dot-concatenated symbol.
+;;   ex. foo.bar.baz => foo
+(defun get-receiver (sym)
+  (let ((s (symbol->string sym)))
+    (aif (string-scan s ".")
+         (intern (substring s 0 it))
+      sym)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
 (defmacro record (args param &body body)
@@ -110,14 +118,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compiler
-
-;; Get symbol which sits on the top of dot-concatenated symbol.
-;;   ex. foo.bar.baz => foo
-(defun get-receiver (sym)
-  (let ((s (symbol->string sym)))
-    (aif (string-scan s ".")
-         (intern (substring s 0 it))
-      sym)))
 
 (defun expand-args (args scope)
   (string-join (map (lambda (x) (compile* x scope))
