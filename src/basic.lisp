@@ -217,25 +217,12 @@
             dup)))
     (list ls)))
 
-(defun vector-map (proc vect)
-  (let* ((len (vector-length vect))
-         (new-vect (make-vector len)))
-    (let loop ((i 0))
-      (if (>= i len)
-          new-vect
-        (do (vector-set! new-vect i
-                         (proc (vector-ref vect i)))
-            (loop (+ i 1)))))))
-
 (defun vector->list (vect)
-  (let1 n (vector-length vect)
-    (if (<= n 0)
-        ()
-      (let loop ((i (- n 1))
-                 (acc ()))
-           (if (< i 0)
-               acc
-             (loop (- i 1) (cons (vector-ref vect i) acc)))))))
+  (let loop ((i (- (vector-length vect) 1))
+             (acc ()))
+       (if (< i 0)
+           acc
+         (loop (- i 1) (cons (vector-ref vect i) acc)))))
 
 (defun position-if (pred seq)
     (let loop ((p seq)

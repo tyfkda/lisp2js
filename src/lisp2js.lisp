@@ -177,10 +177,9 @@
 
 (defun compile-vector (vect scope)
   (string-append "["
-                 (let1 v (vector-map (lambda (x)
-                                       (compile-quote x scope))
-                                     vect)
-                   (v.join ", "))  ;; TODO: Fix this not to use Array#join/JavaScript.
+                 (string-join (map (lambda (x) (compile-quote x scope))
+                                   (vector->list vect))
+                              ", ")
                  "]"))
 
 (defun compile-regexp (regex)
