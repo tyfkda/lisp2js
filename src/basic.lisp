@@ -45,21 +45,21 @@
       ()
     (let ((clause (car clauses))
           (rest (cdr clauses)))
-      (if (eq? (car clause) t)
-          `(do ,@(cdr clause))
-        (if (null? (cdr clause))  ; cond ((foo))
-            (let ((g (gensym)))
-              `(let ((,g ,(car clause)))
-                 (if ,g ,g
-                   (cond ,@rest))))
-          (if (eq? (cadr clause) '=>)  ; cond ((foo) => bar)
-              (let ((g (gensym)))
-                `(let ((,g ,(car clause)))
-                   (if ,g (,(caddr clause) ,g)
-                     (cond ,@rest))))
-            `(if ,(car clause)  ; otherwise
-                 (do ,@(cdr clause))
-               (cond ,@rest))))))))
+      (cond ((eq? (car clause) t)
+             `(do ,@(cdr clause)))
+            ((null? (cdr clause))  ; cond ((foo))
+             (let ((g (gensym)))
+               `(let ((,g ,(car clause)))
+                  (if ,g ,g
+                    (cond ,@rest)))))
+            ((eq? (cadr clause) '=>)  ; cond ((foo) => bar)
+             (let ((g (gensym)))
+               `(let ((,g ,(car clause)))
+                  (if ,g (,(caddr clause) ,g)
+                    (cond ,@rest)))))
+            (t `(if ,(car clause)  ; otherwise
+                    (do ,@(cdr clause))
+                  (cond ,@rest)))))))
 
 (defmacro case (x &body clauses)
   (let1 value (gensym)
@@ -158,9 +158,9 @@
         (t (member x (cdr ls)))))
 
 (defun assoc (x ls)
-  (if (null? ls) nil
-    (if (eq? x (caar ls)) (car ls)
-      (assoc x (cdr ls)))))
+  (cond ((null? ls) nil)
+        ((eq? x (caar ls)) (car ls))
+        (t (assoc x (cdr ls)))))
 
 (defun acons (key datum alist)
   (cons (cons key datum) alist))
