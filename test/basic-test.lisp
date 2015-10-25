@@ -64,6 +64,7 @@
 
 ;; vector
 (test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
+(test "empty vector->list" '() (vector->list #()))
 
 ;; arithmetic operations
 (test "+" 6 (+ 1 2 3))
