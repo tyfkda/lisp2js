@@ -41,11 +41,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax Tree creator.
-(defun traverse-args (args scope)
-  (map (lambda (x)
-         (traverse* x scope))
-       args))
-
 (defmacro record (args param &body body)
   `(apply (lambda ,param ,@body)
           ,args))
@@ -62,42 +57,45 @@
                         (record (cdr ,value) ,(cdar clause) ,@(cdr clause))))))
                 clauses)))))
 
-(defun traverse-quoted-value (x)
-  (if (pair? x)
-      (vector :FUNCALL (vector :REF (if (proper-list? x) 'list 'list*))
-              (map traverse-quoted-value (dotted->proper x)))
-    (vector :CONST x)))
+(labels ((traverse-args (args scope)
+                        (map (lambda (x)
+                               (traverse* x scope))
+                             args))
+         (confirm-valid-params (params)
+                               (when params
+                                 (if (symbol? (car params))
+                                     (confirm-valid-params (cdr params))
+                                   (compile-error "function parameter must be symbol, but" (car params)))))
+         (traverse-quoted-value (x)
+                                (if (pair? x)
+                                    (vector :FUNCALL (vector :REF (if (proper-list? x) 'list 'list*))
+                                            (map traverse-quoted-value (dotted->proper x)))
+                                  (vector :CONST x))))
 
-(defun confirm-valid-params (params)
-  (when params
-    (if (symbol? (car params))
-        (confirm-valid-params (cdr params))
-      (compile-error "function parameter must be symbol, but" (car params)))))
-
-(defun traverse-list (s scope)
-  (record-case s
-    ((quote x)   (cond ((pair? x)  (vector :REF (scope-add-var scope (traverse-quoted-value x))))
-                       (t (vector :CONST x))))
-    ((if p thn &body els)  (vector :IF
-                                   (traverse* p scope)
-                                   (traverse* thn scope)
-                                   (if (null? els)
-                                       nil
-                                     (traverse* (car els) scope))))
-    ((set! x v)  (vector :SET! (traverse* x scope) (traverse* v scope)))
-    ((lambda params &body body)  (do (confirm-valid-params params)
-                                     (let ((new-scope (create-scope scope params)))
-                                       (vector :LAMBDA
-                                               new-scope
-                                               params
-                                               (traverse-args body new-scope)))))
-    ((def name value)  (vector :DEF
-                               (traverse* name scope)
-                               (traverse* value scope)))
-    ((new klass &rest args)  (vector :NEW klass (traverse-args args new-scope)))
-    (t (vector :FUNCALL
-               (traverse* (car s) scope)
-               (traverse-args (cdr s) scope)))))
+  (defun traverse-list (s scope)
+    (record-case s
+                 ((quote x)   (cond ((pair? x)  (vector :REF (scope-add-var scope (traverse-quoted-value x))))
+                                    (t (vector :CONST x))))
+                 ((if p thn &body els)  (vector :IF
+                                                (traverse* p scope)
+                                                (traverse* thn scope)
+                                                (if (null? els)
+                                                    nil
+                                                  (traverse* (car els) scope))))
+                 ((set! x v)  (vector :SET! (traverse* x scope) (traverse* v scope)))
+                 ((lambda params &body body)  (do (confirm-valid-params params)
+                                                  (let ((new-scope (create-scope scope params)))
+                                                    (vector :LAMBDA
+                                                            new-scope
+                                                            params
+                                                            (traverse-args body new-scope)))))
+                 ((def name value)  (vector :DEF
+                                            (traverse* name scope)
+                                            (traverse* value scope)))
+                 ((new klass &rest args)  (vector :NEW klass (traverse-args args new-scope)))
+                 (t (vector :FUNCALL
+                            (traverse* (car s) scope)
+                            (traverse-args (cdr s) scope))))))
 
 (defun traverse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))
