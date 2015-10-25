@@ -145,7 +145,7 @@
           type = 'symbol';
         else if (x instanceof Keyword)
           type = 'keyword';
-        else if (x instanceof LISP.Cons)
+        else if (x instanceof Cons)
           type = 'pair';
         else if (x instanceof Array)
           type = 'vector';
@@ -161,7 +161,7 @@
   };
 
   // Cons cell.
-  LISP.Cons = function(car, cdr, lineNo, path) {
+  var Cons = function(car, cdr, lineNo, path) {
     this.car = car;
     this.cdr = cdr;
 
@@ -171,7 +171,7 @@
     }
   };
 
-  LISP.Cons.prototype = {
+  Cons.prototype = {
     toString: (function() {
       var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
       return function(inspect) {
@@ -183,7 +183,7 @@
         var ss = [];
         var separator = '(';
         var p;
-        for (p = this; p instanceof LISP.Cons; p = p.cdr) {
+        for (p = this; p instanceof Cons; p = p.cdr) {
           ss.push(separator);
           ss.push(makeString(p.car, inspect));
           separator = ' ';
@@ -198,22 +198,22 @@
     })(),
     toArray: function() {
       var result = [];
-      for (var p = this; p instanceof LISP.Cons; p = p.cdr)
+      for (var p = this; p instanceof Cons; p = p.cdr)
         result.push(p.car);
       return result;
     },
   };
 
   LISP.cons = function(car, cdr) {
-    return new LISP.Cons(car, cdr);
+    return new Cons(car, cdr);
   };
   LISP.car = function(s) {
-    if (s instanceof LISP.Cons)
+    if (s instanceof Cons)
       return s.car;
     return s;
   };
   LISP.cdr = function(s) {
-    if (s instanceof LISP.Cons)
+    if (s instanceof Cons)
       return s.cdr;
     return LISP.nil;
   };
@@ -225,7 +225,7 @@
   };
 
   LISP['pair?'] = function(x) {
-    return jsBoolToS(x instanceof LISP.Cons);
+    return jsBoolToS(x instanceof Cons);
   };
   LISP.list = function() {
     var result = LISP.nil;
@@ -622,7 +622,7 @@
       for (;;) {
         var x = Reader.read(stream);
         if (x != null) {
-          result = new LISP.Cons(x, result, stream.lineNo, stream.path);
+          result = new Cons(x, result, stream.lineNo, stream.path);
           continue;
         }
 

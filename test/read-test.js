@@ -10,7 +10,7 @@
   function equals(x, y) {
     if (LISP['eq?'](x, y))
       return true;
-    if (x instanceof LISP.Cons && y instanceof LISP.Cons &&
+    if (LISP['pair?'](x) && LISP['pair?'](y) &&
         equals(LISP.car(x), LISP.car(y)) &&
         equals(LISP.cdr(x), LISP.cdr(y)))
       return true;
