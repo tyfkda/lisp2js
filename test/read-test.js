@@ -82,6 +82,7 @@
   test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), ",@abc");
 
   test('vector', [1, 2, 3], "#(1 2 3)");
+  test('quote in vector', [LISP.list(LISP.intern('quote'), LISP.intern('a'))], "#('a)");
 
   test('regexp', /abc/, "#/abc/");
 

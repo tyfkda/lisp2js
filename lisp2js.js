@@ -175,7 +175,9 @@
     toString: (function() {
       var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
       return function(inspect) {
-        if (LISP['symbol?'](this.car) && LISP['pair?'](this.cdr) && LISP['null?'](this.cdr.cdr) &&
+        if (this.car instanceof Symbol &&  // (symbol? car)
+            this.cdr instanceof Cons &&    // (pair? cdr)
+            this.cdr.cdr &&                // (null? (cdr cdr))
             this.car.name in abbrevTable) {
           return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect);
         }
