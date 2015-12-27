@@ -1,2 +1,4 @@
 /node_modules/
 /lisp2js.js.map
+
+.DS_Store
