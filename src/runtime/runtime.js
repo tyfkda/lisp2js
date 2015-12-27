@@ -606,17 +606,15 @@
       const result = []
       for (;;) {
         const x = Reader.read(stream)
-        if (x !== undefined) {
-          result.push(x)
-          continue
-        }
-
-        if (stream.match(/^\s*\)/)) {  // Close paren.
-          return result
-        }
-        // Error
-        throw new LISP.NoCloseParenException()
+        if (x == null)
+          break
+        result.push(x)
       }
+
+      if (stream.match(/^\s*\)/))  // Close paren.
+        return result
+      // Error
+      throw new LISP.NoCloseParenException()
     }
 
     static unescape(str) {
