@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/tyfkda/lisp2js#readme",
   "devDependencies": {
+    "babel-core": "^6.3.26",
     "babel-eslint": "^4.1.6",
     "babel-preset-es2015": "^6.3.13",
     "gulp": "^3.9.0",
