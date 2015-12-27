@@ -17,8 +17,8 @@
     return result;
   };
 
-  function jsBoolToS(x)  { return x ? LISP.t : LISP.nil; }
-  function arguments2Array(args, start) {
+  var jsBoolToS = function(x)  { return x ? LISP.t : LISP.nil; }
+  var arguments2Array = function(args, start) {
     var len = args.length - start;
     if (len <= 0)
       return [];
@@ -28,7 +28,7 @@
     return array;
   };
 
-  function makeString(x, inspect) {
+  var makeString = function(x, inspect) {
     if (x === LISP.nil)
       return 'nil';
     if (x === LISP.t)
@@ -381,7 +381,7 @@
   };
 
   var kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' };
-  function inspectString(str) {
+  var inspectString = function(str) {
     var f = function(m) {
       if (m in kEscapeCharTable)
         return kEscapeCharTable[m];
@@ -490,7 +490,7 @@
   LISP['regexp-replace-all'] = function(re, str, fn) {
     if (!re.global)
       re = eval(re.toString() + 'g')
-    return str.replace(re, function (match) {
+    return str.replace(re, function(match) {
       return fn(function() {  // TODO: handle arguments.
         return match;
       });
