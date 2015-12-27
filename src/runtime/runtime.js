@@ -156,7 +156,7 @@
   LISP['eq?'] = (x, y) => jsBoolToS(x === y)
 
   // Cons cell.
-  const abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' }
+  const abbrevTable = {quote: '\'', quasiquote: '`', unquote: ',', 'unquote-splicing': ',@'}
   class Cons {
     constructor(car, cdr, lineNo, path) {
       this.car = car
@@ -350,7 +350,7 @@
 
   LISP['char->integer'] = (char, index) => char.charCodeAt(index)
 
-  const kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' }
+  const kEscapeCharTable = {'\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"'}
   const inspectString = (str) => {
     const f = (m) => {
       if (m in kEscapeCharTable)
@@ -580,27 +580,26 @@
       let result = LISP.nil
       for (;;) {
         const x = Reader.read(stream)
-        if (x != null) {
-          result = new Cons(x, result, stream.lineNo, stream.path)
-          continue
-        }
+        if (x == null)
+          break
+        result = new Cons(x, result, stream.lineNo, stream.path)
+      }
 
-        if (stream.match(/^\s*\)/)) {  // Close paren.
-          return LISP['reverse!'](result)
-        }
-        if (stream.match(kReSingleDot)) {  // Dot.
-          const last = Reader.read(stream)
-          if (last != null) {
-            if (stream.match(/^\s*\)/)) {  // Close paren.
-              const reversed = LISP['reverse!'](result)
-              result.cdr = last
-              return reversed
-            }
+      if (stream.match(/^\s*\)/)) {  // Close paren.
+        return LISP['reverse!'](result)
+      }
+      if (stream.match(kReSingleDot)) {  // Dot.
+        const last = Reader.read(stream)
+        if (last != null) {
+          if (stream.match(/^\s*\)/)) {  // Close paren.
+            const reversed = LISP['reverse!'](result)
+            result.cdr = last
+            return reversed
           }
         }
-        // Error
-        throw new LISP.NoCloseParenException()
       }
+      // Error
+      throw new LISP.NoCloseParenException()
     }
 
     static readVector(stream) {
@@ -635,7 +634,7 @@
     readTable[c] = fn
   }
 
-  LISP['set-macro-character']("'", (stream, c) => {
+  LISP['set-macro-character']('\'', (stream, c) => {
     return LISP.list(LISP.intern('quote'), Reader.read(stream))
   })
   LISP['set-macro-character']('`', (stream, c) => {
@@ -658,7 +657,6 @@
   LISP['read-line'] = (stream) => {
     return (stream || LISP['*stdin*']).getLine()
   }
-
 
   // For node JS.
   if (typeof process !== 'undefined') {
@@ -705,7 +703,8 @@
             if (string[string.length - 1] != '\n')
               this.chomped = true
             else
-              string = string.slice(0, string.length - 1)  // Remove last '\n' to avoid last empty line.
+              // Remove last '\n' to avoid last empty line.
+              string = string.slice(0, string.length - 1)
           }
           this.lines = string.split('\n')
           this.index = 0

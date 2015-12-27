@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 //-*- mode:js -*-
 
-(function() {
+(() => {
   'use strict'
 
-  var LISP
+  let LISP
 
   // Run codes.
-  var runCodes = function(codes, compile) {
-    var stream = new LISP.StrStream(codes)
-    var result
+  const runCodes = (codes, compile) => {
+    const stream = new LISP.StrStream(codes)
+    let result
     for (;;) {
-      var s = LISP.read(stream)
+      const s = LISP.read(stream)
       if (s == null)
         return result
 
@@ -25,27 +25,27 @@
   }
 
   // Read-Eval-Print loop.
-  var repl = function() {
+  const repl = () => {
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
 
-    var tty = require('tty')
-    var isatty = tty.isatty(0)  // Whether the stdin is a tty.
-    var prompt = '> '
-    var inputs = []
+    const tty = require('tty')
+    const isatty = tty.isatty(0)  // Whether the stdin is a tty.
+    const prompt = '> '
+    const inputs = []
 
     if (isatty)
       process.stdout.write(prompt)
-    process.stdin.on('data', function (chunk) {
+    process.stdin.on('data', (chunk) => {
       inputs.push(chunk)
       try {
-        var code = inputs.join('')
+        const code = inputs.join('')
         if (code.match(/^\s*$/)) {
-          inputs = []
+          inputs.length = 0
         } else {
-          var result = runCodes(code, compileOnly)
+          const result = runCodes(code, compileOnly)
           // Otherwise input should be consumed.
-          inputs = []
+          inputs.length = 0
           if (isatty)
             console.log(LISP['x->string'](result, 10))
         }
@@ -59,12 +59,12 @@
           console.error(e)
           if (!isatty)
             process.exit(1)
-          inputs = []
+          inputs.length = 0
           process.stdout.write(prompt)
         }
       }
     })
-    process.stdin.on('end', function () {
+    process.stdin.on('end', () => {
       if (inputs.length > 0) {
         console.error('Input not terminated: [' + inputs + ']')
         process.exit(1)
@@ -75,15 +75,14 @@
   }
 
   // Run script.
-  var fs = require('fs')
-
+  const fs = require('fs')
 
   // Main.
-  var translator = null
-  var index = 2
-  var compileOnly = false
+  let translator = null
+  let index = 2
+  let compileOnly = false
   for (; index < process.argv.length; ++index) {
-    var option = process.argv[index]
+    const option = process.argv[index]
     if (option == '-c') {
       compileOnly = true
       continue
@@ -112,10 +111,10 @@
   // Process command line argument as a script file.
   try {
     LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1))
-    var status = 0
+    let status = 0
     if (compileOnly) {
-      var text = fs.readFileSync(process.argv[index], 'utf-8')
-      var matchShebang = text.match(/^#!(.*)\n/)
+      const text = fs.readFileSync(process.argv[index], 'utf-8')
+      const matchShebang = text.match(/^#!(.*)\n/)
       if (matchShebang)
         text = text.slice(matchShebang[0].length)
       runCodes(text, compileOnly)
@@ -126,7 +125,7 @@
     }
     if (status)
       process.exit(status)
-  } catch(e) {
+  } catch (e) {
     process.stderr.write(e.toString() + '\n')
     process.exit(1)
   }

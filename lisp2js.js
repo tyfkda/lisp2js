@@ -176,7 +176,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   // Cons cell.
-  var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
+  var abbrevTable = { quote: '\'', quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
 
   var Cons = (function () {
     function Cons(car, cdr, lineNo, path) {
@@ -669,30 +669,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var result = LISP.nil;
         for (;;) {
           var x = Reader.read(stream);
-          if (x != null) {
-            result = new Cons(x, result, stream.lineNo, stream.path);
-            continue;
-          }
+          if (x == null) break;
+          result = new Cons(x, result, stream.lineNo, stream.path);
+        }
 
-          if (stream.match(/^\s*\)/)) {
-            // Close paren.
-            return LISP['reverse!'](result);
-          }
-          if (stream.match(kReSingleDot)) {
-            // Dot.
-            var last = Reader.read(stream);
-            if (last != null) {
-              if (stream.match(/^\s*\)/)) {
-                // Close paren.
-                var reversed = LISP['reverse!'](result);
-                result.cdr = last;
-                return reversed;
-              }
+        if (stream.match(/^\s*\)/)) {
+          // Close paren.
+          return LISP['reverse!'](result);
+        }
+        if (stream.match(kReSingleDot)) {
+          // Dot.
+          var last = Reader.read(stream);
+          if (last != null) {
+            if (stream.match(/^\s*\)/)) {
+              // Close paren.
+              var reversed = LISP['reverse!'](result);
+              result.cdr = last;
+              return reversed;
             }
           }
-          // Error
-          throw new LISP.NoCloseParenException();
         }
+        // Error
+        throw new LISP.NoCloseParenException();
       }
     }, {
       key: 'readVector',
@@ -731,7 +729,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     readTable[c] = fn;
   };
 
-  LISP['set-macro-character']("'", function (stream, c) {
+  LISP['set-macro-character']('\'', function (stream, c) {
     return LISP.list(LISP.intern('quote'), Reader.read(stream));
   });
   LISP['set-macro-character']('`', function (stream, c) {
@@ -808,7 +806,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               var string = left + buffer.slice(0, n).toString();
               this.chomped = false;
               if (string.length > 0) {
-                if (string[string.length - 1] != '\n') this.chomped = true;else string = string.slice(0, string.length - 1); // Remove last '\n' to avoid last empty line.
+                if (string[string.length - 1] != '\n') this.chomped = true;else
+                  // Remove last '\n' to avoid last empty line.
+                  string = string.slice(0, string.length - 1);
               }
               this.lines = string.split('\n');
               this.index = 0;
