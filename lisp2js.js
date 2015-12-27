@@ -1,10 +1,11 @@
-(function(createLisp) {
+(function(createLisp, installEval) {
   'use strict';
 
   var g = ((typeof window !== 'undefined') ? window :
            (typeof GLOBAL !== 'undefined') ? GLOBAL : {})
 
   var LISP = createLisp(g)
+  installEval(LISP);
 
   if (typeof module !== 'undefined')
     module.exports = LISP;
@@ -75,10 +76,6 @@
       return s;
     var macrofn = macroTable[s.car];
     return LISP.apply(macrofn, s.cdr);
-  };
-
-  LISP.eval = function(exp) {
-    return eval(LISP.compile(exp));
   };
 
   LISP.error = function() {
@@ -922,4 +919,10 @@ LISP["compile-error"] = (function(){var args = LISP._getRestArgs(arguments, 0); 
 LISP.compile = (function(s){return ((function(top$2dscope){return ((function(tree){return (LISP["compile-new-scope"](top$2dscope, LISP["compile*"](tree, top$2dscope)));})(LISP["traverse*"](s, top$2dscope)));})(LISP["create-scope"](LISP.nil, LISP.nil)));});
 
   return LISP;
+}, function(LISP) {
+  // Using eval JS function prevent uglify to mangle local variable names,
+  // so put such code here.
+  LISP.eval = function(exp) {
+    return eval(LISP.compile(exp));
+  };
 });
