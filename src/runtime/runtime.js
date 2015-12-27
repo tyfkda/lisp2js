@@ -82,10 +82,19 @@
     throw arguments2Array(arguments, 0).join(', ')
   }
 
+  // Base class.
+  class SObject {
+  }
+
   // Symbol.
-  class Symbol {
+  class Symbol extends SObject {
     constructor(name) {
+      super()
       this.name = name
+    }
+
+    static getTypeName() {
+      return 'symbol'
     }
 
     toString() {
@@ -111,9 +120,14 @@
   })()
   LISP['symbol?'] = x => jsBoolToS(x instanceof Symbol)
 
-  class Keyword {
+  class Keyword extends SObject {
     constructor(name) {
+      super()
       this.name = name
+    }
+
+    static getTypeName() {
+      return 'keyword'
     }
 
     toString(inspect) {
@@ -138,16 +152,10 @@
     else {
       type = typeof x
       if (type === 'object') {
-        if (x instanceof Symbol)
-          type = 'symbol'
-        else if (x instanceof Keyword)
-          type = 'keyword'
-        else if (x instanceof Cons)
-          type = 'pair'
-        else if (x instanceof Array)
+        if (x instanceof Array)
           type = 'vector'
-        else if (x instanceof HashTable)
-          type = 'table'
+        else if (x instanceof SObject)
+          type = x.constructor.getTypeName()
       }
     }
     return LISP.intern(type)
@@ -162,8 +170,9 @@
     unquote:            ',',
     'unquote-splicing': ',@'
   }
-  class Cons {
+  class Cons extends SObject {
     constructor(car, cdr, lineNo, path) {
+      super()
       this.car = car
       this.cdr = cdr
 
@@ -171,6 +180,10 @@
         this.lineNo = lineNo
         this.path = path
       }
+    }
+
+    static getTypeName() {
+      return 'pair'
     }
 
     toString(inspect) {
@@ -395,8 +408,10 @@
   }
   LISP.JS = global
 
-  class HashTable {
-    constructor() {}
+  class HashTable extends SObject {
+    static getTypeName() {
+      return 'table'
+    }
 
     toString() {
       let contents = ''
@@ -461,8 +476,9 @@
   }
 
   // Stream.
-  class Stream {
+  class Stream extends SObject {
     constructor() {
+      super()
       this.str = ''
       this.lineNo = 0
     }

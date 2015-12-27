@@ -2,11 +2,11 @@
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -89,13 +89,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     throw arguments2Array(arguments, 0).join(', ');
   };
 
+  // Base class.
+
+  var SObject = function SObject() {
+    _classCallCheck(this, SObject);
+  };
+
   // Symbol.
 
-  var Symbol = (function () {
+  var Symbol = (function (_SObject) {
+    _inherits(Symbol, _SObject);
+
     function Symbol(name) {
       _classCallCheck(this, Symbol);
 
-      this.name = name;
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Symbol).call(this));
+
+      _this.name = name;
+      return _this;
     }
 
     _createClass(Symbol, [{
@@ -103,10 +114,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function toString() {
         return this.name;
       }
+    }], [{
+      key: 'getTypeName',
+      value: function getTypeName() {
+        return 'symbol';
+      }
     }]);
 
     return Symbol;
-  })();
+  })(SObject);
 
   LISP['symbol->string'] = function (x) {
     return x.name;
@@ -129,11 +145,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return jsBoolToS(x instanceof Symbol);
   };
 
-  var Keyword = (function () {
+  var Keyword = (function (_SObject2) {
+    _inherits(Keyword, _SObject2);
+
     function Keyword(name) {
       _classCallCheck(this, Keyword);
 
-      this.name = name;
+      var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Keyword).call(this));
+
+      _this2.name = name;
+      return _this2;
     }
 
     _createClass(Keyword, [{
@@ -141,10 +162,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function toString(inspect) {
         return inspect ? ':' + this.name : this.name;
       }
+    }], [{
+      key: 'getTypeName',
+      value: function getTypeName() {
+        return 'keyword';
+      }
     }]);
 
     return Keyword;
-  })();
+  })(SObject);
 
   LISP['make-keyword'] = (function () {
     var keywordTable = {}; // key(string) => Keyword object
@@ -165,7 +191,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     if (x === LISP.nil || x === LISP.t) type = 'bool';else {
       type = typeof x === 'undefined' ? 'undefined' : _typeof(x);
       if (type === 'object') {
-        if (x instanceof Symbol) type = 'symbol';else if (x instanceof Keyword) type = 'keyword';else if (x instanceof Cons) type = 'pair';else if (x instanceof Array) type = 'vector';else if (x instanceof HashTable) type = 'table';
+        if (x instanceof Array) type = 'vector';else if (x instanceof SObject) type = x.constructor.getTypeName();
       }
     }
     return LISP.intern(type);
@@ -183,17 +209,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     'unquote-splicing': ',@'
   };
 
-  var Cons = (function () {
+  var Cons = (function (_SObject3) {
+    _inherits(Cons, _SObject3);
+
     function Cons(car, cdr, lineNo, path) {
       _classCallCheck(this, Cons);
 
-      this.car = car;
-      this.cdr = cdr;
+      var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Cons).call(this));
+
+      _this3.car = car;
+      _this3.cdr = cdr;
 
       if (lineNo != null) {
-        this.lineNo = lineNo;
-        this.path = path;
+        _this3.lineNo = lineNo;
+        _this3.path = path;
       }
+      return _this3;
     }
 
     _createClass(Cons, [{
@@ -229,10 +260,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           result.push(p.car);
         }return result;
       }
+    }], [{
+      key: 'getTypeName',
+      value: function getTypeName() {
+        return 'pair';
+      }
     }]);
 
     return Cons;
-  })();
+  })(SObject);
 
   LISP.cons = function (car, cdr) {
     return new Cons(car, cdr);
@@ -430,9 +466,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
   LISP.JS = global;
 
-  var HashTable = (function () {
+  var HashTable = (function (_SObject4) {
+    _inherits(HashTable, _SObject4);
+
     function HashTable() {
       _classCallCheck(this, HashTable);
+
+      return _possibleConstructorReturn(this, Object.getPrototypeOf(HashTable).apply(this, arguments));
     }
 
     _createClass(HashTable, [{
@@ -446,10 +486,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
         return '#table<' + contents + '>';
       }
+    }], [{
+      key: 'getTypeName',
+      value: function getTypeName() {
+        return 'table';
+      }
     }]);
 
     return HashTable;
-  })();
+  })(SObject);
 
   LISP.HashTable = HashTable;
 
@@ -522,12 +567,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   // Stream.
 
-  var Stream = (function () {
+  var Stream = (function (_SObject5) {
+    _inherits(Stream, _SObject5);
+
     function Stream() {
       _classCallCheck(this, Stream);
 
-      this.str = '';
-      this.lineNo = 0;
+      var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stream).call(this));
+
+      _this5.str = '';
+      _this5.lineNo = 0;
+      return _this5;
     }
 
     _createClass(Stream, [{
@@ -584,7 +634,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }]);
 
     return Stream;
-  })();
+  })(SObject);
 
   var StrStream = (function (_Stream) {
     _inherits(StrStream, _Stream);
@@ -592,11 +642,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function StrStream(str) {
       _classCallCheck(this, StrStream);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(StrStream).call(this));
+      var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrStream).call(this));
 
-      _this.str = str;
-      _this.lineNo = 1;
-      return _this;
+      _this6.str = str;
+      _this6.lineNo = 1;
+      return _this6;
     }
 
     _createClass(StrStream, [{
@@ -770,13 +820,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function FileStream(fd, path) {
           _classCallCheck(this, FileStream);
 
-          var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(FileStream).call(this));
+          var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(FileStream).call(this));
 
-          _this2.fd = fd;
-          _this2.path = path;
-          _this2.lines = [];
-          _this2.index = 0;
-          return _this2;
+          _this7.fd = fd;
+          _this7.path = path;
+          _this7.lines = [];
+          _this7.index = 0;
+          return _this7;
         }
 
         _createClass(FileStream, [{
