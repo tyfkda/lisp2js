@@ -673,10 +673,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           result = new Cons(x, result, stream.lineNo, stream.path);
         }
 
-        if (stream.match(/^\s*\)/)) {
-          // Close paren.
+        if (stream.match(/^\s*\)/)) // Close paren.
           return LISP['reverse!'](result);
-        }
         if (stream.match(kReSingleDot)) {
           // Dot.
           var last = Reader.read(stream);

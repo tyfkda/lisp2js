@@ -585,9 +585,8 @@
         result = new Cons(x, result, stream.lineNo, stream.path)
       }
 
-      if (stream.match(/^\s*\)/)) {  // Close paren.
+      if (stream.match(/^\s*\)/))  // Close paren.
         return LISP['reverse!'](result)
-      }
       if (stream.match(kReSingleDot)) {  // Dot.
         const last = Reader.read(stream)
         if (last != null) {
