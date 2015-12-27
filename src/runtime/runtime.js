@@ -83,13 +83,14 @@
   }
 
   // Symbol.
-  let Symbol = function(name) {
-    this.name = name
-  }
-  Symbol.prototype = {
-    toString: function() {
+  class Symbol {
+    constructor(name) {
+      this.name = name
+    }
+
+    toString() {
       return this.name
-    },
+    }
   }
 
   LISP['symbol->string'] = x => x.name
@@ -110,13 +111,14 @@
   })()
   LISP['symbol?'] = x => jsBoolToS(x instanceof Symbol)
 
-  const Keyword = function(name) {
-    this.name = name
-  }
-  Keyword.prototype = {
-    toString: function(inspect) {
+  class Keyword {
+    constructor(name) {
+      this.name = name
+    }
+
+    toString(inspect) {
       return inspect ? ':' + this.name : this.name
-    },
+    }
   }
   LISP['make-keyword'] = (() => {
     const keywordTable = {}  // key(string) => Keyword object
@@ -144,7 +146,7 @@
           type = 'pair'
         else if (x instanceof Array)
           type = 'vector'
-        else if (x instanceof LISP.HashTable)
+        else if (x instanceof HashTable)
           type = 'table'
       }
     }
@@ -154,49 +156,48 @@
   LISP['eq?'] = (x, y) => jsBoolToS(x === y)
 
   // Cons cell.
-  const Cons = function(car, cdr, lineNo, path) {
-    this.car = car
-    this.cdr = cdr
+  const abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' }
+  class Cons {
+    constructor(car, cdr, lineNo, path) {
+      this.car = car
+      this.cdr = cdr
 
-    if (lineNo != null) {
-      this.lineNo = lineNo
-      this.path = path
-    }
-  }
-
-  Cons.prototype = {
-    toString: (() => {
-      const abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' }
-      return function(inspect) {
-        if (this.car instanceof Symbol &&  // (symbol? car)
-            this.cdr instanceof Cons &&    // (pair? cdr)
-            this.cdr.cdr &&                // (null? (cdr cdr))
-            this.car.name in abbrevTable) {
-          return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
-        }
-
-        const ss = []
-        let separator = '('
-        let p
-        for (p = this; p instanceof Cons; p = p.cdr) {
-          ss.push(separator)
-          ss.push(makeString(p.car, inspect))
-          separator = ' '
-        }
-        if (p !== LISP.nil) {
-          ss.push(' . ')
-          ss.push(makeString(p, inspect))
-        }
-        ss.push(')')
-        return ss.join('')
+      if (lineNo != null) {
+        this.lineNo = lineNo
+        this.path = path
       }
-    })(),
-    toArray: function() {
+    }
+
+    toString(inspect) {
+      if (this.car instanceof Symbol &&  // (symbol? car)
+          this.cdr instanceof Cons &&    // (pair? cdr)
+          this.cdr.cdr &&                // (null? (cdr cdr))
+          this.car.name in abbrevTable) {
+        return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
+      }
+
+      const ss = []
+      let separator = '('
+      let p
+      for (p = this; p instanceof Cons; p = p.cdr) {
+        ss.push(separator)
+        ss.push(makeString(p.car, inspect))
+        separator = ' '
+      }
+      if (p !== LISP.nil) {
+        ss.push(' . ')
+        ss.push(makeString(p, inspect))
+      }
+      ss.push(')')
+      return ss.join('')
+    }
+
+    toArray() {
       const result = []
       for (let p = this; p instanceof Cons; p = p.cdr)
         result.push(p.car)
       return result
-    },
+    }
   }
 
   LISP.cons = (car, cdr) => new Cons(car, cdr)
@@ -389,9 +390,10 @@
   }
   LISP.JS = global
 
-  LISP.HashTable = function() {}
-  LISP.HashTable.prototype = {
-    toString: function() {
+  class HashTable {
+    constructor() {}
+
+    toString() {
       let contents = ''
       for (let k in this) {
         if (!(this.hasOwnProperty(k)))
@@ -401,12 +403,13 @@
         contents += k + ':' + this[k]
       }
       return '#table<' + contents + '>'
-    },
+    }
   }
+  LISP.HashTable = HashTable
 
   // Hash table.
-  LISP['make-hash-table'] = () => new LISP.HashTable()
-  LISP['hash-table?'] = x => x instanceof LISP.HashTable
+  LISP['make-hash-table'] = () => new HashTable()
+  LISP['hash-table?'] = x => x instanceof HashTable
   LISP['hash-table-exists?'] = (hash, x) => x in hash ? LISP.t : LISP.nil
   LISP['hash-table-get'] = function(hash, x) {
     if (x in hash)
@@ -453,26 +456,27 @@
   }
 
   // Stream.
-  const Stream = function() {
-    this.str = ''
-    this.lineNo = 0
-  }
-  Stream.prototype = {
-    close: function() {},
-    peek: function() {
+  class Stream {
+    constructor() {
+      this.str = ''
+      this.lineNo = 0
+    }
+
+    close() {}
+    peek() {
       const result = this.fetch()
       if (result == null)
         return result
       return this.str[0]
-    },
-    getc: function() {
+    }
+    getc() {
       const c = this.peek()
       if (c == null)
         return c
       this.str = this.str.slice(1)
       return c
-    },
-    match: function(regexp, keep) {
+    }
+    match(regexp, keep) {
       const result = this.fetch()
       if (result == null)
         return result
@@ -481,16 +485,16 @@
       if (m && !keep)
         this.str = RegExp.rightContext
       return m
-    },
-    eof: function() {
+    }
+    eof() {
       return this.str == null
-    },
-    getLine: function() {
+    }
+    getLine() {
       const result = this.str || this.readLine()
       this.str = ''
       return result
-    },
-    fetch: function() {
+    }
+    fetch() {
       if (this.str == null)
         return null
 
@@ -500,17 +504,19 @@
         ++this.lineNo
       }
       return this.str
-    },
+    }
   }
 
-  const StrStream = function(str) {
-    Stream.call(this)
-    this.str = str
-    this.lineNo = 1
-  }
-  StrStream.prototype = Object.create(Stream.prototype)
-  StrStream.prototype.readLine = function() {
-    return null
+  class StrStream extends Stream {
+    constructor(str) {
+      super()
+      this.str = str
+      this.lineNo = 1
+    }
+
+    readLine() {
+      return null
+    }
   }
   LISP.StrStream = StrStream
 
@@ -527,8 +533,8 @@
 
   const readTable = {}
 
-  const Reader = {
-    read: (stream) => {
+  class Reader {
+    static read(stream) {
       do {
         if (stream.eof())
           return null
@@ -556,9 +562,9 @@
       if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
         return Reader.readSymbolOrNumber(m[1])
       return undefined
-    },
+    }
 
-    readSymbolOrNumber: (str) => {
+    static readSymbolOrNumber(str) {
       if (str === 'nil')
         return LISP.nil
       if (str === 't')
@@ -568,9 +574,9 @@
       if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
         return parseFloat(str)
       return LISP.intern(str)
-    },
+    }
 
-    readList: (stream) => {
+    static readList(stream) {
       let result = LISP.nil
       for (;;) {
         const x = Reader.read(stream)
@@ -595,9 +601,9 @@
         // Error
         throw new LISP.NoCloseParenException()
       }
-    },
+    }
 
-    readVector: (stream) => {
+    static readVector(stream) {
       const result = []
       for (;;) {
         const x = Reader.read(stream)
@@ -612,9 +618,9 @@
         // Error
         throw new LISP.NoCloseParenException()
       }
-    },
+    }
 
-    unescape: (str) => {
+    static unescape(str) {
       return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, (_1, _2, hex, c) => {
         if (hex)
           return String.fromCharCode(parseInt(hex, 16))
@@ -622,7 +628,7 @@
           return kReadUnescapeTable[c]
         return c
       })
-    },
+    }
   }
 
   LISP['set-macro-character'] = (c, fn) => {
@@ -658,18 +664,18 @@
   if (typeof process !== 'undefined') {
     const fs = require('fs')
 
-    LISP.FileStream = (() => {
-      const BUFFER_SIZE = 4096
-      const buffer = new Buffer(BUFFER_SIZE)
-      const FileStream = function(fd, path) {
-        Stream.call(this)
+    const BUFFER_SIZE = 4096
+    const buffer = new Buffer(BUFFER_SIZE)
+    class FileStream extends Stream {
+      constructor(fd, path) {
+        super()
         this.fd = fd
         this.path = path
         this.lines = []
         this.index = 0
       }
-      FileStream.prototype = Object.create(Stream.prototype)
-      FileStream.prototype.close = function() {
+
+      close() {
         if (this.fd == null)
           return
         fs.closeSync(this.fd)
@@ -678,7 +684,7 @@
         this.str = null
         this.chomped = false
       }
-      FileStream.prototype.readLine = function() {
+      readLine() {
         for (;;) {
           let left = ''
           if (this.index < this.lines.length) {
@@ -705,8 +711,8 @@
           this.index = 0
         }
       }
-      return FileStream
-    })()
+    }
+    LISP.FileStream = FileStream
 
     LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd, '*stdin*')
     LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*')
