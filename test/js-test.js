@@ -28,13 +28,13 @@
     test('if-true', 2, '(if 1 2 3)')
     test('if-false', 3, '(if nil 2 3)')
     test('if-false2', false, '(if nil 2)')
-    test('set!', 123, '(do (def xyz nil) (set! xyz 123) xyz)')
+    test('set!', 123, '(progn (def xyz nil) (set! xyz 123) xyz)')
     test('lambda', 2222, '((lambda (x) (+ x x)) 1111)')
     test('nested-lambda', 3, '(((lambda (x) (lambda (y) (+ x y))) 1) 2)')
     test('lambda-rest', LISP.list(1, 2, 3),
          '((lambda (x &rest y) (cons x y)) 1 2 3)')
     test('lambda-rest2', LISP.list(1), '((lambda (x &rest y) (cons x y)) 1)')
-    test('def', 123, '(do (def x 123) x)')
+    test('def', 123, '(progn (def x 123) x)')
     test('new', [], '(new Array)')
     test('+', 6, '(+ 1 2 3)')
 

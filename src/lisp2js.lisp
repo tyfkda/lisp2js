@@ -91,12 +91,12 @@
                                                     nil
                                                   (traverse* (car els) scope))))
                  ((set! x v)  (vector :SET! (traverse* x scope) (traverse* v scope)))
-                 ((lambda params &body body)  (do (confirm-valid-params params)
-                                                  (let ((new-scope (create-scope scope params)))
-                                                    (vector :LAMBDA
-                                                            new-scope
-                                                            params
-                                                            (traverse-args body new-scope)))))
+                 ((lambda params &body body)  (progn (confirm-valid-params params)
+                                                     (let ((new-scope (create-scope scope params)))
+                                                       (vector :LAMBDA
+                                                               new-scope
+                                                               params
+                                                               (traverse-args body new-scope)))))
                  ((def name value)  (vector :DEF
                                             (traverse* name scope)
                                             (traverse* value scope)))

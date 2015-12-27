@@ -883,21 +883,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var body = LISP._getRestArgs(arguments, 2);return LISP["list*"](LISP.intern("let"), LISP.list(LISP.list(name, value)), body);
   });
   LISP["register-macro"](LISP.intern("let*"), function (pairs) {
-    var body = LISP._getRestArgs(arguments, 1);return LISP.isTrue(LISP["null?"](pairs)) ? LISP["list*"](LISP.intern("do"), body) : LISP.list(LISP.intern("let1"), LISP.caar(pairs), LISP.cadar(pairs), LISP["list*"](LISP.intern("let*"), LISP.cdr(pairs), body));
+    var body = LISP._getRestArgs(arguments, 1);return LISP.isTrue(LISP["null?"](pairs)) ? LISP["list*"](LISP.intern("progn"), body) : LISP.list(LISP.intern("let1"), LISP.caar(pairs), LISP.cadar(pairs), LISP["list*"](LISP.intern("let*"), LISP.cdr(pairs), body));
   });
   LISP["register-macro"](LISP.intern("when"), function (pred) {
-    var body = LISP._getRestArgs(arguments, 1);return LISP.list(LISP.intern("if"), pred, LISP["list*"](LISP.intern("do"), body));
+    var body = LISP._getRestArgs(arguments, 1);return LISP.list(LISP.intern("if"), pred, LISP["list*"](LISP.intern("progn"), body));
   });
   LISP["register-macro"](LISP.intern("unless"), function (pred) {
-    var body = LISP._getRestArgs(arguments, 1);return LISP.list(LISP.intern("if"), pred, LISP.nil, LISP["list*"](LISP.intern("do"), body));
+    var body = LISP._getRestArgs(arguments, 1);return LISP.list(LISP.intern("if"), pred, LISP.nil, LISP["list*"](LISP.intern("progn"), body));
   });
   LISP["register-macro"](LISP.intern("cond"), function () {
     var clauses = LISP._getRestArgs(arguments, 0);return LISP.isTrue(LISP["null?"](clauses)) ? LISP.nil : (function (clause, rest) {
-      return LISP.isTrue(LISP["eq?"](LISP.car(clause), LISP.t)) ? LISP["list*"](LISP.intern("do"), LISP.cdr(clause)) : LISP.isTrue(LISP["null?"](LISP.cdr(clause))) ? (function (g) {
+      return LISP.isTrue(LISP["eq?"](LISP.car(clause), LISP.t)) ? LISP["list*"](LISP.intern("progn"), LISP.cdr(clause)) : LISP.isTrue(LISP["null?"](LISP.cdr(clause))) ? (function (g) {
         return LISP.list(LISP.intern("let"), LISP.list(LISP.list(g, LISP.car(clause))), LISP.list(LISP.intern("if"), g, g, LISP["list*"](LISP.intern("cond"), rest)));
       })(LISP.gensym()) : LISP.isTrue(LISP["eq?"](LISP.cadr(clause), LISP.intern("=>"))) ? (function (g) {
         return LISP.list(LISP.intern("let"), LISP.list(LISP.list(g, LISP.car(clause))), LISP.list(LISP.intern("if"), g, LISP.list(LISP.caddr(clause), g), LISP["list*"](LISP.intern("cond"), rest)));
-      })(LISP.gensym()) : LISP.list(LISP.intern("if"), LISP.car(clause), LISP["list*"](LISP.intern("do"), LISP.cdr(clause)), LISP["list*"](LISP.intern("cond"), rest));
+      })(LISP.gensym()) : LISP.list(LISP.intern("if"), LISP.car(clause), LISP["list*"](LISP.intern("progn"), LISP.cdr(clause)), LISP["list*"](LISP.intern("cond"), rest));
     })(LISP.car(clauses), LISP.cdr(clauses));
   });
   LISP["register-macro"](LISP.intern("case"), function (x) {
@@ -917,14 +917,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP.list(LISP.intern("let1"), g, LISP.car(args), LISP.list(LISP.intern("if"), g, g, LISP["list*"](LISP.intern("or"), LISP.cdr(args))));
     })(LISP.gensym());
   });
-  LISP["register-macro"](LISP.intern("do"), function () {
+  LISP["register-macro"](LISP.intern("progn"), function () {
     var body = LISP._getRestArgs(arguments, 0);return LISP.isTrue(LISP["null?"](body)) ? LISP.nil : LISP.isTrue(LISP["null?"](LISP.cdr(body))) ? LISP.car(body) : LISP["list*"](LISP.intern("let"), LISP.nil, body);
   });
   LISP["register-macro"](LISP.intern("aif"), function (expr, thn) {
     var els = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("let1"), LISP.intern("it"), expr, LISP["list*"](LISP.intern("if"), LISP.intern("it"), thn, els));
   });
   LISP["register-macro"](LISP.intern("awhen"), function (expr) {
-    var body = LISP._getRestArgs(arguments, 1);return LISP.list(LISP.intern("aif"), expr, LISP["list*"](LISP.intern("do"), body));
+    var body = LISP._getRestArgs(arguments, 1);return LISP.list(LISP.intern("aif"), expr, LISP["list*"](LISP.intern("progn"), body));
   });
   LISP["register-macro"](LISP.intern("awhile"), function (expr) {
     var body = LISP._getRestArgs(arguments, 1);return (function (loop) {
@@ -1069,7 +1069,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var body = LISP._getRestArgs(arguments, 1);return (function () {
       var __8 = LISP.list(0),
           __9 = LISP.list(1);return function (i, limit, loop) {
-        return LISP.list(LISP.intern("let1"), limit, LISP.cadr(params), LISP.list(LISP.intern("let"), loop, LISP.list(LISP["list*"](i, __8)), LISP.list(LISP.intern("if"), LISP.list(LISP.intern("<"), i, limit), LISP["list*"](LISP.intern("do"), LISP.append(body, LISP.list(LISP.list(loop, LISP["list*"](LISP.intern("+"), i, __9))))), LISP.caddr(params))));
+        return LISP.list(LISP.intern("let1"), limit, LISP.cadr(params), LISP.list(LISP.intern("let"), loop, LISP.list(LISP["list*"](i, __8)), LISP.list(LISP.intern("if"), LISP.list(LISP.intern("<"), i, limit), LISP["list*"](LISP.intern("progn"), LISP.append(body, LISP.list(LISP.list(loop, LISP["list*"](LISP.intern("+"), i, __9))))), LISP.caddr(params))));
       };
     })()(LISP.car(params), LISP.gensym(), LISP.gensym());
   });

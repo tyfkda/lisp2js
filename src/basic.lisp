@@ -26,19 +26,19 @@
 
 (defmacro let* (pairs &body body)
   (if (null? pairs)
-      `(do ,@body)
+      `(progn ,@body)
     `(let1 ,(caar pairs) ,(cadar pairs)
        (let* ,(cdr pairs)
          ,@body))))
 
 (defmacro when (pred &body body)
   `(if ,pred
-       (do ,@body)))
+       (progn ,@body)))
 
 (defmacro unless (pred &body body)
   `(if ,pred
        nil
-     (do ,@body)))
+     (progn ,@body)))
 
 (defmacro cond (&body clauses)
   (if (null? clauses)
@@ -46,7 +46,7 @@
     (let ((clause (car clauses))
           (rest (cdr clauses)))
       (cond ((eq? (car clause) t)
-             `(do ,@(cdr clause)))
+             `(progn ,@(cdr clause)))
             ((null? (cdr clause))  ; cond ((foo))
              (let ((g (gensym)))
                `(let ((,g ,(car clause)))
@@ -58,7 +58,7 @@
                   (if ,g (,(caddr clause) ,g)
                     (cond ,@rest)))))
             (t `(if ,(car clause)  ; otherwise
-                    (do ,@(cdr clause))
+                    (progn ,@(cdr clause))
                   (cond ,@rest)))))))
 
 (defmacro case (x &body clauses)
@@ -90,7 +90,7 @@
          (if ,g ,g
            (or ,@(cdr args)))))))
 
-(defmacro do (&body body)
+(defmacro progn (&body body)
   (cond ((null? body) nil)
         ((null? (cdr body)) (car body))
         (t `(let ()
@@ -102,7 +102,7 @@
 
 (defmacro awhen (expr &body body)
   `(aif ,expr
-        (do ,@body)))
+        (progn ,@body)))
 
 (defmacro awhile (expr &body body)
   (let ((loop (gensym)))
@@ -193,8 +193,8 @@
       (let loop ((p args)
                  (q (cdr args)))
         (if (null? (cdr q))
-            (do (set-cdr! p (car q))
-                args)
+            (progn (set-cdr! p (car q))
+                   args)
           (loop q (cdr q)))))))
 
 (defun last-pair (ls)
@@ -267,8 +267,8 @@
     `(let1 ,limit ,(cadr params)
        (let ,loop ((,i 0))
             (if (< ,i ,limit)
-                (do ,@body
-                    (,loop (+ ,i 1)))
+                (progn ,@body
+                       (,loop (+ ,i 1)))
               ,(caddr params))))))
 
 (defmacro dolist (pair &body body)

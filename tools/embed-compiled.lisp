@@ -12,8 +12,8 @@
       (let loop ((acc ()))
            (aif (read-line stream)
                 (loop (cons it acc))
-             (do (close stream)
-                 (reverse! acc)))))))
+             (progn (close stream)
+                    (reverse! acc)))))))
 
 (defun main (argv)
   (when (null? (cdr argv))
