@@ -15,7 +15,7 @@ gulp.task('default', [], () => {
 
 gulp.task('babel', () => {
   gulp.src('./runtime.js')
-    .pipe(sourcemaps.init({loadMaps:true}))
+    .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(babel())
     .pipe(rename('lisp2js.js'))
     .pipe(sourcemaps.write('./'))
@@ -24,7 +24,7 @@ gulp.task('babel', () => {
 
 gulp.task('uglify', () => {
   gulp.src('./lisp2js.js')
-    .pipe(sourcemaps.init({loadMaps:true}))
+    .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(babel())
     .pipe(uglify().on('error', gutil.log))
     .pipe(rename('lisp2js.min.js'))
@@ -33,8 +33,9 @@ gulp.task('uglify', () => {
 })
 
 gulp.task('lint', () => {
-  return gulp.src(['src/runtime/runtime.js',
-                   'jslisp'])
+  return gulp.src(['src/**/*.js',
+                   'test/**/*.js',
+                   'gulpfile.babel.js'])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.failOnError())

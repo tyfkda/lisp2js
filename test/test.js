@@ -1,13 +1,13 @@
-(function() {
+(() => {
   'use strict'
 
-  var LISP = require('../lisp2js')
+  const LISP = require('../lisp2js')
 
-  function print(value) {
+  const print = (value) => {
     console.log(value)
   }
 
-  function equals(x, y) {
+  const equals = (x, y) => {
     if (LISP['eq?'](x, y))
       return true
     if (LISP['pair?'](x) && LISP['pair?'](y) &&
@@ -21,35 +21,35 @@
     return false
   }
 
-  function evalExpression(expression) {
-    var stream = new LISP.StrStream(expression)
-    var result
+  const evalExpression = (expression) => {
+    const stream = new LISP.StrStream(expression)
+    let result
     for (;;) {
-      var s = LISP.read(stream)
+      const s = LISP.read(stream)
       if (s == null)
         return result
       result = LISP.eval(s)
     }
   }
 
-  function test(title, expected, expression) {
+  const test = (title, expected, expression) => {
     process.stdout.write('Testing ' + title + '... ')
-    var result = evalExpression(expression)
+    const result = evalExpression(expression)
     if (equals(expected, result)) {
       print('ok')
       return
     }
 
-    console.error("\x1b[1;31m[ERROR]\x1b[0;39m")
-    console.error("  expected " + expected + ' : actual ' + result)
+    console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
+    console.error('  expected ' + expected + ' : actual ' + result)
     process.exit(1)
   }
 
-  function fail(title, expression) {
+  const fail = (title, expression) => {
     process.stdout.write('Testing ' + title + '... ')
     try {
-      var result = evalExpression(expression)
-      console.error("\x1b[1;31m[ERROR]\x1b[0;39m")
+      const result = evalExpression(expression)
+      console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
       console.error('  Failure expected, but succeeded! [' + result + ']')
       process.exit(1)
     } catch (e) {
@@ -80,23 +80,23 @@
   test('+', 6, '(+ 1 2 3)')
 
   // Vector.
-  test('vector', [1, 'foo', LISP.list(2, LISP.intern('bar'))], "(vector 1 \"foo\" '(2 bar))")
+  test('vector', [1, 'foo', LISP.list(2, LISP.intern('bar'))], '(vector 1 "foo" \'(2 bar))')
   test('vector-length', 3, '(vector-length #(1 2 3))')
   test('vector-ref', 2, '(vector-ref #(1 2 3) 1)')
 
   // Macros.
-  test('defmacro', false, ("(defmacro nil! (x) (list 'def x 'nil))" +
-                           "(nil! xyz)" +
-                           "xyz"))
+  test('defmacro', false, ('(defmacro nil! (x) (list \'def x \'nil))' +
+                           '(nil! xyz)' +
+                           'xyz'))
 
   // Field reference.
-  test('refer-field', 123, ("(def h (make-hash-table))" +
-                            "(set! h.x 123)" +
-                            "h.x"))
+  test('refer-field', 123, ('(def h (make-hash-table))' +
+                            '(set! h.x 123)' +
+                            'h.x'))
 
   // Fail cases
   fail('invalid-apply', '(1 2 3)')
   fail('invalid-param', '(lambda (nil t 1) 2)')
 
-  print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m")
+  print('\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m')
 })()

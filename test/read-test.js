@@ -1,13 +1,13 @@
-(function() {
+(() => {
   'use strict'
 
-  var LISP = require('../src/runtime/runtime')
+  const LISP = require('../src/runtime/runtime')
 
-  function print(value) {
+  const print = (value) => {
     console.log(value)
   }
 
-  function equals(x, y) {
+  const equals = (x, y) => {
     if (LISP['eq?'](x, y))
       return true
     if (LISP['pair?'](x) && LISP['pair?'](y) &&
@@ -21,24 +21,24 @@
     return false
   }
 
-  function test(title, expected, expression) {
+  const test = (title, expected, expression) => {
     process.stdout.write('Testing ' + title + '... ')
-    var result = LISP['read-from-string'](expression)
+    let result = LISP['read-from-string'](expression)
     if (equals(expected, result)) {
       print('ok')
       return
     }
 
-    console.error("\x1b[1;31m[ERROR]\x1b[0;39m")
-    console.error("  expected " + expected + ' : actual ' + result)
+    console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
+    console.error('  expected ' + expected + ' : actual ' + result)
     process.exit(1)
   }
 
-  function fail(title, exception, code) {
+  const fail = (title, exception, code) => {
     process.stdout.write('Testing ' + title + '... ')
-    var errorMessage
+    let errorMessage
     try {
-      var result = LISP['read-from-string'](code)
+      const result = LISP['read-from-string'](code)
       errorMessage = 'Failure expected, but succeeded: result=' + result
     } catch (exc) {
       if (exc instanceof exception) {
@@ -48,7 +48,7 @@
       errorMessage = 'Unexpected exception: expected ' + exception + ' : actual ' + exc
     }
 
-    console.error("\x1b[1;31m[ERROR]\x1b[0;39m")
+    console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
     console.error('  ' + errorMessage)
     process.exit(1)
   }
@@ -70,23 +70,23 @@
   test('symbol', LISP.intern('symbol'), 'symbol')
   test('number like symbol', LISP.intern('1+'), '1+')
   test('non ascii character symbol', LISP.intern('Ｓｙｍｂｏｌ'), 'Ｓｙｍｂｏｌ')
-  test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), "'abc")
+  test('quote', LISP.list(LISP.intern('quote'), LISP.intern('abc')), '\'abc')
   test('string', 'abc', '"abc"')
   test('complex string', 'foo bar\nbaz', '"foo bar\nbaz"')
   test('double quote in string', '"', '"\\""')
   test('escape character', '\x1b', '"\x1b"')
   test('keyword', LISP['make-keyword']('keyword'), ':keyword')
 
-  test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), "`abc")
-  test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), ",abc")
-  test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), ",@abc")
+  test('quasiquote', LISP.list(LISP.intern('quasiquote'), LISP.intern('abc')), '`abc')
+  test('unquote', LISP.list(LISP.intern('unquote'), LISP.intern('abc')), ',abc')
+  test('unquote-splicing', LISP.list(LISP.intern('unquote-splicing'), LISP.intern('abc')), ',@abc')
 
-  test('vector', [1, 2, 3], "#(1 2 3)")
-  test('quote in vector', [LISP.list(LISP.intern('quote'), LISP.intern('a'))], "#('a)")
+  test('vector', [1, 2, 3], '#(1 2 3)')
+  test('quote in vector', [LISP.list(LISP.intern('quote'), LISP.intern('a'))], '#(\'a)')
 
-  test('regexp', /abc/, "#/abc/")
+  test('regexp', /abc/, '#/abc/')
 
   fail('no close paren', LISP.NoCloseParenException, '(1 2 3')
 
-  print("\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m")
+  print('\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m')
 })()
