@@ -79,7 +79,7 @@
 
 
   // Main.
-  var translator = "./lisp2js";
+  var translator = null;
   var index = 2;
   var compileOnly = false;
   for (; index < process.argv.length; ++index) {
@@ -95,6 +95,14 @@
     break;
   }
 
+  if (translator == null) {
+    try {
+      if (fs.statSync(__dirname + '/lisp2js.js').isFile())
+        translator = './lisp2js'
+    } catch (e) {
+      translator = './lisp2js.min'
+    }
+  }
   LISP = require(translator);
 
   if (index >= process.argv.length) {  // No input file name: read from stdin.
