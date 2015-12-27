@@ -1,10 +1,10 @@
 ((createLisp, installEval) => {
   'use strict'
 
-  var g = ((typeof window !== 'undefined') ? window :
-           (typeof GLOBAL !== 'undefined') ? GLOBAL : {})
+  const g = ((typeof window !== 'undefined') ? window :
+             (typeof GLOBAL !== 'undefined') ? GLOBAL : {})
 
-  let LISP = createLisp(g)
+  const LISP = createLisp(g)
   installEval(LISP)
 
   if (typeof module !== 'undefined')
@@ -14,28 +14,28 @@
 })((global) => {
   'use strict'
 
-  let LISP = {}
+  const LISP = {}
 
   // Convert JS array into Lisp list.
-  let arrayToList = (array) => {
+  const arrayToList = (array) => {
     let result = LISP.nil
     for (let i = array.length; --i >= 0; )
       result = LISP.cons(array[i], result)
     return result
   }
 
-  let jsBoolToS = x => x ? LISP.t : LISP.nil
-  let arguments2Array = (args, start) => {
-    let len = args.length - start
+  const jsBoolToS = x => x ? LISP.t : LISP.nil
+  const arguments2Array = (args, start) => {
+    const len = args.length - start
     if (len <= 0)
       return []
-    let array = new Array(len)
+    const array = new Array(len)
     for (let i = 0; i < len; ++i)
       array[i] = args[i + start]
     return array
   }
 
-  let makeString = (x, inspect) => {
+  const makeString = (x, inspect) => {
     if (x === LISP.nil)
       return 'nil'
     if (x === LISP.t)
@@ -66,7 +66,7 @@
                     console.log(str)
                   })
 
-  let macroTable = {}
+  const macroTable = {}
   LISP['register-macro'] = (name, func) => {
     macroTable[name] = func
     return name
@@ -74,7 +74,7 @@
   LISP['macroexpand-1'] = (s) => {
     if (!LISP['pair?'](s) || !(s.car in macroTable))
       return s
-    let macrofn = macroTable[s.car]
+    const macrofn = macroTable[s.car]
     return LISP.apply(macrofn, s.cdr)
   }
 
@@ -110,7 +110,7 @@
   })()
   LISP['symbol?'] = x => jsBoolToS(x instanceof Symbol)
 
-  let Keyword = function(name) {
+  const Keyword = function(name) {
     this.name = name
   }
   Keyword.prototype = {
@@ -154,7 +154,7 @@
   LISP['eq?'] = (x, y) => jsBoolToS(x === y)
 
   // Cons cell.
-  let Cons = function(car, cdr, lineNo, path) {
+  const Cons = function(car, cdr, lineNo, path) {
     this.car = car
     this.cdr = cdr
 
@@ -166,7 +166,7 @@
 
   Cons.prototype = {
     toString: (() => {
-      let abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' }
+      const abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' }
       return function(inspect) {
         if (this.car instanceof Symbol &&  // (symbol? car)
             this.cdr instanceof Cons &&    // (pair? cdr)
@@ -175,7 +175,7 @@
           return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
         }
 
-        let ss = []
+        const ss = []
         let separator = '('
         let p
         for (p = this; p instanceof Cons; p = p.cdr) {
@@ -192,7 +192,7 @@
       }
     })(),
     toArray: function() {
-      let result = []
+      const result = []
       for (let p = this; p instanceof Cons; p = p.cdr)
         result.push(p.car)
       return result
@@ -343,15 +343,15 @@
   LISP['string-ref'] = (str, index) => str[index]
   LISP.substring = (str, start, end) => str.slice(start, end)
   LISP['string-scan'] = (str, item) => {
-    let index = str.indexOf(item)
+    const index = str.indexOf(item)
     return index >= 0 ? index : LISP.nil
   }
 
   LISP['char->integer'] = (char, index) => char.charCodeAt(index)
 
-  let kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' }
-  let inspectString = (str) => {
-    let f = (m) => {
+  const kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' }
+  const inspectString = (str) => {
+    const f = (m) => {
       if (m in kEscapeCharTable)
         return kEscapeCharTable[m]
       return '\\x' + ('0' + m.charCodeAt(0).toString(16)).slice(-2)
@@ -381,7 +381,7 @@
       for (let i = 1; i < arguments.length - 1; ++i)
         params.push(arguments[i])
       // Last argument for `apply` is expected as list (or nil).
-      let last = arguments[arguments.length - 1]
+      const last = arguments[arguments.length - 1]
       if (last !== LISP.nil)
         params = params.concat(last.toArray())
     }
@@ -422,7 +422,7 @@
   LISP['make-vector'] = (count, value) => {
     if (value === undefined)
       value = LISP.nil
-    let vector = new Array(count)
+    const vector = new Array(count)
     for (let i = 0; i < count; ++i)
       vector[i] = value
     return vector
@@ -437,8 +437,8 @@
   LISP.rxmatch = (re, str) => jsBoolToS(re.exec(str))
   LISP['regexp-replace-all'] = (re, str, fn) => {
     if (!re.global) {
-      let s = re.toString()
-      let i = s.lastIndexOf('/')
+      const s = re.toString()
+      const i = s.lastIndexOf('/')
       re = new RegExp(s.slice(1, i), s.slice(i + 1) + 'g')
     }
     return str.replace(re, (match) => {
@@ -448,36 +448,36 @@
     })
   }
   LISP['regexp->string'] = (x) => {
-    let s = x.toString()
+    const s = x.toString()
     return s.slice(1, s.length - 1)
   }
 
   // Stream.
-  let Stream = function() {
+  const Stream = function() {
     this.str = ''
     this.lineNo = 0
   }
   Stream.prototype = {
     close: function() {},
     peek: function() {
-      let result = this.fetch()
+      const result = this.fetch()
       if (result == null)
         return result
       return this.str[0]
     },
     getc: function() {
-      let c = this.peek()
+      const c = this.peek()
       if (c == null)
         return c
       this.str = this.str.slice(1)
       return c
     },
     match: function(regexp, keep) {
-      let result = this.fetch()
+      const result = this.fetch()
       if (result == null)
         return result
 
-      let m = this.str.match(regexp)
+      const m = this.str.match(regexp)
       if (m && !keep)
         this.str = RegExp.rightContext
       return m
@@ -486,7 +486,7 @@
       return this.str == null
     },
     getLine: function() {
-      let result = this.str || this.readLine()
+      const result = this.str || this.readLine()
       this.str = ''
       return result
     },
@@ -503,7 +503,7 @@
     },
   }
 
-  let StrStream = function(str) {
+  const StrStream = function(str) {
     Stream.call(this)
     this.str = str
     this.lineNo = 1
@@ -517,24 +517,24 @@
   // Reader.
   LISP.NoCloseParenException = function() {}
 
-  let kDelimitors = '\\s(){}\\[\\]\'`,;#"'
-  let kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])')
-  let kReSymbolOrNumber = RegExp('^([^' + kDelimitors + ']+)')
-  let kReadUnescapeTable = {
+  const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
+  const kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])')
+  const kReSymbolOrNumber = RegExp('^([^' + kDelimitors + ']+)')
+  const kReadUnescapeTable = {
     't': '\t',
     'n': '\n',
   }
 
-  let readTable = {}
+  const readTable = {}
 
-  let Reader = {
+  const Reader = {
     read: (stream) => {
       do {
         if (stream.eof())
           return null
       } while (stream.match(/^\s+/))
 
-      let c = stream.peek()
+      const c = stream.peek()
       if (c in readTable)
         return readTable[c](stream, stream.getc())
 
@@ -573,7 +573,7 @@
     readList: (stream) => {
       let result = LISP.nil
       for (;;) {
-        let x = Reader.read(stream)
+        const x = Reader.read(stream)
         if (x != null) {
           result = new Cons(x, result, stream.lineNo, stream.path)
           continue
@@ -583,10 +583,10 @@
           return LISP['reverse!'](result)
         }
         if (stream.match(kReSingleDot)) {  // Dot.
-          let last = Reader.read(stream)
+          const last = Reader.read(stream)
           if (last != null) {
             if (stream.match(/^\s*\)/)) {  // Close paren.
-              let reversed = LISP['reverse!'](result)
+              const reversed = LISP['reverse!'](result)
               result.cdr = last
               return reversed
             }
@@ -598,9 +598,9 @@
     },
 
     readVector: (stream) => {
-      let result = []
+      const result = []
       for (;;) {
-        let x = Reader.read(stream)
+        const x = Reader.read(stream)
         if (x !== undefined) {
           result.push(x)
           continue
@@ -636,7 +636,7 @@
     return LISP.list(LISP.intern('quasiquote'), Reader.read(stream))
   })
   LISP['set-macro-character'](',', (stream, c) => {
-    let c2 = stream.peek()
+    const c2 = stream.peek()
     let keyword = 'unquote'
     if (c2 == '@') {
       keyword = 'unquote-splicing'
@@ -660,8 +660,8 @@
 
     LISP.FileStream = (() => {
       const BUFFER_SIZE = 4096
-      let buffer = new Buffer(BUFFER_SIZE)
-      let FileStream = function(fd, path) {
+      const buffer = new Buffer(BUFFER_SIZE)
+      const FileStream = function(fd, path) {
         Stream.call(this)
         this.fd = fd
         this.path = path
@@ -690,7 +690,7 @@
 
           if (this.fd == null)
             return LISP.nil
-          let n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE)
+          const n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE)
           if (n <= 0)
             return null
           let string = left + buffer.slice(0, n).toString()
@@ -714,7 +714,7 @@
 
     LISP.open = (path, flag) => {
       try {
-        let fd = fs.openSync(path, flag || 'r')
+        const fd = fs.openSync(path, flag || 'r')
         return new LISP.FileStream(fd, path)
       } catch (e) {
         return LISP.nil
@@ -727,7 +727,7 @@
     }
 
     LISP.load = (fileName) => {
-      let stream = LISP.open(fileName)
+      const stream = LISP.open(fileName)
       if (!stream) {
         return LISP.error('Cannot open [' + fileName + ']')
       }
@@ -737,7 +737,7 @@
 
       let result
       for (;;) {
-        let s = LISP.read(stream)
+        const s = LISP.read(stream)
         if (s == null)
           break
         result = LISP.eval(s)
