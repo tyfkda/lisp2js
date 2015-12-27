@@ -6,6 +6,8 @@ TMPFN=runtime.js
 clean:
 	rm -rf lisp2js-old.js $(TMPFN)
 
+release:	lisp2js.min.js
+
 update-compiler:	lisp2js.js
 lisp2js.js:	$(SRCS) src/runtime/runtime.js
 	make ,$(TMPFN)
