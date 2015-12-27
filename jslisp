@@ -2,97 +2,97 @@
 //-*- mode:js -*-
 
 (function() {
-  'use strict';
+  'use strict'
 
-  var LISP;
+  var LISP
 
   // Run codes.
   var runCodes = function(codes, compile) {
-    var stream = new LISP.StrStream(codes);
-    var result;
+    var stream = new LISP.StrStream(codes)
+    var result
     for (;;) {
-      var s = LISP.read(stream);
+      var s = LISP.read(stream)
       if (s == null)
-        return result;
+        return result
 
       if (compile) {
-        result = LISP.compile(s);
-        LISP.print(result + ';\n');
+        result = LISP.compile(s)
+        LISP.print(result + ';\n')
       } else {
-        result = LISP.eval(s);
+        result = LISP.eval(s)
       }
     }
-  };
+  }
 
   // Read-Eval-Print loop.
   var repl = function() {
-    process.stdin.resume();
-    process.stdin.setEncoding('utf8');
+    process.stdin.resume()
+    process.stdin.setEncoding('utf8')
 
-    var tty = require('tty');
-    var isatty = tty.isatty(0);  // Whether the stdin is a tty.
-    var prompt = '> ';
-    var inputs = [];
+    var tty = require('tty')
+    var isatty = tty.isatty(0)  // Whether the stdin is a tty.
+    var prompt = '> '
+    var inputs = []
 
     if (isatty)
-      process.stdout.write(prompt);
+      process.stdout.write(prompt)
     process.stdin.on('data', function (chunk) {
-      inputs.push(chunk);
+      inputs.push(chunk)
       try {
-        var code = inputs.join('');
+        var code = inputs.join('')
         if (code.match(/^\s*$/)) {
-          inputs = [];
+          inputs = []
         } else {
-          var result = runCodes(code, compileOnly);
+          var result = runCodes(code, compileOnly)
           // Otherwise input should be consumed.
-          inputs = [];
+          inputs = []
           if (isatty)
-            console.log(LISP['x->string'](result, 10));
+            console.log(LISP['x->string'](result, 10))
         }
         if (isatty)
-          process.stdout.write(prompt);
+          process.stdout.write(prompt)
       } catch (e) {
         if (e instanceof LISP.NoCloseParenException) {
           // In REPL, if NoCloseParenException occurs,
           // a user keep typing so inputs should be kept.
         } else {
-          console.error(e);
+          console.error(e)
           if (!isatty)
-            process.exit(1);
-          inputs = [];
-          process.stdout.write(prompt);
+            process.exit(1)
+          inputs = []
+          process.stdout.write(prompt)
         }
       }
-    });
+    })
     process.stdin.on('end', function () {
       if (inputs.length > 0) {
-        console.error('Input not terminated: [' + inputs + ']');
-        process.exit(1);
-        return;
+        console.error('Input not terminated: [' + inputs + ']')
+        process.exit(1)
+        return
       }
-      process.exit(0);
-    });
-  };
+      process.exit(0)
+    })
+  }
 
   // Run script.
-  var fs = require('fs');
+  var fs = require('fs')
 
 
   // Main.
-  var translator = null;
-  var index = 2;
-  var compileOnly = false;
+  var translator = null
+  var index = 2
+  var compileOnly = false
   for (; index < process.argv.length; ++index) {
-    var option = process.argv[index];
+    var option = process.argv[index]
     if (option == '-c') {
-      compileOnly = true;
-      continue;
+      compileOnly = true
+      continue
     }
     if (option == '-t') {
-      translator = process.argv[++index];
-      continue;
+      translator = process.argv[++index]
+      continue
     }
-    break;
+    break
   }
 
   if (translator == null) {
@@ -103,31 +103,31 @@
       translator = './lisp2js.min'
     }
   }
-  LISP = require(translator);
+  LISP = require(translator)
 
   if (index >= process.argv.length) {  // No input file name: read from stdin.
-    return repl();
+    return repl()
   }
 
   // Process command line argument as a script file.
   try {
-    LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1));
-    var status = 0;
+    LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1))
+    var status = 0
     if (compileOnly) {
-      var text = fs.readFileSync(process.argv[index], 'utf-8');
-      var matchShebang = text.match(/^#!(.*)\n/);
+      var text = fs.readFileSync(process.argv[index], 'utf-8')
+      var matchShebang = text.match(/^#!(.*)\n/)
       if (matchShebang)
-        text = text.slice(matchShebang[0].length);
-      runCodes(text, compileOnly);
+        text = text.slice(matchShebang[0].length)
+      runCodes(text, compileOnly)
     } else {
-      LISP.load(process.argv[index]);
+      LISP.load(process.argv[index])
       if ('main' in LISP)
-        status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']));
+        status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']))
     }
     if (status)
-      process.exit(status);
+      process.exit(status)
   } catch(e) {
-    process.stderr.write(e.toString() + '\n');
-    process.exit(1);
+    process.stderr.write(e.toString() + '\n')
+    process.exit(1)
   }
-})();
+})()
