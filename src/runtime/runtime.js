@@ -1,4 +1,4 @@
-(function(createLisp, installEval) {
+((createLisp, installEval) => {
   'use strict'
 
   var g = ((typeof window !== 'undefined') ? window :
@@ -11,21 +11,21 @@
     module.exports = LISP
   else
     g.LISP = LISP
-})(function(global) {
+})((global) => {
   'use strict'
 
   let LISP = {}
 
   // Convert JS array into Lisp list.
-  let arrayToList = function(array) {
+  let arrayToList = (array) => {
     let result = LISP.nil
     for (let i = array.length; --i >= 0; )
       result = LISP.cons(array[i], result)
     return result
   }
 
-  let jsBoolToS = function(x)  { return x ? LISP.t : LISP.nil }
-  let arguments2Array = function(args, start) {
+  let jsBoolToS = x => x ? LISP.t : LISP.nil
+  let arguments2Array = (args, start) => {
     let len = args.length - start
     if (len <= 0)
       return []
@@ -35,7 +35,7 @@
     return array
   }
 
-  let makeString = function(x, inspect) {
+  let makeString = (x, inspect) => {
     if (x === LISP.nil)
       return 'nil'
     if (x === LISP.t)
@@ -43,7 +43,7 @@
     if (typeof x == 'string')
       return inspect ? inspectString(x) : x
     if (x instanceof Array)
-      return '#(' + x.map(function(v) { return makeString(v, inspect) }).join(' ') + ')'
+      return '#(' + x.map(v => makeString(v, inspect)).join(' ') + ')'
     if (x == null)  // null or undefined
       return '' + x
     return x.toString(inspect)
@@ -52,26 +52,26 @@
   LISP.nil = false
   LISP.t = true
 
-  LISP.isTrue = function(x) {
+  LISP.isTrue = (x) => {
     return x !== LISP.nil && x != null  // !(false || null || undefined)
   }
 
-  LISP._getRestArgs = function(args, start) {
+  LISP._getRestArgs = (args, start) => {
     return arrayToList(Array.prototype.slice.call(args, start))
   }
   LISP._output = (typeof(process) !== 'undefined'
-                  ? function(str) {  // for node.js.
+                  ? (str) => {  // for node.js.
                     process.stdout.write(str)
-                  } : function(str) {  // for browser.
+                  } : (str) => {  // for browser.
                     console.log(str)
                   })
 
   let macroTable = {}
-  LISP['register-macro'] = function(name, func) {
+  LISP['register-macro'] = (name, func) => {
     macroTable[name] = func
     return name
   }
-  LISP['macroexpand-1'] = function(s) {
+  LISP['macroexpand-1'] = (s) => {
     if (!LISP['pair?'](s) || !(s.car in macroTable))
       return s
     let macrofn = macroTable[s.car]
@@ -92,27 +92,23 @@
     },
   }
 
-  LISP['symbol->string'] = function(x) {
-    return x.name
-  }
+  LISP['symbol->string'] = x => x.name
 
-  LISP.intern = (function() {
-    let symbolTable = {}  // key(string) => Symbol object
-    return function(name) {
+  LISP.intern = (() => {
+    const symbolTable = {}  // key(string) => Symbol object
+    return (name) => {
       if (name in symbolTable)
         return symbolTable[name]
       return symbolTable[name] = new Symbol(name)
     }
   })()
-  LISP.gensym = (function() {
+  LISP.gensym = (() => {
     let index = 0
-    return function() {
+    return () => {
       return LISP.intern('__' + (++index))
     }
   })()
-  LISP['symbol?'] = function(x) {
-    return jsBoolToS(x instanceof Symbol)
-  }
+  LISP['symbol?'] = x => jsBoolToS(x instanceof Symbol)
 
   let Keyword = function(name) {
     this.name = name
@@ -122,22 +118,18 @@
       return inspect ? ':' + this.name : this.name
     },
   }
-  LISP['make-keyword'] = (function() {
-    let keywordTable = {}  // key(string) => Keyword object
-    return function(name) {
+  LISP['make-keyword'] = (() => {
+    const keywordTable = {}  // key(string) => Keyword object
+    return (name) => {
       if (name in keywordTable)
         return keywordTable[name]
       return keywordTable[name] = new Keyword(name)
     }
   })()
-  LISP['keyword?'] = function(x) {
-    return jsBoolToS(x instanceof Keyword)
-  }
-  LISP['keyword->string'] = function(x) {
-    return x.name
-  }
+  LISP['keyword?'] = x => jsBoolToS(x instanceof Keyword)
+  LISP['keyword->string'] = x => x.name
 
-  LISP.type = function(x) {
+  LISP.type = (x) => {
     let type
     if (x === LISP.nil || x === LISP.t)
       type = 'bool'
@@ -159,9 +151,7 @@
     return LISP.intern(type)
   }
 
-  LISP['eq?'] = function(x, y) {
-    return jsBoolToS(x === y)
-  }
+  LISP['eq?'] = (x, y) => jsBoolToS(x === y)
 
   // Cons cell.
   let Cons = function(car, cdr, lineNo, path) {
@@ -175,7 +165,7 @@
   }
 
   Cons.prototype = {
-    toString: (function() {
+    toString: (() => {
       let abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' }
       return function(inspect) {
         if (this.car instanceof Symbol &&  // (symbol? car)
@@ -209,36 +199,28 @@
     },
   }
 
-  LISP.cons = function(car, cdr) {
-    return new Cons(car, cdr)
-  }
-  LISP.car = function(s) {
+  LISP.cons = (car, cdr) => new Cons(car, cdr)
+  LISP.car = (s) => {
     if (s instanceof Cons)
       return s.car
     return s
   }
-  LISP.cdr = function(s) {
+  LISP.cdr = (s) => {
     if (s instanceof Cons)
       return s.cdr
     return LISP.nil
   }
-  LISP['set-car!'] = function(s, x) {
-    return (s.car = x)
-  }
-  LISP['set-cdr!'] = function(s, x) {
-    return (s.cdr = x)
-  }
+  LISP['set-car!'] = (s, x) => (s.car = x)
+  LISP['set-cdr!'] = (s, x) => (s.cdr = x)
 
-  LISP['pair?'] = function(x) {
-    return jsBoolToS(x instanceof Cons)
-  }
+  LISP['pair?'] = x => jsBoolToS(x instanceof Cons)
   LISP.list = function() {
     let result = LISP.nil
     for (let i = arguments.length; --i >= 0; )
       result = LISP.cons(arguments[i], result)
     return result
   }
-  LISP['reverse!'] = function(x) {
+  LISP['reverse!'] = (x) => {
     let rev = LISP.nil
     for (let ls = x; LISP['pair?'](ls); ) {
       let d = ls.cdr
@@ -249,12 +231,8 @@
     return rev
   }
 
-  LISP['number?'] = function(x) {
-    return jsBoolToS(typeof x === 'number')
-  }
-  LISP['number->string'] = function(x, n) {
-    return x.toString(n)
-  }
+  LISP['number?'] = x => jsBoolToS(typeof x === 'number')
+  LISP['number->string'] = (x, n) => x.toString(n)
   LISP['+'] = function() {
     if (arguments.length == 0)
       return 0
@@ -351,41 +329,29 @@
   }
 
   // String.
-  LISP['string?'] = function(x) {
-    return jsBoolToS(typeof x === 'string')
-  }
-  LISP['string=?'] = function(x, y) {
-    return jsBoolToS(x === y)
-  }
+  LISP['string?'] = x => jsBoolToS(typeof x === 'string')
+  LISP['string=?'] = (x, y) => jsBoolToS(x === y)
   LISP['string-append'] = function() {
     return arguments2Array(arguments, 0).join('')
   }
-  LISP['string-join'] = function(list, separator) {
+  LISP['string-join'] = (list, separator) => {
     if (list === LISP.nil)
       return ''
     return list.toArray().join(separator)
   }
-  LISP['string-length'] = function(str) {
-    return str.length
-  }
-  LISP['string-ref'] = function(str, index) {
-    return str[index]
-  }
-  LISP.substring = function(str, start, end) {
-    return str.slice(start, end)
-  }
-  LISP['string-scan'] = function(str, item) {
+  LISP['string-length'] = str => str.length
+  LISP['string-ref'] = (str, index) => str[index]
+  LISP.substring = (str, start, end) => str.slice(start, end)
+  LISP['string-scan'] = (str, item) => {
     let index = str.indexOf(item)
     return index >= 0 ? index : LISP.nil
   }
 
-  LISP['char->integer'] = function(char, index) {
-    return char.charCodeAt(index)
-  }
+  LISP['char->integer'] = (char, index) => char.charCodeAt(index)
 
   let kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' }
-  let inspectString = function(str) {
-    let f = function(m) {
+  let inspectString = (str) => {
+    let f = (m) => {
       if (m in kEscapeCharTable)
         return kEscapeCharTable[m]
       return '\\x' + ('0' + m.charCodeAt(0).toString(16)).slice(-2)
@@ -394,17 +360,17 @@
   }
 
   LISP['x->string'] = makeString
-  LISP.print = function(x) {
+  LISP.print = (x) => {
     LISP._output(makeString(x))
     return x
   }
-  LISP.puts = function(x) {
+  LISP.puts = (x) => {
     LISP._output(makeString(x))
     if (typeof(process) !== 'undefined')
       LISP._output('\n')
     return x
   }
-  LISP.write = function(x) {
+  LISP.write = (x) => {
     LISP._output(makeString(x, 10))  // 10 means true, and it is used as radix.
     return x
   }
@@ -439,29 +405,21 @@
   }
 
   // Hash table.
-  LISP['make-hash-table'] = function() {
-    return new LISP.HashTable()
-  }
-  LISP['hash-table?'] = function(x) {
-    return x instanceof LISP.HashTable
-  }
-  LISP['hash-table-exists?'] = function(hash, x) {
-    return x in hash ? LISP.t : LISP.nil
-  }
+  LISP['make-hash-table'] = () => new LISP.HashTable()
+  LISP['hash-table?'] = x => x instanceof LISP.HashTable
+  LISP['hash-table-exists?'] = (hash, x) => x in hash ? LISP.t : LISP.nil
   LISP['hash-table-get'] = function(hash, x) {
     if (x in hash)
       return hash[x]
     return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil
   }
-  LISP['hash-table-put!'] = function(hash, x, value) {
-    return hash[x] = value
-  }
+  LISP['hash-table-put!'] = (hash, x, value) => hash[x] = value
 
   // Vector.
   LISP.vector = function() {
     return arguments2Array(arguments, 0)
   }
-  LISP['make-vector'] = function(count, value) {
+  LISP['make-vector'] = (count, value) => {
     if (value === undefined)
       value = LISP.nil
     let vector = new Array(count)
@@ -469,39 +427,27 @@
       vector[i] = value
     return vector
   }
-  LISP['vector?'] = function(x) {
-    return jsBoolToS(x instanceof Array)
-  }
-  LISP['vector-length'] = function(vector) {
-    return vector.length
-  }
-  LISP['vector-ref'] = function(vector, index) {
-    return vector[index]
-  }
-  LISP['vector-set!'] = function(vector, index, value) {
-    return vector[index] = value
-  }
+  LISP['vector?'] = x => jsBoolToS(x instanceof Array)
+  LISP['vector-length'] = vector => vector.length
+  LISP['vector-ref'] = (vector, index) => vector[index]
+  LISP['vector-set!'] = (vector, index, value) => vector[index] = value
 
   // Regexp.
-  LISP['regexp?'] = function(x) {
-    return jsBoolToS(x instanceof RegExp)
-  }
-  LISP.rxmatch = function(re, str) {
-    return jsBoolToS(re.exec(str))
-  }
-  LISP['regexp-replace-all'] = function(re, str, fn) {
+  LISP['regexp?'] = x => jsBoolToS(x instanceof RegExp)
+  LISP.rxmatch = (re, str) => jsBoolToS(re.exec(str))
+  LISP['regexp-replace-all'] = (re, str, fn) => {
     if (!re.global) {
       let s = re.toString()
       let i = s.lastIndexOf('/')
       re = new RegExp(s.slice(1, i), s.slice(i + 1) + 'g')
     }
-    return str.replace(re, function(match) {
-      return fn(function() {  // TODO: handle arguments.
+    return str.replace(re, (match) => {
+      return fn(() => {  // TODO: handle arguments.
         return match
       })
     })
   }
-  LISP['regexp->string'] = function(x) {
+  LISP['regexp->string'] = (x) => {
     let s = x.toString()
     return s.slice(1, s.length - 1)
   }
@@ -582,7 +528,7 @@
   let readTable = {}
 
   let Reader = {
-    read: function(stream) {
+    read: (stream) => {
       do {
         if (stream.eof())
           return null
@@ -612,7 +558,7 @@
       return undefined
     },
 
-    readSymbolOrNumber: function(str) {
+    readSymbolOrNumber: (str) => {
       if (str === 'nil')
         return LISP.nil
       if (str === 't')
@@ -624,7 +570,7 @@
       return LISP.intern(str)
     },
 
-    readList: function(stream) {
+    readList: (stream) => {
       let result = LISP.nil
       for (;;) {
         let x = Reader.read(stream)
@@ -651,7 +597,7 @@
       }
     },
 
-    readVector: function(stream) {
+    readVector: (stream) => {
       let result = []
       for (;;) {
         let x = Reader.read(stream)
@@ -668,8 +614,8 @@
       }
     },
 
-    unescape: function(str) {
-      return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, function(_1, _2, hex, c) {
+    unescape: (str) => {
+      return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, (_1, _2, hex, c) => {
         if (hex)
           return String.fromCharCode(parseInt(hex, 16))
         if (c in kReadUnescapeTable)
@@ -679,17 +625,17 @@
     },
   }
 
-  LISP['set-macro-character'] = function(c, fn) {
+  LISP['set-macro-character'] = (c, fn) => {
     readTable[c] = fn
   }
 
-  LISP['set-macro-character']("'", function(stream, c) {
+  LISP['set-macro-character']("'", (stream, c) => {
     return LISP.list(LISP.intern('quote'), Reader.read(stream))
   })
-  LISP['set-macro-character']('`', function(stream, c) {
+  LISP['set-macro-character']('`', (stream, c) => {
     return LISP.list(LISP.intern('quasiquote'), Reader.read(stream))
   })
-  LISP['set-macro-character'](',', function(stream, c) {
+  LISP['set-macro-character'](',', (stream, c) => {
     let c2 = stream.peek()
     let keyword = 'unquote'
     if (c2 == '@') {
@@ -699,15 +645,11 @@
     return LISP.list(LISP.intern(keyword), Reader.read(stream))
   })
 
-  LISP.read = function(stream) {
-    return Reader.read(stream || LISP['*stdin*'])
-  }
+  LISP.read = stream => Reader.read(stream || LISP['*stdin*'])
 
-  LISP['read-from-string'] = function(str) {
-    return Reader.read(new StrStream(str))
-  }
+  LISP['read-from-string'] = str => Reader.read(new StrStream(str))
 
-  LISP['read-line'] = function(stream) {
+  LISP['read-line'] = (stream) => {
     return (stream || LISP['*stdin*']).getLine()
   }
 
@@ -716,7 +658,7 @@
   if (typeof process !== 'undefined') {
     const fs = require('fs')
 
-    LISP.FileStream = (function() {
+    LISP.FileStream = (() => {
       const BUFFER_SIZE = 4096
       let buffer = new Buffer(BUFFER_SIZE)
       let FileStream = function(fd, path) {
@@ -770,7 +712,7 @@
     LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*')
     LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd, '*stderr*')
 
-    LISP.open = function(path, flag) {
+    LISP.open = (path, flag) => {
       try {
         let fd = fs.openSync(path, flag || 'r')
         return new LISP.FileStream(fd, path)
@@ -779,12 +721,12 @@
       }
     }
 
-    LISP.close = function(stream) {
+    LISP.close = (stream) => {
       stream.close()
       return stream
     }
 
-    LISP.load = function(fileName) {
+    LISP.load = (fileName) => {
       let stream = LISP.open(fileName)
       if (!stream) {
         return LISP.error('Cannot open [' + fileName + ']')
@@ -805,9 +747,7 @@
     }
 
     // System
-    LISP.exit = function(code) {
-      process.exit(code)
-    }
+    LISP.exit = (code) => process.exit(code)
 
     LISP.jsrequire = require
   }
@@ -815,10 +755,8 @@
   /*==== EMBED COMPILED CODE HERE ====*/
 
   return LISP
-}, function(LISP) {
+}, (LISP) => {
   // Using eval JS function prevent uglify to mangle local variable names,
   // so put such code here.
-  LISP.eval = function(exp) {
-    return eval(LISP.compile(exp))
-  }
+  LISP.eval = (exp) => eval(LISP.compile(exp))
 })
