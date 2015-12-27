@@ -1,4 +1,4 @@
-(load "./test.lisp")
+(load "./test-util.lisp")
 
 ;; not
 (test "not-nil" t (not nil))

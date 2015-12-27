@@ -1,4 +1,4 @@
-(load "./test.lisp")
+(load "./test-util.lisp")
 
 (let1 scope (create-scope nil '(x y &rest z))
   (test "local-var?[x]" t (local-var? scope 'x))

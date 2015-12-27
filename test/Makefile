@@ -1,5 +1,7 @@
 all:	test
 
+.PHONY:	read-test basic-test compiler-test js-test example-test
+
 test:	read-test basic-test compiler-test js-test example-test
 
 read-test:
@@ -12,7 +14,7 @@ compiler-test:
 	../jslisp compiler-test.lisp
 
 js-test:
-	node ./test.js
+	node ./js-test.js
 
 example-test:
 	./example-test.sh
