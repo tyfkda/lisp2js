@@ -1,6 +1,14 @@
 'use strict';
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 (function (createLisp, installEval) {
   'use strict';
@@ -82,14 +90,23 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
   };
 
   // Symbol.
-  var Symbol = function Symbol(name) {
-    this.name = name;
-  };
-  Symbol.prototype = {
-    toString: function toString() {
-      return this.name;
+
+  var Symbol = (function () {
+    function Symbol(name) {
+      _classCallCheck(this, Symbol);
+
+      this.name = name;
     }
-  };
+
+    _createClass(Symbol, [{
+      key: 'toString',
+      value: function toString() {
+        return this.name;
+      }
+    }]);
+
+    return Symbol;
+  })();
 
   LISP['symbol->string'] = function (x) {
     return x.name;
@@ -112,14 +129,23 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     return jsBoolToS(x instanceof Symbol);
   };
 
-  var Keyword = function Keyword(name) {
-    this.name = name;
-  };
-  Keyword.prototype = {
-    toString: function toString(inspect) {
-      return inspect ? ':' + this.name : this.name;
+  var Keyword = (function () {
+    function Keyword(name) {
+      _classCallCheck(this, Keyword);
+
+      this.name = name;
     }
-  };
+
+    _createClass(Keyword, [{
+      key: 'toString',
+      value: function toString(inspect) {
+        return inspect ? ':' + this.name : this.name;
+      }
+    }]);
+
+    return Keyword;
+  })();
+
   LISP['make-keyword'] = (function () {
     var keywordTable = {}; // key(string) => Keyword object
     return function (name) {
@@ -135,11 +161,11 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
   };
 
   LISP.type = function (x) {
-    var type;
+    var type = undefined;
     if (x === LISP.nil || x === LISP.t) type = 'bool';else {
-      var type = typeof x === 'undefined' ? 'undefined' : _typeof(x);
+      type = typeof x === 'undefined' ? 'undefined' : _typeof(x);
       if (type === 'object') {
-        if (x instanceof Symbol) type = 'symbol';else if (x instanceof Keyword) type = 'keyword';else if (x instanceof Cons) type = 'pair';else if (x instanceof Array) type = 'vector';else if (x instanceof LISP.HashTable) type = 'table';
+        if (x instanceof Symbol) type = 'symbol';else if (x instanceof Keyword) type = 'keyword';else if (x instanceof Cons) type = 'pair';else if (x instanceof Array) type = 'vector';else if (x instanceof HashTable) type = 'table';
       }
     }
     return LISP.intern(type);
@@ -150,20 +176,24 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
   };
 
   // Cons cell.
-  var Cons = function Cons(car, cdr, lineNo, path) {
-    this.car = car;
-    this.cdr = cdr;
+  var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
 
-    if (lineNo != null) {
-      this.lineNo = lineNo;
-      this.path = path;
+  var Cons = (function () {
+    function Cons(car, cdr, lineNo, path) {
+      _classCallCheck(this, Cons);
+
+      this.car = car;
+      this.cdr = cdr;
+
+      if (lineNo != null) {
+        this.lineNo = lineNo;
+        this.path = path;
+      }
     }
-  };
 
-  Cons.prototype = {
-    toString: (function () {
-      var abbrevTable = { quote: "'", quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
-      return function (inspect) {
+    _createClass(Cons, [{
+      key: 'toString',
+      value: function toString(inspect) {
         if (this.car instanceof Symbol && // (symbol? car)
         this.cdr instanceof Cons && // (pair? cdr)
         this.cdr.cdr && // (null? (cdr cdr))
@@ -173,7 +203,7 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 
         var ss = [];
         var separator = '(';
-        var p;
+        var p = undefined;
         for (p = this; p instanceof Cons; p = p.cdr) {
           ss.push(separator);
           ss.push(makeString(p.car, inspect));
@@ -185,15 +215,19 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
         }
         ss.push(')');
         return ss.join('');
-      };
-    })(),
-    toArray: function toArray() {
-      var result = [];
-      for (var p = this; p instanceof Cons; p = p.cdr) {
-        result.push(p.car);
-      }return result;
-    }
-  };
+      }
+    }, {
+      key: 'toArray',
+      value: function toArray() {
+        var result = [];
+        for (var p = this; p instanceof Cons; p = p.cdr) {
+          result.push(p.car);
+        }return result;
+      }
+    }]);
+
+    return Cons;
+  })();
 
   LISP.cons = function (car, cdr) {
     return new Cons(car, cdr);
@@ -391,25 +425,35 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
   };
   LISP.JS = global;
 
-  LISP.HashTable = function () {};
-  LISP.HashTable.prototype = {
-    toString: function toString() {
-      var contents = '';
-      for (var k in this) {
-        if (!this.hasOwnProperty(k)) continue;
-        if (contents.length > 0) contents += ', ';
-        contents += k + ':' + this[k];
-      }
-      return '#table<' + contents + '>';
+  var HashTable = (function () {
+    function HashTable() {
+      _classCallCheck(this, HashTable);
     }
-  };
+
+    _createClass(HashTable, [{
+      key: 'toString',
+      value: function toString() {
+        var contents = '';
+        for (var k in this) {
+          if (!this.hasOwnProperty(k)) continue;
+          if (contents.length > 0) contents += ', ';
+          contents += k + ':' + this[k];
+        }
+        return '#table<' + contents + '>';
+      }
+    }]);
+
+    return HashTable;
+  })();
+
+  LISP.HashTable = HashTable;
 
   // Hash table.
   LISP['make-hash-table'] = function () {
-    return new LISP.HashTable();
+    return new HashTable();
   };
   LISP['hash-table?'] = function (x) {
-    return x instanceof LISP.HashTable;
+    return x instanceof HashTable;
   };
   LISP['hash-table-exists?'] = function (hash, x) {
     return x in hash ? LISP.t : LISP.nil;
@@ -472,59 +516,94 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
   };
 
   // Stream.
-  var Stream = function Stream() {
-    this.str = '';
-    this.lineNo = 0;
-  };
-  Stream.prototype = {
-    close: function close() {},
-    peek: function peek() {
-      var result = this.fetch();
-      if (result == null) return result;
-      return this.str[0];
-    },
-    getc: function getc() {
-      var c = this.peek();
-      if (c == null) return c;
-      this.str = this.str.slice(1);
-      return c;
-    },
-    match: function match(regexp, keep) {
-      var result = this.fetch();
-      if (result == null) return result;
 
-      var m = this.str.match(regexp);
-      if (m && !keep) this.str = RegExp.rightContext;
-      return m;
-    },
-    eof: function eof() {
-      return this.str == null;
-    },
-    getLine: function getLine() {
-      var result = this.str || this.readLine();
+  var Stream = (function () {
+    function Stream() {
+      _classCallCheck(this, Stream);
+
       this.str = '';
-      return result;
-    },
-    fetch: function fetch() {
-      if (this.str == null) return null;
-
-      if (this.str === '') {
-        if ((this.str = this.readLine()) == null) return undefined;
-        ++this.lineNo;
-      }
-      return this.str;
+      this.lineNo = 0;
     }
-  };
 
-  var StrStream = function StrStream(str) {
-    Stream.call(this);
-    this.str = str;
-    this.lineNo = 1;
-  };
-  StrStream.prototype = Object.create(Stream.prototype);
-  StrStream.prototype.readLine = function () {
-    return null;
-  };
+    _createClass(Stream, [{
+      key: 'close',
+      value: function close() {}
+    }, {
+      key: 'peek',
+      value: function peek() {
+        var result = this.fetch();
+        if (result == null) return result;
+        return this.str[0];
+      }
+    }, {
+      key: 'getc',
+      value: function getc() {
+        var c = this.peek();
+        if (c == null) return c;
+        this.str = this.str.slice(1);
+        return c;
+      }
+    }, {
+      key: 'match',
+      value: function match(regexp, keep) {
+        var result = this.fetch();
+        if (result == null) return result;
+
+        var m = this.str.match(regexp);
+        if (m && !keep) this.str = RegExp.rightContext;
+        return m;
+      }
+    }, {
+      key: 'eof',
+      value: function eof() {
+        return this.str == null;
+      }
+    }, {
+      key: 'getLine',
+      value: function getLine() {
+        var result = this.str || this.readLine();
+        this.str = '';
+        return result;
+      }
+    }, {
+      key: 'fetch',
+      value: function fetch() {
+        if (this.str == null) return null;
+
+        if (this.str === '') {
+          if ((this.str = this.readLine()) == null) return undefined;
+          ++this.lineNo;
+        }
+        return this.str;
+      }
+    }]);
+
+    return Stream;
+  })();
+
+  var StrStream = (function (_Stream) {
+    _inherits(StrStream, _Stream);
+
+    function StrStream(str) {
+      _classCallCheck(this, StrStream);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(StrStream).call(this));
+
+      _this.str = str;
+      _this.lineNo = 1;
+      return _this;
+    }
+
+    _createClass(StrStream, [{
+      key: 'readLine',
+      value: function readLine() {
+        return null;
+      }
+    }]);
+
+    return StrStream;
+  })(Stream);
+
   LISP.StrStream = StrStream;
 
   // Reader.
@@ -540,100 +619,113 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 
   var readTable = {};
 
-  var Reader = {
-    read: function read(stream) {
-      do {
-        if (stream.eof()) return null;
-      } while (stream.match(/^\s+/));
+  var Reader = (function () {
+    function Reader() {
+      _classCallCheck(this, Reader);
+    }
 
-      var c = stream.peek();
-      if (c in readTable) return readTable[c](stream, stream.getc());
+    _createClass(Reader, null, [{
+      key: 'read',
+      value: function read(stream) {
+        do {
+          if (stream.eof()) return null;
+        } while (stream.match(/^\s+/));
 
-      var m;
-      if (stream.match(/^\(/)) // Left paren '('.
-        return Reader.readList(stream);
-      if (stream.match(/^;[^\n]*\n?/)) // Line comment.
-        return Reader.read(stream);
-      if (m = stream.match(/^"((\\.|[^"\\])*)"/)) // string.
-        return Reader.unescape(m[1]);
-      if (stream.match(/^#\(/)) // vector.
-        return Reader.readVector(stream);
-      if (m = stream.match(/^#\/([^\/]*)\//)) // regexp TODO: Implement properly.
-        return new RegExp(m[1]);
-      if (stream.match(/^#\|(.|[\n\r])*?\|#/)) // Block comment.
-        return Reader.read(stream);
-      if (stream.match(kReSingleDot, true)) // Single dot.
+        var c = stream.peek();
+        if (c in readTable) return readTable[c](stream, stream.getc());
+
+        var m = undefined;
+        if (stream.match(/^\(/)) // Left paren '('.
+          return Reader.readList(stream);
+        if (stream.match(/^;[^\n]*\n?/)) // Line comment.
+          return Reader.read(stream);
+        if (m = stream.match(/^"((\\.|[^"\\])*)"/)) // string.
+          return Reader.unescape(m[1]);
+        if (stream.match(/^#\(/)) // vector.
+          return Reader.readVector(stream);
+        if (m = stream.match(/^#\/([^\/]*)\//)) // regexp TODO: Implement properly.
+          return new RegExp(m[1]);
+        if (stream.match(/^#\|(.|[\n\r])*?\|#/)) // Block comment.
+          return Reader.read(stream);
+        if (stream.match(kReSingleDot, true)) // Single dot.
+          return undefined;
+        if (m = stream.match(kReSymbolOrNumber)) // Symbol or number.
+          return Reader.readSymbolOrNumber(m[1]);
         return undefined;
-      if (m = stream.match(kReSymbolOrNumber)) // Symbol or number.
-        return Reader.readSymbolOrNumber(m[1]);
-      return undefined;
-    },
+      }
+    }, {
+      key: 'readSymbolOrNumber',
+      value: function readSymbolOrNumber(str) {
+        if (str === 'nil') return LISP.nil;
+        if (str === 't') return LISP.t;
+        if (str[0] === ':') return LISP['make-keyword'](str.slice(1));
+        if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/)) // Number.
+          return parseFloat(str);
+        return LISP.intern(str);
+      }
+    }, {
+      key: 'readList',
+      value: function readList(stream) {
+        var result = LISP.nil;
+        for (;;) {
+          var x = Reader.read(stream);
+          if (x != null) {
+            result = new Cons(x, result, stream.lineNo, stream.path);
+            continue;
+          }
 
-    readSymbolOrNumber: function readSymbolOrNumber(str) {
-      if (str === 'nil') return LISP.nil;
-      if (str === 't') return LISP.t;
-      if (str[0] === ':') return LISP['make-keyword'](str.slice(1));
-      if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/)) // Number.
-        return parseFloat(str);
-      return LISP.intern(str);
-    },
-
-    readList: function readList(stream) {
-      var result = LISP.nil;
-      for (;;) {
-        var x = Reader.read(stream);
-        if (x != null) {
-          result = new Cons(x, result, stream.lineNo, stream.path);
-          continue;
-        }
-
-        if (stream.match(/^\s*\)/)) {
-          // Close paren.
-          return LISP['reverse!'](result);
-        }
-        if (stream.match(kReSingleDot)) {
-          // Dot.
-          var last = Reader.read(stream);
-          if (last != null) {
-            if (stream.match(/^\s*\)/)) {
-              // Close paren.
-              var reversed = LISP['reverse!'](result);
-              result.cdr = last;
-              return reversed;
+          if (stream.match(/^\s*\)/)) {
+            // Close paren.
+            return LISP['reverse!'](result);
+          }
+          if (stream.match(kReSingleDot)) {
+            // Dot.
+            var last = Reader.read(stream);
+            if (last != null) {
+              if (stream.match(/^\s*\)/)) {
+                // Close paren.
+                var reversed = LISP['reverse!'](result);
+                result.cdr = last;
+                return reversed;
+              }
             }
           }
+          // Error
+          throw new LISP.NoCloseParenException();
         }
-        // Error
-        throw new LISP.NoCloseParenException();
       }
-    },
+    }, {
+      key: 'readVector',
+      value: function readVector(stream) {
+        var result = [];
+        for (;;) {
+          var x = Reader.read(stream);
+          if (x !== undefined) {
+            result.push(x);
+            continue;
+          }
 
-    readVector: function readVector(stream) {
-      var result = [];
-      for (;;) {
-        var x = Reader.read(stream);
-        if (x !== undefined) {
-          result.push(x);
-          continue;
+          if (stream.match(/^\s*\)/)) {
+            // Close paren.
+            return result;
+          }
+          // Error
+          throw new LISP.NoCloseParenException();
         }
-
-        if (stream.match(/^\s*\)/)) {
-          // Close paren.
-          return result;
-        }
-        // Error
-        throw new LISP.NoCloseParenException();
       }
-    },
+    }, {
+      key: 'unescape',
+      value: function unescape(str) {
+        return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, function (_1, _2, hex, c) {
+          if (hex) return String.fromCharCode(parseInt(hex, 16));
+          if (c in kReadUnescapeTable) return kReadUnescapeTable[c];
+          return c;
+        });
+      }
+    }]);
 
-    unescape: function unescape(str) {
-      return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, function (_1, _2, hex, c) {
-        if (hex) return String.fromCharCode(parseInt(hex, 16));
-        if (c in kReadUnescapeTable) return kReadUnescapeTable[c];
-        return c;
-      });
-    }
-  };
+    return Reader;
+  })();
 
   LISP['set-macro-character'] = function (c, fn) {
     readTable[c] = fn;
@@ -646,9 +738,9 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
     return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
   });
   LISP['set-macro-character'](',', function (stream, c) {
-    var c = stream.peek();
+    var c2 = stream.peek();
     var keyword = 'unquote';
-    if (c == '@') {
+    if (c2 == '@') {
       keyword = 'unquote-splicing';
       stream.getc();
     }
@@ -669,92 +761,109 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 
   // For node JS.
   if (typeof process !== 'undefined') {
-    var fs = require('fs');
+    (function () {
+      var fs = require('fs');
 
-    LISP.FileStream = (function () {
       var BUFFER_SIZE = 4096;
       var buffer = new Buffer(BUFFER_SIZE);
-      var FileStream = function FileStream(fd, path) {
-        Stream.call(this);
-        this.fd = fd;
-        this.path = path;
-        this.lines = [];
-        this.index = 0;
-      };
-      FileStream.prototype = Object.create(Stream.prototype);
-      FileStream.prototype.close = function () {
-        if (this.fd == null) return;
-        fs.closeSync(this.fd);
-        this.fd = null;
-        this.lines.length = this.index = 0;
-        this.str = null;
-        this.chomped = false;
-      };
-      FileStream.prototype.readLine = function () {
-        for (;;) {
-          var left = '';
-          if (this.index < this.lines.length) {
-            if (this.index < this.lines.length - 1 || !this.chomped) return this.lines[this.index++];
-            if (this.chomped) left = this.lines[this.index];
-          }
 
-          if (this.fd == null) return LISP.nil;
-          var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
-          if (n <= 0) return null;
-          var string = left + buffer.slice(0, n).toString();
-          this.chomped = false;
-          if (string.length > 0) {
-            if (string[string.length - 1] != '\n') this.chomped = true;else string = string.slice(0, string.length - 1); // Remove last '\n' to avoid last empty line.
+      var FileStream = (function (_Stream2) {
+        _inherits(FileStream, _Stream2);
+
+        function FileStream(fd, path) {
+          _classCallCheck(this, FileStream);
+
+          var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(FileStream).call(this));
+
+          _this2.fd = fd;
+          _this2.path = path;
+          _this2.lines = [];
+          _this2.index = 0;
+          return _this2;
+        }
+
+        _createClass(FileStream, [{
+          key: 'close',
+          value: function close() {
+            if (this.fd == null) return;
+            fs.closeSync(this.fd);
+            this.fd = null;
+            this.lines.length = this.index = 0;
+            this.str = null;
+            this.chomped = false;
           }
-          this.lines = string.split('\n');
-          this.index = 0;
+        }, {
+          key: 'readLine',
+          value: function readLine() {
+            for (;;) {
+              var left = '';
+              if (this.index < this.lines.length) {
+                if (this.index < this.lines.length - 1 || !this.chomped) return this.lines[this.index++];
+                if (this.chomped) left = this.lines[this.index];
+              }
+
+              if (this.fd == null) return LISP.nil;
+              var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
+              if (n <= 0) return null;
+              var string = left + buffer.slice(0, n).toString();
+              this.chomped = false;
+              if (string.length > 0) {
+                if (string[string.length - 1] != '\n') this.chomped = true;else string = string.slice(0, string.length - 1); // Remove last '\n' to avoid last empty line.
+              }
+              this.lines = string.split('\n');
+              this.index = 0;
+            }
+          }
+        }]);
+
+        return FileStream;
+      })(Stream);
+
+      LISP.FileStream = FileStream;
+
+      LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd, '*stdin*');
+      LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*');
+      LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd, '*stderr*');
+
+      LISP.open = function (path, flag) {
+        try {
+          var fd = fs.openSync(path, flag || 'r');
+          return new LISP.FileStream(fd, path);
+        } catch (e) {
+          return LISP.nil;
         }
       };
-      return FileStream;
+
+      LISP.close = function (stream) {
+        stream.close();
+        return stream;
+      };
+
+      LISP.load = function (fileName) {
+        var stream = LISP.open(fileName);
+        if (!stream) {
+          return LISP.error('Cannot open [' + fileName + ']');
+        }
+
+        if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
+
+        var result = undefined;
+        for (;;) {
+          var s = LISP.read(stream);
+          if (s == null) break;
+          result = LISP.eval(s);
+        }
+        LISP.close(stream);
+        return result;
+      };
+
+      // System
+      LISP.exit = function (code) {
+        return process.exit(code);
+      };
+
+      LISP.jsrequire = require;
     })();
-
-    LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd, '*stdin*');
-    LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*');
-    LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd, '*stderr*');
-
-    LISP.open = function (path, flag) {
-      try {
-        var fd = fs.openSync(path, flag || 'r');
-        return new LISP.FileStream(fd, path);
-      } catch (e) {
-        return LISP.nil;
-      }
-    };
-
-    LISP.close = function (stream) {
-      stream.close();
-      return stream;
-    };
-
-    LISP.load = function (fileName) {
-      var stream = LISP.open(fileName);
-      if (!stream) {
-        return LISP.error('Cannot open [' + fileName + ']');
-      }
-
-      if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
-
-      var result;
-      for (;;) {
-        var s = LISP.read(stream);
-        if (s == null) break;
-        result = LISP.eval(s);
-      }
-      LISP.close(stream);
-      return result;
-    };
-
-    // System
-    LISP.exit = function (code) {
-      process.exit(code);
-    };
-
-    LISP.jsrequire = require;
   }
 
   /*==== EMBED COMPILED CODE HERE ====*/
