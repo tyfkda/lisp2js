@@ -5,6 +5,7 @@ import uglify from 'gulp-uglify'
 import sourcemaps from 'gulp-sourcemaps'
 import rename from 'gulp-rename'
 import gutil from 'gulp-util'
+import eslint from 'gulp-eslint'
 
 const destDir = '.'
 
@@ -29,4 +30,12 @@ gulp.task('uglify', () => {
     .pipe(rename('lisp2js.min.js'))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(destDir))
+})
+
+gulp.task('lint', () => {
+  return gulp.src(['src/runtime/runtime.js',
+                   'jslisp'])
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failOnError())
 })
