@@ -1,10 +1,16 @@
-(function(scope, val) {
+(function(createLisp) {
   'use strict';
+
+  var g = ((typeof window !== 'undefined') ? window :
+           (typeof GLOBAL !== 'undefined') ? GLOBAL : {})
+
+  var LISP = createLisp(g)
+
   if (typeof module !== 'undefined')
-    module.exports = val;
+    module.exports = LISP;
   else
-    scope.LISP = val;
-})(this, (function() {
+    g.LISP = LISP;
+})(function(global) {
   'use strict';
 
   var LISP = {};
@@ -418,8 +424,7 @@
     }
     return fn.apply(null, params);
   };
-  LISP.JS = ((typeof window !== 'undefined') ? window :
-             (typeof GLOBAL !== 'undefined') ? GLOBAL : {}),
+  LISP.JS = global
 
   LISP.HashTable = function() {};
   LISP.HashTable.prototype = {
@@ -917,4 +922,4 @@ LISP["compile-error"] = (function(){var args = LISP._getRestArgs(arguments, 0); 
 LISP.compile = (function(s){return ((function(top$2dscope){return ((function(tree){return (LISP["compile-new-scope"](top$2dscope, LISP["compile*"](tree, top$2dscope)));})(LISP["traverse*"](s, top$2dscope)));})(LISP["create-scope"](LISP.nil, LISP.nil)));});
 
   return LISP;
-})());
+});
