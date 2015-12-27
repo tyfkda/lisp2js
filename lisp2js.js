@@ -176,7 +176,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   // Cons cell.
-  var abbrevTable = { quote: '\'', quasiquote: '`', unquote: ',', 'unquote-splicing': ',@' };
+  var abbrevTable = {
+    quote: '\'',
+    quasiquote: '`',
+    unquote: ',',
+    'unquote-splicing': ',@'
+  };
 
   var Cons = (function () {
     function Cons(car, cdr, lineNo, path) {
@@ -643,8 +648,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return Reader.unescape(m[1]);
         if (stream.match(/^#\(/)) // vector.
           return Reader.readVector(stream);
-        if (m = stream.match(/^#\/([^\/]*)\//)) // regexp TODO: Implement properly.
-          return new RegExp(m[1]);
+        if (m = stream.match(/^#\/([^\/]*)\//)) // regexp
+          return new RegExp(m[1]); // TODO: Implement properly.
         if (stream.match(/^#\|(.|[\n\r])*?\|#/)) // Block comment.
           return Reader.read(stream);
         if (stream.match(kReSingleDot, true)) // Single dot.

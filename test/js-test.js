@@ -31,14 +31,16 @@
     test('set!', 123, '(do (def xyz nil) (set! xyz 123) xyz)')
     test('lambda', 2222, '((lambda (x) (+ x x)) 1111)')
     test('nested-lambda', 3, '(((lambda (x) (lambda (y) (+ x y))) 1) 2)')
-    test('lambda-rest', LISP.list(1, 2, 3), '((lambda (x &rest y) (cons x y)) 1 2 3)')
+    test('lambda-rest', LISP.list(1, 2, 3),
+         '((lambda (x &rest y) (cons x y)) 1 2 3)')
     test('lambda-rest2', LISP.list(1), '((lambda (x &rest y) (cons x y)) 1)')
     test('def', 123, '(do (def x 123) x)')
     test('new', [], '(new Array)')
     test('+', 6, '(+ 1 2 3)')
 
     // Vector.
-    test('vector', [1, 'foo', LISP.list(2, LISP.intern('bar'))], '(vector 1 "foo" \'(2 bar))')
+    test('vector', [1, 'foo', LISP.list(2, LISP.intern('bar'))],
+         '(vector 1 "foo" \'(2 bar))')
     test('vector-length', 3, '(vector-length #(1 2 3))')
     test('vector-ref', 2, '(vector-ref #(1 2 3) 1)')
 

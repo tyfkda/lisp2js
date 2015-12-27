@@ -37,16 +37,16 @@ module.exports = (() => {
 
     const fail = (title, exception, code) => {
       process.stdout.write('Testing ' + title + '... ')
-      let errorMessage
+      let err
       try {
         const result = converter(code)
-        errorMessage = 'Failure expected, but succeeded: result=' + result
+        err = 'Failure expected, but succeeded: result=' + result
       } catch (exc) {
         if (exception == null || exc instanceof exception) {
           print('ok')
           return
         }
-        errorMessage = 'Unexpected exception: expected ' + exception + ' : actual ' + exc
+        err = 'Unexpected exception: expected ' + exception + ' : actual ' + exc
       }
 
       console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
