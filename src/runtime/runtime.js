@@ -488,8 +488,11 @@
     return jsBoolToS(re.exec(str));
   };
   LISP['regexp-replace-all'] = function(re, str, fn) {
-    if (!re.global)
-      re = eval(re.toString() + 'g')
+    if (!re.global) {
+      var s = re.toString()
+      var i = s.lastIndexOf('/')
+      re = new RegExp(s.slice(1, i), s.slice(i + 1) + 'g')
+    }
     return str.replace(re, function(match) {
       return fn(function() {  // TODO: handle arguments.
         return match;
