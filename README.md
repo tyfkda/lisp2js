@@ -20,6 +20,7 @@ Translate Lisp code into JavaScript.
 * Argument count check (because of JavaScript nature)
 * Multiple values
 
+
 ## Mapping
 Lisp code is compiled into JS, in a rule below:
 
@@ -34,6 +35,15 @@ Lisp code is compiled into JS, in a rule below:
 | lambda     | Function        |
 | hash table | Object          |
 | vector     | Array           |
+
+
+## How to build
+
+You need to install Node.js and npm.
+
+* Run `npm install`
+* When you modify source code, run `make` to update `lisp2js.js`
+* To update minified code, run `make release`
 
 
 ## History

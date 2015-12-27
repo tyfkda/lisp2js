@@ -7,6 +7,7 @@ Lispコード→JavaScriptトランスレータ
 
 [デモ](https://tyfkda.github.io/lisp2js/)
 
+
 ## 特徴
 * コンパイルによって直接実行できるJSコードが吐き出される（VMではない）
 * JSの関数やオブジェクトに簡単にアクセスできる（逆もしかり）
@@ -19,6 +20,7 @@ Lispコード→JavaScriptトランスレータ
 * 末尾呼び出し最適化
 * 引数チェック（JavaScriptに変換され実行されるので）
 * 多値
+
 
 ## マッピング
 Lispコードは下のルールでJSにコンパイルされる：
@@ -34,6 +36,15 @@ Lispコードは下のルールでJSにコンパイルされる：
 | lambda     | Function        |
 | hash table | Object          |
 | vector     | Array           |
+
+
+## ビルドの方法
+
+Node.jsとnpmがインストールされている必要がある。
+
+* `npm install` で、必要なモジュールをインストール
+* ソースを修正した場合、 `make` で `lisp2js.js` が更新される
+* 圧縮したコードを更新するには、 `make release` を実行
 
 
 ## 履歴
