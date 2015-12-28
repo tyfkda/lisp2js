@@ -685,7 +685,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function read(stream) {
         do {
           if (stream.eof()) return null;
-        } while (stream.match(/^\s+/));
+        } while (stream.match(/^(\s+|$)/));
 
         var c = stream.peek();
         if (c in readTable) return readTable[c](stream, stream.getc());

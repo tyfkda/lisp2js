@@ -560,7 +560,7 @@
       do {
         if (stream.eof())
           return null
-      } while (stream.match(/^\s+/))
+      } while (stream.match(/^(\s+|$)/))
 
       const c = stream.peek()
       if (c in readTable)
