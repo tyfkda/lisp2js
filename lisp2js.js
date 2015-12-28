@@ -1183,14 +1183,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     })(fn(LISP.car(x)), LISP.maptree(fn, LISP.cdr(x)));
   };
   LISP["bq-splicing-frob"] = function (x) {
-    return LISP.isTrue(LISP["pair?"](x)) ? (function (__2) {
-      return LISP.isTrue(__2) ? __2 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
+    return LISP.isTrue(LISP["pair?"](x)) ? (function (__3) {
+      return LISP.isTrue(__3) ? __3 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
     })(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing"))) : LISP.nil;
   };
   LISP["bq-frob"] = function (x) {
-    return LISP.isTrue(LISP["pair?"](x)) ? (function (__3) {
-      return LISP.isTrue(__3) ? __3 : (function (__4) {
-        return LISP.isTrue(__4) ? __4 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
+    return LISP.isTrue(LISP["pair?"](x)) ? (function (__4) {
+      return LISP.isTrue(__4) ? __4 : (function (__5) {
+        return LISP.isTrue(__5) ? __5 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
       })(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing")));
     })(LISP["eq?"](LISP.car(x), LISP.intern("unquote"))) : LISP.nil;
   };
@@ -1207,20 +1207,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     })(LISP.nil);
   };
   LISP["null-or-quoted"] = function (x) {
-    return (function (__5) {
-      return LISP.isTrue(__5) ? __5 : LISP.isTrue(LISP["pair?"](x)) ? LISP["eq?"](LISP.car(x), LISP.intern("quote")) : LISP.nil;
+    return (function (__6) {
+      return LISP.isTrue(__6) ? __6 : LISP.isTrue(LISP["pair?"](x)) ? LISP["eq?"](LISP.car(x), LISP.intern("quote")) : LISP.nil;
     })(LISP["null?"](x));
   };
   LISP["bq-attach-append"] = function (op, item, result) {
-    return LISP.isTrue(LISP.isTrue(LISP["null-or-quoted"](item)) ? LISP["null-or-quoted"](result) : LISP.nil) ? LISP.list(LISP.intern("quote"), LISP.append(LISP.cadr(item), LISP.cadr(result))) : LISP.isTrue((function (__6) {
-      return LISP.isTrue(__6) ? __6 : LISP["equal?"](result, LISP["*bq-quote-nil*"]);
+    return LISP.isTrue(LISP.isTrue(LISP["null-or-quoted"](item)) ? LISP["null-or-quoted"](result) : LISP.nil) ? LISP.list(LISP.intern("quote"), LISP.append(LISP.cadr(item), LISP.cadr(result))) : LISP.isTrue((function (__7) {
+      return LISP.isTrue(__7) ? __7 : LISP["equal?"](result, LISP["*bq-quote-nil*"]);
     })(LISP["null?"](result))) ? LISP.isTrue(LISP["bq-splicing-frob"](item)) ? LISP.list(op, item) : item : LISP.isTrue(LISP.isTrue(LISP["pair?"](result)) ? LISP["eq?"](LISP.car(result), op) : LISP.nil) ? LISP["list*"](LISP.car(result), item, LISP.cdr(result)) : LISP.list(op, item, result);
   };
   LISP["bq-attach-conses"] = function (items, result) {
-    return LISP.isTrue(LISP.isTrue(LISP.every(LISP["null-or-quoted"], items)) ? LISP["null-or-quoted"](result) : LISP.nil) ? LISP.list(LISP.intern("quote"), LISP.append(LISP.map(LISP.cadr, items), LISP.cadr(result))) : LISP.isTrue((function (__7) {
-      return LISP.isTrue(__7) ? __7 : LISP["equal?"](result, LISP["*bq-quote-nil*"]);
-    })(LISP["null?"](result))) ? LISP.cons(LISP.intern("list"), items) : LISP.isTrue(LISP.isTrue(LISP["pair?"](result)) ? (function (__8) {
-      return LISP.isTrue(__8) ? __8 : LISP["eq?"](LISP.car(result), LISP.intern("list*"));
+    return LISP.isTrue(LISP.isTrue(LISP.every(LISP["null-or-quoted"], items)) ? LISP["null-or-quoted"](result) : LISP.nil) ? LISP.list(LISP.intern("quote"), LISP.append(LISP.map(LISP.cadr, items), LISP.cadr(result))) : LISP.isTrue((function (__8) {
+      return LISP.isTrue(__8) ? __8 : LISP["equal?"](result, LISP["*bq-quote-nil*"]);
+    })(LISP["null?"](result))) ? LISP.cons(LISP.intern("list"), items) : LISP.isTrue(LISP.isTrue(LISP["pair?"](result)) ? (function (__9) {
+      return LISP.isTrue(__9) ? __9 : LISP["eq?"](LISP.car(result), LISP.intern("list*"));
     })(LISP["eq?"](LISP.car(result), LISP.intern("list"))) : LISP.nil) ? LISP.cons(LISP.car(result), LISP.append(items, LISP.cdr(result))) : LISP.cons(LISP.intern("list*"), LISP.append(items, LISP.list(result)));
   };
   LISP.macroexpand = function (exp) {

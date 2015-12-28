@@ -22,17 +22,21 @@ module.exports = (() => {
   }
 
   const runTest = (converter, proc) => {
+    let successCount = 0
+    let errorCount = 0
+
     const test = (title, expected, expression) => {
       process.stdout.write('Testing ' + title + '... ')
       let result = converter(expression)
       if (equals(expected, result)) {
         print('ok')
+        ++successCount
         return
       }
 
-      console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
-      console.error('  expected ' + expected + ' : actual ' + result)
-      process.exit(1)
+      console.error('\x1b[1;31m[ERROR]\n  expected ' + expected +
+                    ' : actual ' + result + '\x1b[0;39m')
+      ++errorCount
     }
 
     const fail = (title, exception, code) => {
@@ -44,19 +48,24 @@ module.exports = (() => {
       } catch (exc) {
         if (exception == null || exc instanceof exception) {
           print('ok')
+          ++successCount
           return
         }
         err = 'Unexpected exception: expected ' + exception + ' : actual ' + exc
       }
 
-      console.error('\x1b[1;31m[ERROR]\x1b[0;39m')
-      console.error('  ' + errorMessage)
-      process.exit(1)
+      console.error('\x1b[1;31m[ERROR]\n  ' + errorMessage + '\x1b[0;39m')
+      ++errorCount
     }
 
     proc(test, fail)
 
-    print('\x1b[1;32mTEST ALL SUCCEEDED!\x1b[0;39m')
+    if (errorCount > 0) {
+      console.error('\x1b[1;31m' + errorCount + '/' +
+                    (successCount + errorCount) + ' tests failed\x1b[0;39m')
+      return process.exit(1)
+    }
+    print('\x1b[1;32mALL ' + successCount + ' TESTS SUCCEEDED!\x1b[0;39m')
   }
 
   return {runTest}
