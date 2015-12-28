@@ -1,4 +1,4 @@
-((createLisp, installEval) => {
+((createLisp, installEval, installAux) => {
   'use strict'
 
   const g = ((typeof window !== 'undefined') ? window :
@@ -6,6 +6,7 @@
 
   const LISP = createLisp(g)
   installEval(LISP)
+  installAux(LISP)
 
   if (typeof module !== 'undefined')
     module.exports = LISP
@@ -775,11 +776,11 @@
     LISP.jsrequire = require
   }
 
-  /*==== EMBED COMPILED CODE HERE ====*/
-
   return LISP
 }, (LISP) => {
   // Using eval JS function prevent uglify to mangle local variable names,
   // so put such code here.
   LISP.eval = (exp) => eval(LISP.compile(exp))
+}, (LISP) => {
+  /*==== EMBED COMPILED CODE HERE ====*/
 })

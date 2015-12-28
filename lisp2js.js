@@ -10,13 +10,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-(function (createLisp, installEval) {
+(function (createLisp, installEval, installAux) {
   'use strict';
 
   var g = typeof window !== 'undefined' ? window : typeof GLOBAL !== 'undefined' ? GLOBAL : {};
 
   var LISP = createLisp(g);
   installEval(LISP);
+  installAux(LISP);
 
   if (typeof module !== 'undefined') module.exports = LISP;else g.LISP = LISP;
 })(function (global) {
@@ -915,6 +916,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     })();
   }
 
+  return LISP;
+}, function (LISP) {
+  // Using eval JS function prevent uglify to mangle local variable names,
+  // so put such code here.
+  LISP.eval = function (exp) {
+    return eval(LISP.compile(exp));
+  };
+}, function (LISP) {
   /*==== EMBED COMPILED CODE HERE ====*/
   LISP["register-macro"](LISP.intern("defmacro"), function (name, params) {
     var body = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("register-macro"), LISP.list(LISP.intern("quote"), name), LISP["list*"](LISP.intern("lambda"), params, body));
@@ -1440,14 +1449,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return LISP["compile-new-scope"](top$2dscope, LISP["compile*"](tree, top$2dscope));
       })(LISP["traverse*"](s, top$2dscope));
     })(LISP["create-scope"](LISP.nil, LISP.nil));
-  };
-
-  return LISP;
-}, function (LISP) {
-  // Using eval JS function prevent uglify to mangle local variable names,
-  // so put such code here.
-  LISP.eval = function (exp) {
-    return eval(LISP.compile(exp));
   };
 });
 //# sourceMappingURL=lisp2js.js.map
