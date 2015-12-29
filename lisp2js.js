@@ -775,17 +775,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return Reader;
   })();
 
-  LISP['set-macro-character'] = function (c, fn) {
+  var setMacroCharacter = function setMacroCharacter(c, fn) {
     readTable[c] = fn;
   };
+  LISP['set-macro-character'] = setMacroCharacter;
 
-  LISP['set-macro-character']('\'', function (stream, c) {
+  setMacroCharacter('\'', function (stream, c) {
     return LISP.list(LISP.intern('quote'), Reader.read(stream));
   });
-  LISP['set-macro-character']('`', function (stream, c) {
+  setMacroCharacter('`', function (stream, c) {
     return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
   });
-  LISP['set-macro-character'](',', function (stream, c) {
+  setMacroCharacter(',', function (stream, c) {
     var c2 = stream.peek();
     var keyword = 'unquote';
     if (c2 == '@') {

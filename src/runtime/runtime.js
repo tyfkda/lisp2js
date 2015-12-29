@@ -649,17 +649,16 @@
     }
   }
 
-  LISP['set-macro-character'] = (c, fn) => {
-    readTable[c] = fn
-  }
+  const setMacroCharacter = (c, fn) => { readTable[c] = fn }
+  LISP['set-macro-character'] = setMacroCharacter
 
-  LISP['set-macro-character']('\'', (stream, c) => {
+  setMacroCharacter('\'', (stream, c) => {
     return LISP.list(LISP.intern('quote'), Reader.read(stream))
   })
-  LISP['set-macro-character']('`', (stream, c) => {
+  setMacroCharacter('`', (stream, c) => {
     return LISP.list(LISP.intern('quasiquote'), Reader.read(stream))
   })
-  LISP['set-macro-character'](',', (stream, c) => {
+  setMacroCharacter(',', (stream, c) => {
     const c2 = stream.peek()
     let keyword = 'unquote'
     if (c2 == '@') {
