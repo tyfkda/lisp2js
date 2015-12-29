@@ -440,8 +440,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   LISP['x->string'] = makeString;
-  LISP.print = function (x) {
-    LISP._output(makeString(x));
+  LISP.print = function (x, stream) {
+    var s = makeString(x);
+    if (stream) stream.write(s);else LISP._output(s);
     return x;
   };
   LISP.puts = function (x) {
@@ -865,6 +866,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               this.index = 0;
             }
           }
+        }, {
+          key: 'write',
+          value: function write(s) {
+            fs.write(this.fd, s);
+          }
         }]);
 
         return FileStream;
@@ -872,9 +878,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       LISP.FileStream = FileStream;
 
-      LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd, '*stdin*');
-      LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*');
-      LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd, '*stderr*');
+      LISP['*stdin*'] = new FileStream(process.stdin.fd, '*stdin*');
+      LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*');
+      LISP['*stderr*'] = new FileStream(process.stderr.fd, '*stderr*');
 
       LISP.open = function (path, flag) {
         try {

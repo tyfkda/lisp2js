@@ -380,8 +380,12 @@
   }
 
   LISP['x->string'] = makeString
-  LISP.print = (x) => {
-    LISP._output(makeString(x))
+  LISP.print = (x, stream) => {
+    const s = makeString(x)
+    if (stream)
+      stream.write(s)
+    else
+      LISP._output(s)
     return x
   }
   LISP.puts = (x) => {
@@ -728,12 +732,15 @@
           this.index = 0
         }
       }
+      write(s) {
+        fs.write(this.fd, s)
+      }
     }
     LISP.FileStream = FileStream
 
-    LISP['*stdin*'] = new LISP.FileStream(process.stdin.fd, '*stdin*')
-    LISP['*stdout*'] = new LISP.FileStream(process.stdout.fd, '*stdout*')
-    LISP['*stderr*'] = new LISP.FileStream(process.stderr.fd, '*stderr*')
+    LISP['*stdin*'] = new FileStream(process.stdin.fd, '*stdin*')
+    LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*')
+    LISP['*stderr*'] = new FileStream(process.stderr.fd, '*stderr*')
 
     LISP.open = (path, flag) => {
       try {
