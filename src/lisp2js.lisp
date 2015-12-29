@@ -302,7 +302,7 @@
 
 ;; If the given scope has quoted value, output them as local variable values,
 ;; and encapsulate with anonymous function.
-(defun compile-new-scope (scope compiled-body)
+(defun compile-new-scope (compiled-body scope)
   (aif (scope-get-var scope)
        (string-append "(function() { var "
                       (string-join (map (lambda (x)
@@ -329,8 +329,8 @@
     ((:LAMBDA)  (let ((extended-scope (vector-ref s 1))
                       (params (vector-ref s 2))
                       (body (vector-ref s 3)))
-                  (compile-new-scope extended-scope
-                                     (compile-lambda params body scope extended-scope))))
+                  (compile-new-scope (compile-lambda params body scope extended-scope)
+                                     extended-scope)))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     (t  (compile-error "Unknown AST node:" s))))
@@ -342,5 +342,5 @@
   (let* ((top-scope (create-scope nil ()))
          (tree (traverse* s top-scope)))
     ;;(write tree)
-    (compile-new-scope top-scope
-                       (compile* tree top-scope))))
+    (compile-new-scope (compile* tree top-scope)
+                       top-scope)))

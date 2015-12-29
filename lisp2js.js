@@ -1425,7 +1425,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   LISP["compile-new"] = function (class$2dname, args, scope) {
     return LISP["string-append"]("new ", LISP["symbol->string"](class$2dname), "(", LISP["expand-args"](args, scope), ")");
   };
-  LISP["compile-new-scope"] = function (scope, compiled$2dbody) {
+  LISP["compile-new-scope"] = function (compiled$2dbody, scope) {
     return (function (it) {
       return LISP.isTrue(it) ? LISP["string-append"]("(function() { var ", LISP["string-join"](LISP.map(function (x) {
         return LISP["string-append"](LISP["escape-symbol"](LISP.car(x)), " = ", LISP["compile*"](LISP.cdr(x), scope));
@@ -1437,7 +1437,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("CONST"))) ? LISP["compile-quote"](LISP["vector-ref"](s, 1), scope) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("REF"))) ? LISP["compile-symbol"](LISP["vector-ref"](s, 1), scope) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("IF"))) ? (function (p, thn, els) {
         return LISP["compile-if"](p, thn, els, scope);
       })(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("FUNCALL"))) ? LISP["compile-funcall"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("SET!"))) ? LISP["compile-set!"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("LAMBDA"))) ? (function (extended$2dscope, params, body) {
-        return LISP["compile-new-scope"](extended$2dscope, LISP["compile-lambda"](params, body, scope, extended$2dscope));
+        return LISP["compile-new-scope"](LISP["compile-lambda"](params, body, scope, extended$2dscope), extended$2dscope);
       })(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("DEF"))) ? LISP["compile-def"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__10, LISP["make-keyword"]("NEW"))) ? LISP["compile-new"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP["compile-error"]("Unknown AST node:", s);
     })(LISP["vector-ref"](s, 0));
   };
@@ -1447,7 +1447,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   LISP.compile = function (s) {
     return (function (top$2dscope) {
       return (function (tree) {
-        return LISP["compile-new-scope"](top$2dscope, LISP["compile*"](tree, top$2dscope));
+        return LISP["compile-new-scope"](LISP["compile*"](tree, top$2dscope), top$2dscope);
       })(LISP["traverse*"](s, top$2dscope));
     })(LISP["create-scope"](LISP.nil, LISP.nil));
   };
