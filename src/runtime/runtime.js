@@ -171,6 +171,12 @@
     unquote:            ',',
     'unquote-splicing': ',@'
   }
+  const canAbbrev = (s) => {
+    return (s.car instanceof Symbol &&
+            s.car.name in abbrevTable &&
+            s.cdr instanceof Cons &&
+            LISP['eq?'](s.cdr.cdr, LISP.nil))
+  }
   class Cons extends SObject {
     constructor(car, cdr, lineNo, path) {
       super()
@@ -188,12 +194,8 @@
     }
 
     toString(inspect) {
-      if (this.car instanceof Symbol &&  // (symbol? car)
-          this.cdr instanceof Cons &&    // (pair? cdr)
-          this.cdr.cdr &&                // (null? (cdr cdr))
-          this.car.name in abbrevTable) {
+      if (canAbbrev(this))
         return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
-      }
 
       const ss = []
       let separator = '('

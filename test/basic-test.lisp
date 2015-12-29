@@ -34,6 +34,7 @@
  (test "proper-list?" t (proper-list? (list 1 2 3)))
  (test "proper-list?" nil (proper-list? (list* 1 2 3)))
  (test "nil isnt proper-list" nil (proper-list? nil))
+ (test "abbrev" "'a" (x->string ''a))
 
  ;; type
  (test "type of nil" 'bool (type nil))
