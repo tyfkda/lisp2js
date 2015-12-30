@@ -695,8 +695,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (c in readTable) return readTable[c](stream, stream.getc());
 
         var m = undefined;
-        if (stream.match(/^\(/)) // Left paren '('.
-          return Reader.readList(stream);
         if (stream.match(/^;[^\n]*\n?/)) // Line comment.
           return Reader.read(stream);
         if (m = stream.match(/^"((\\.|[^"\\])*)"/)) // string.
@@ -783,6 +781,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     readTable[c] = fn;
   };
   LISP['set-macro-character'] = setMacroCharacter;
+
+  setMacroCharacter('(', function (stream, c) {
+    return (// Left paren '('.
+      Reader.readList(stream)
+    );
+  });
 
   LISP.read = function (stream) {
     return Reader.read(stream || LISP['*stdin*']);

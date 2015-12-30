@@ -579,8 +579,6 @@
         return readTable[c](stream, stream.getc())
 
       let m
-      if (stream.match(/^\(/))  // Left paren '('.
-        return Reader.readList(stream)
       if (stream.match(/^;[^\n]*\n?/))  // Line comment.
         return Reader.read(stream)
       if (m = stream.match(/^"((\\.|[^"\\])*)"/))  // string.
@@ -663,6 +661,9 @@
 
   const setMacroCharacter = (c, fn) => { readTable[c] = fn }
   LISP['set-macro-character'] = setMacroCharacter
+
+  setMacroCharacter('(', (stream, c) =>  // Left paren '('.
+                    Reader.readList(stream))
 
   LISP.read = stream => Reader.read(stream || LISP['*stdin*'])
 
