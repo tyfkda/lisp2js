@@ -807,6 +807,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return (stream || LISP['*stdin*']).getLine();
   };
 
+  LISP['read-char'] = function () {
+    var stream = arguments.length <= 0 || arguments[0] === undefined ? LISP['*stdin*'] : arguments[0];
+
+    return stream.getc();
+  };
+
   // For node JS.
   if (typeof process !== 'undefined') {
     (function () {

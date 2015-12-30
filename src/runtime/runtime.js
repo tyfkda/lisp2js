@@ -682,6 +682,10 @@
     return (stream || LISP['*stdin*']).getLine()
   }
 
+  LISP['read-char'] = (stream = LISP['*stdin*']) => {
+    return stream.getc()
+  }
+
   // For node JS.
   if (typeof process !== 'undefined') {
     const fs = require('fs')
