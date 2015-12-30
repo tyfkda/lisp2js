@@ -758,11 +758,16 @@
       return stream
     }
 
-    LISP.load = (fileName) => {
-      const stream = LISP.open(fileName)
-      if (!stream) {
-        return LISP.error('Cannot open [' + fileName + ']')
-      }
+    LISP.load = (fileSpec) => {
+      let stream
+      if (typeof fileSpec == 'string') {
+        stream = LISP.open(fileSpec)
+        if (!stream)
+          return LISP.error('Cannot open [' + fileName + ']')
+      } else if (fileSpec instanceof Stream)
+        stream = fileSpec
+      else
+        return LISP.error(`Illegal fileSpec: ${fileSpec}`)
 
       if (stream.match(/^#!/, true))
         stream.getLine()  // Skip Shebang.
@@ -774,7 +779,8 @@
           break
         result = LISP.eval(s)
       }
-      LISP.close(stream)
+      if (stream !== fileSpec)
+        LISP.close(stream)
       return result
     }
 

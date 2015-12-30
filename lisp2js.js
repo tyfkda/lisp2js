@@ -894,11 +894,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return stream;
       };
 
-      LISP.load = function (fileName) {
-        var stream = LISP.open(fileName);
-        if (!stream) {
-          return LISP.error('Cannot open [' + fileName + ']');
-        }
+      LISP.load = function (fileSpec) {
+        var stream = undefined;
+        if (typeof fileSpec == 'string') {
+          stream = LISP.open(fileSpec);
+          if (!stream) return LISP.error('Cannot open [' + fileName + ']');
+        } else if (fileSpec instanceof Stream) stream = fileSpec;else return LISP.error('Illegal fileSpec: ' + fileSpec);
 
         if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
 
@@ -908,7 +909,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           if (s == null) break;
           result = LISP.eval(s);
         }
-        LISP.close(stream);
+        if (stream !== fileSpec) LISP.close(stream);
         return result;
       };
 

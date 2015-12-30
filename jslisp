@@ -29,13 +29,10 @@
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
 
-    const tty = require('tty')
-    const isatty = tty.isatty(0)  // Whether the stdin is a tty.
     const prompt = '> '
     const inputs = []
 
-    if (isatty)
-      process.stdout.write(prompt)
+    process.stdout.write(prompt)
     process.stdin.on('data', (chunk) => {
       inputs.push(chunk)
       try {
@@ -46,19 +43,15 @@
           const result = runCodes(code, compileOnly)
           // Otherwise input should be consumed.
           inputs.length = 0
-          if (isatty)
-            console.log(LISP['x->string'](result, 10))
+          console.log(LISP['x->string'](result, 10))
         }
-        if (isatty)
-          process.stdout.write(prompt)
+        process.stdout.write(prompt)
       } catch (e) {
         if (e instanceof LISP.NoCloseParenException) {
           // In REPL, if NoCloseParenException occurs,
           // a user keep typing so inputs should be kept.
         } else {
           console.error(e)
-          if (!isatty)
-            process.exit(1)
           inputs.length = 0
           process.stdout.write(prompt)
         }
@@ -72,6 +65,11 @@
       }
       process.exit(0)
     })
+  }
+  const replNoPrompt = () => {
+    process.stdin.resume()
+    process.stdin.setEncoding('utf8')
+    return LISP.load(LISP['*stdin*'])
   }
 
   // Run script.
@@ -105,7 +103,11 @@
   LISP = require(translator)
 
   if (index >= process.argv.length) {  // No input file name: read from stdin.
-    return repl()
+    const tty = require('tty')
+    if (tty.isatty(0))
+      return repl()
+    else
+      return replNoPrompt()
   }
 
   // Process command line argument as a script file.
