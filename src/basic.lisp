@@ -3,6 +3,23 @@
                   `(register-macro ',name
                                    (lambda ,params ,@body))))
 
+;; Reader macros
+(set-macro-character "'"
+  (lambda (stream _)
+    (list 'quote (read stream))))
+
+(set-macro-character "`"
+  (lambda (stream _)
+    (list `quasiquote (read stream))))
+
+(set-macro-character ","
+  (lambda (stream _)
+    (let ((c2 (read-char stream)))
+      (if (eq? c2 "@")
+          (list 'unquote-splicing (read stream))
+        (progn (unread-char c2 stream)
+               (list 'unquote (read stream)))))))
+
 (defmacro defun (name params &body body)
   `(def ,name (lambda ,params ,@body)))
 

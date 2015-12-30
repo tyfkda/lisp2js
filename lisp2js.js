@@ -599,6 +599,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return c;
       }
     }, {
+      key: 'ungetc',
+      value: function ungetc(c) {
+        if (this.str) this.str = c + this.str;else this.str = c;
+      }
+    }, {
       key: 'match',
       value: function match(regexp, keep) {
         var result = this.fetch();
@@ -779,22 +784,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
   LISP['set-macro-character'] = setMacroCharacter;
 
-  setMacroCharacter('\'', function (stream, c) {
-    return LISP.list(LISP.intern('quote'), Reader.read(stream));
-  });
-  setMacroCharacter('`', function (stream, c) {
-    return LISP.list(LISP.intern('quasiquote'), Reader.read(stream));
-  });
-  setMacroCharacter(',', function (stream, c) {
-    var c2 = stream.peek();
-    var keyword = 'unquote';
-    if (c2 == '@') {
-      keyword = 'unquote-splicing';
-      stream.getc();
-    }
-    return LISP.list(LISP.intern(keyword), Reader.read(stream));
-  });
-
   LISP.read = function (stream) {
     return Reader.read(stream || LISP['*stdin*']);
   };
@@ -811,6 +800,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var stream = arguments.length <= 0 || arguments[0] === undefined ? LISP['*stdin*'] : arguments[0];
 
     return stream.getc();
+  };
+
+  LISP['unread-char'] = function (c) {
+    var stream = arguments.length <= 1 || arguments[1] === undefined ? LISP['*stdin*'] : arguments[1];
+
+    stream.ungetc(c);
+    return LISP.nil;
   };
 
   // For node JS.
@@ -939,6 +935,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   /*==== EMBED COMPILED CODE HERE ====*/
   LISP["register-macro"](LISP.intern("defmacro"), function (name, params) {
     var body = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("register-macro"), LISP.list(LISP.intern("quote"), name), LISP["list*"](LISP.intern("lambda"), params, body));
+  });
+  LISP["set-macro-character"]("'", function (stream, _) {
+    return LISP.list(LISP.intern("quote"), LISP.read(stream));
+  });
+  LISP["set-macro-character"]("`", function (stream, _) {
+    return LISP.list(LISP.intern("quasiquote"), LISP.read(stream));
+  });
+  LISP["set-macro-character"](",", function (stream, _) {
+    return (function (c2) {
+      return LISP.isTrue(LISP["eq?"](c2, "@")) ? LISP.list(LISP.intern("unquote-splicing"), LISP.read(stream)) : (function () {
+        return LISP["unread-char"](c2, stream), LISP.list(LISP.intern("unquote"), LISP.read(stream));
+      })();
+    })(LISP["read-char"](stream));
   });
   LISP["register-macro"](LISP.intern("defun"), function (name, params) {
     var body = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("def"), name, LISP["list*"](LISP.intern("lambda"), params, body));

@@ -504,6 +504,12 @@
       this.str = this.str.slice(1)
       return c
     }
+    ungetc(c) {
+      if (this.str)
+        this.str = c + this.str
+      else
+        this.str = c
+    }
     match(regexp, keep) {
       const result = this.fetch()
       if (result == null)
@@ -658,22 +664,6 @@
   const setMacroCharacter = (c, fn) => { readTable[c] = fn }
   LISP['set-macro-character'] = setMacroCharacter
 
-  setMacroCharacter('\'', (stream, c) => {
-    return LISP.list(LISP.intern('quote'), Reader.read(stream))
-  })
-  setMacroCharacter('`', (stream, c) => {
-    return LISP.list(LISP.intern('quasiquote'), Reader.read(stream))
-  })
-  setMacroCharacter(',', (stream, c) => {
-    const c2 = stream.peek()
-    let keyword = 'unquote'
-    if (c2 == '@') {
-      keyword = 'unquote-splicing'
-      stream.getc()
-    }
-    return LISP.list(LISP.intern(keyword), Reader.read(stream))
-  })
-
   LISP.read = stream => Reader.read(stream || LISP['*stdin*'])
 
   LISP['read-from-string'] = str => Reader.read(new StrStream(str))
@@ -684,6 +674,11 @@
 
   LISP['read-char'] = (stream = LISP['*stdin*']) => {
     return stream.getc()
+  }
+
+  LISP['unread-char'] = (c, stream = LISP['*stdin*']) => {
+    stream.ungetc(c)
+    return LISP.nil
   }
 
   // For node JS.
