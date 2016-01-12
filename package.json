@@ -8,6 +8,7 @@
     "test": "test"
   },
   "scripts": {
+    "build": "make",
     "test": "make test"
   },
   "repository": {

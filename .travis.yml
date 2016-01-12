@@ -4,4 +4,4 @@ node_js:
   - 4.1
 before_script:
     - touch src/lisp2js.lisp
-script: "make && make test"
+script: "npm run build && npm run test"
