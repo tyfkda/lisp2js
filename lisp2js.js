@@ -782,7 +782,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
   LISP['set-macro-character'] = setMacroCharacter;
 
-  setMacroCharacter('(', function (stream, c) {
+  setMacroCharacter('(', function (stream, _c) {
     return (// Left paren '('.
       Reader.readList(stream)
     );
@@ -935,7 +935,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   LISP.eval = function (exp) {
     return eval(LISP.compile(exp));
   };
-}, function (LISP) {
+}, function ( /*eslint no-unused-vars: 0*/LISP) {
   /*==== EMBED COMPILED CODE HERE ====*/
   LISP["register-macro"](LISP.intern("defmacro"), function (name, params) {
     var body = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("register-macro"), LISP.list(LISP.intern("quote"), name), LISP["list*"](LISP.intern("lambda"), params, body));

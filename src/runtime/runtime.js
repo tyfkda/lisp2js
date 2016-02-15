@@ -20,7 +20,7 @@
   // Convert JS array into Lisp list.
   const arrayToList = (array) => {
     let result = LISP.nil
-    for (let i = array.length; --i >= 0; )
+    for (let i = array.length; --i >= 0;)
       result = LISP.cons(array[i], result)
     return result
   }
@@ -60,7 +60,7 @@
   LISP._getRestArgs = (args, start) => {
     return arrayToList(Array.prototype.slice.call(args, start))
   }
-  LISP._output = (typeof(process) !== 'undefined'
+  LISP._output = (typeof process !== 'undefined'
                   ? (str) => {  // for node.js.
                     process.stdout.write(str)
                   } : (str) => {  // for browser.
@@ -166,10 +166,10 @@
 
   // Cons cell.
   const abbrevTable = {
-    quote:              '\'',
-    quasiquote:         '`',
-    unquote:            ',',
-    'unquote-splicing': ',@'
+    quote: '\'',
+    quasiquote: '`',
+    unquote: ',',
+    'unquote-splicing': ',@',
   }
   const canAbbrev = (s) => {
     return (s.car instanceof Symbol &&
@@ -238,14 +238,14 @@
   LISP['pair?'] = x => jsBoolToS(x instanceof Cons)
   LISP.list = function() {
     let result = LISP.nil
-    for (let i = arguments.length; --i >= 0; )
+    for (let i = arguments.length; --i >= 0;)
       result = LISP.cons(arguments[i], result)
     return result
   }
   LISP['reverse!'] = (x) => {
     let rev = LISP.nil
-    for (let ls = x; LISP['pair?'](ls); ) {
-      let d = ls.cdr
+    for (let ls = x; LISP['pair?'](ls);) {
+      const d = ls.cdr
       ls.cdr = rev
       rev = ls
       ls = d
@@ -305,7 +305,7 @@
     if (arguments.length > 0) {
       let value = arguments[0]
       for (let i = 1; i < arguments.length; ++i) {
-        let target = arguments[i]
+        const target = arguments[i]
         if (!(value < target))
           return LISP.nil
         value = target
@@ -317,7 +317,7 @@
     if (arguments.length > 0) {
       let value = arguments[0]
       for (let i = 1; i < arguments.length; ++i) {
-        let target = arguments[i]
+        const target = arguments[i]
         if (!(value > target))
           return LISP.nil
         value = target
@@ -329,7 +329,7 @@
     if (arguments.length > 0) {
       let value = arguments[0]
       for (let i = 1; i < arguments.length; ++i) {
-        let target = arguments[i]
+        const target = arguments[i]
         if (!(value <= target))
           return LISP.nil
         value = target
@@ -341,7 +341,7 @@
     if (arguments.length > 0) {
       let value = arguments[0]
       for (let i = 1; i < arguments.length; ++i) {
-        let target = arguments[i]
+        const target = arguments[i]
         if (!(value >= target))
           return LISP.nil
         value = target
@@ -392,7 +392,7 @@
   }
   LISP.puts = (x) => {
     LISP._output(makeString(x))
-    if (typeof(process) !== 'undefined')
+    if (typeof process !== 'undefined')
       LISP._output('\n')
     return x
   }
@@ -422,7 +422,7 @@
 
     toString() {
       let contents = ''
-      for (let k in this) {
+      for (const k in this) {
         if (!(this.hasOwnProperty(k)))
           continue
         if (contents.length > 0)
@@ -662,7 +662,7 @@
   const setMacroCharacter = (c, fn) => { readTable[c] = fn }
   LISP['set-macro-character'] = setMacroCharacter
 
-  setMacroCharacter('(', (stream, c) =>  // Left paren '('.
+  setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
                     Reader.readList(stream))
 
   LISP.read = stream => Reader.read(stream || LISP['*stdin*'])
@@ -795,6 +795,6 @@
   // Using eval JS function prevent uglify to mangle local variable names,
   // so put such code here.
   LISP.eval = (exp) => eval(LISP.compile(exp))
-}, (LISP) => {
+}, (/*eslint no-unused-vars: 0*/LISP) => {
   /*==== EMBED COMPILED CODE HERE ====*/
 })

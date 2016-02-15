@@ -27,7 +27,7 @@ module.exports = (() => {
 
     const test = (title, expected, expression) => {
       process.stdout.write('Testing ' + title + '... ')
-      let result = converter(expression)
+      const result = converter(expression)
       if (equals(expected, result)) {
         print('ok')
         ++successCount
@@ -54,7 +54,7 @@ module.exports = (() => {
         err = 'Unexpected exception: expected ' + exception + ' : actual ' + exc
       }
 
-      console.error('\x1b[1;31m[ERROR]\n  ' + errorMessage + '\x1b[0;39m')
+      console.error('\x1b[1;31m[ERROR]\n  ' + err + '\x1b[0;39m')
       ++errorCount
     }
 
