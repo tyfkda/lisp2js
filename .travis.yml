@@ -3,5 +3,5 @@ language: node_js
 node_js:
   - 5
 before_script:
-    - touch src/lisp2js.lisp
+    - touch src/compiler.lisp
 script: "npm run build && npm run test"

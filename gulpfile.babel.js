@@ -16,7 +16,7 @@ const destDir = '.'
 const kSrcLispFiles = [
   'src/basic.lisp',
   'src/backquote.lisp',
-  'src/lisp2js.lisp',
+  'src/compiler.lisp',
 ]
 const kRuntimeFiles = [
   'src/runtime/*.js',
