@@ -8,8 +8,10 @@
     "test": "test"
   },
   "scripts": {
-    "build": "make",
-    "test": "make test"
+    "watch": "gulp watch",
+    "build": "gulp build",
+    "test": "make test",
+    "release": "gulp release"
   },
   "repository": {
     "type": "git",
@@ -27,6 +29,7 @@
     "babel-preset-es2015": "^6.3.13",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.1",
+    "gulp-concat": "^2.6.0",
     "gulp-eslint": "^1.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^1.6.0",

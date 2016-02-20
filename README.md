@@ -42,8 +42,8 @@ Lisp code is compiled into JS, in a rule below:
 You need to install Node.js and npm.
 
 * Run `npm install`
-* When you modify source code, run `make` to update `lisp2js.js`
-* To update minified code, run `make release`
+* When you modify source code, run `npm run build` to update `lisp2js.js`
+* To update minified code, run `npm run release`
 
 
 ## History

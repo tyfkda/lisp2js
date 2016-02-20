@@ -7,22 +7,43 @@ import rename from 'gulp-rename'
 import gutil from 'gulp-util'
 import eslint from 'gulp-eslint'
 
+import jslisp from './tools/gulp-jslisp'
+import embed from './tools/gulp-embed'
+import concat from 'gulp-concat'
+
 const destDir = '.'
 
-gulp.task('default', [], () => {
-  console.log('dummy')
+const kSrcLispFiles = [
+  'src/basic.lisp',
+  'src/backquote.lisp',
+  'src/lisp2js.lisp',
+]
+const kRuntimeFiles = [
+  'src/runtime/*.js',
+]
+
+gulp.task('default', ['build', 'watch'])
+
+gulp.task('watch', [], () => {
+  gulp.watch(kSrcLispFiles.concat(kRuntimeFiles),
+             ['build'])
 })
 
-gulp.task('babel', () => {
-  gulp.src('./runtime.js')
+gulp.task('build', () => {
+  gulp.src(kSrcLispFiles)
     .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(concat('lisp2js.js'))
+    .pipe(jslisp())
+    .pipe(embed({
+      template: 'src/runtime/runtime.js',
+      pattern: /EMBED COMPILED CODE HERE/,
+    }))
     .pipe(babel())
-    .pipe(rename('lisp2js.js'))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(destDir))
 })
 
-gulp.task('uglify', () => {
+gulp.task('release', ['build'], () => {
   gulp.src('./lisp2js.js')
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(babel())
