@@ -26,17 +26,22 @@
 
   // Read-Eval-Print loop.
   const repl = () => {
+    const readline = require('readline')
+    const rl = readline.createInterface(process.stdin, process.stdout)
+
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
 
     const prompt = '> '
+    const prompt2 = '. '
     const inputs = []
 
-    process.stdout.write(prompt)
-    process.stdin.on('data', (chunk) => {
-      inputs.push(chunk)
+    rl.setPrompt(prompt)
+    rl.prompt()
+    rl.on('line', (line) => {
+      inputs.push(line)
       try {
-        const code = inputs.join('')
+        const code = inputs.join('\n')
         if (code.match(/^\s*$/)) {
           inputs.length = 0
         } else {
@@ -45,19 +50,21 @@
           inputs.length = 0
           console.log(LISP['x->string'](result, 10))
         }
-        process.stdout.write(prompt)
+        rl.setPrompt(prompt)
+        rl.prompt()
       } catch (e) {
         if (e instanceof LISP.NoCloseParenException) {
           // In REPL, if NoCloseParenException occurs,
           // a user keep typing so inputs should be kept.
+          rl.setPrompt(prompt2)
         } else {
           console.error(e)
           inputs.length = 0
-          process.stdout.write(prompt)
+          rl.setPrompt(prompt)
+          rl.prompt()
         }
       }
-    })
-    process.stdin.on('end', () => {
+    }).on('close', () => {
       if (inputs.length > 0) {
         console.error('Input not terminated: [' + inputs + ']')
         process.exit(1)
