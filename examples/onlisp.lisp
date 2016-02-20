@@ -12,9 +12,9 @@
      `(,',long ,@args)))
 
 (defmacro abbrevs (&rest names)
-  `(do ,@(map (^(pair)
-                `(abbrev ,@pair))
-              (group names 2))))
+  `(progn ,@(map (lambda (pair)
+                   `(abbrev ,@pair))
+                 (group names 2))))
 
 ;; Test
 (abbrevs plus +
