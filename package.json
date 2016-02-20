@@ -10,7 +10,7 @@
   "scripts": {
     "watch": "gulp watch",
     "build": "gulp build",
-    "test": "make test",
+    "test": "make -C test",
     "release": "gulp release"
   },
   "repository": {
