@@ -228,8 +228,8 @@
       return s.cdr
     return LISP.nil
   }
-  LISP['set-car!'] = (s, x) => (s.car = x)
-  LISP['set-cdr!'] = (s, x) => (s.cdr = x)
+  LISP['set-car!'] = (s, x) => s.car = x
+  LISP['set-cdr!'] = (s, x) => s.cdr = x
 
   LISP['pair?'] = x => jsBoolToS(x instanceof Cons)
   LISP.list = function() {
