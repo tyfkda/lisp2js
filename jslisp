@@ -61,8 +61,8 @@
           console.error(e)
           inputs.length = 0
           rl.setPrompt(prompt)
-          rl.prompt()
         }
+        rl.prompt()
       }
     }).on('close', () => {
       if (inputs.length > 0) {
