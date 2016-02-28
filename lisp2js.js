@@ -521,8 +521,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return x in hash ? LISP.t : LISP.nil;
   };
   LISP['hash-table-get'] = function (hash, x) {
-    if (x in hash) return hash[x];
-    return arguments.length >= 3 ? arguments[3 - 1] : LISP.nil;
+    var valueForNonExist = arguments.length <= 2 || arguments[2] === undefined ? LISP.nil : arguments[2];
+
+    return x in hash ? hash[x] : valueForNonExist;
   };
   LISP['hash-table-put!'] = function (hash, x, value) {
     return hash[x] = value;

@@ -438,10 +438,8 @@
   LISP['make-hash-table'] = () => new HashTable()
   LISP['hash-table?'] = x => x instanceof HashTable
   LISP['hash-table-exists?'] = (hash, x) => x in hash ? LISP.t : LISP.nil
-  LISP['hash-table-get'] = function(hash, x) {
-    if (x in hash)
-      return hash[x]
-    return (arguments.length >= 3) ? arguments[3 - 1] : LISP.nil
+  LISP['hash-table-get'] = function(hash, x, valueForNonExist = LISP.nil) {
+    return (x in hash) ? hash[x] : valueForNonExist
   }
   LISP['hash-table-put!'] = (hash, x, value) => hash[x] = value
 
