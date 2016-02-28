@@ -159,18 +159,6 @@
   LISP['eq?'] = (x, y) => jsBoolToS(x === y)
 
   // Cons cell.
-  const kAbbrevTable = {
-    quote: '\'',
-    quasiquote: '`',
-    unquote: ',',
-    'unquote-splicing': ',@',
-  }
-  const canAbbrev = (s) => {
-    return (s.car instanceof Symbol &&
-            s.car.name in kAbbrevTable &&
-            s.cdr instanceof Cons &&
-            LISP['eq?'](s.cdr.cdr, LISP.nil))
-  }
   class Cons extends SObject {
     constructor(car, cdr, lineNo, path) {
       super()
@@ -188,8 +176,9 @@
     }
 
     toString(inspect) {
-      if (canAbbrev(this))
-        return kAbbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
+      const abbrev = Cons.canAbbrev(this)
+      if (abbrev)
+        return abbrev + makeString(this.cdr.car, inspect)
 
       const ss = []
       let separator = '('
@@ -212,6 +201,19 @@
       for (let p = this; p instanceof Cons; p = p.cdr)
         result.push(p.car)
       return result
+    }
+
+    static canAbbrev(s) {
+      const kAbbrevTable = {
+        quote: '\'',
+        quasiquote: '`',
+        unquote: ',',
+        'unquote-splicing': ',@',
+      }
+      return (s.car instanceof Symbol &&
+              s.car.name in kAbbrevTable &&
+              s.cdr instanceof Cons &&
+              LISP['eq?'](s.cdr.cdr, LISP.nil)) ? kAbbrevTable[s.car.name] : false
     }
   }
 
