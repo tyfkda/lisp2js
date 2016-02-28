@@ -35,7 +35,7 @@
     if (typeof x == 'string')
       return inspect ? inspectString(x) : x
     if (x instanceof Array)
-      return '#(' + x.map(v => makeString(v, inspect)).join(' ') + ')'
+      return `#(${x.map(v => makeString(v, inspect)).join(' ')})`
     if (x == null)  // null or undefined
       return '' + x
     return x.toString(inspect)
@@ -109,7 +109,7 @@
   {
     let index = 0
     LISP.gensym = () => {
-      return LISP.intern('__' + (++index))
+      return LISP.intern(`__${++index}`)
     }
   }
 
@@ -124,7 +124,7 @@
     }
 
     toString(inspect) {
-      return inspect ? ':' + this.name : this.name
+      return inspect ? `:${this.name}` : this.name
     }
   }
 
@@ -178,7 +178,7 @@
     toString(inspect) {
       const abbrev = Cons.canAbbrev(this)
       if (abbrev)
-        return abbrev + makeString(this.cdr.car, inspect)
+        return `${abbrev}${makeString(this.cdr.car, inspect)}`
 
       const ss = []
       let separator = '('
@@ -369,9 +369,9 @@
     const f = (m) => {
       if (m in kEscapeCharTable)
         return kEscapeCharTable[m]
-      return '\\x' + ('0' + m.charCodeAt(0).toString(16)).slice(-2)
+      return `\\x${('0' + m.charCodeAt(0).toString(16)).slice(-2)}`
     }
-    return '"' + str.replace(/[\x00-\x1f"\\]/g, f) + '"'
+    return `"${str.replace(/[\x00-\x1f\"\\]/g, f)}"`
   }
 
   LISP['x->string'] = makeString
@@ -417,9 +417,9 @@
           continue
         if (contents.length > 0)
           contents += ', '
-        contents += k + ':' + this[k]
+        contents += `${k}:${this[k]}`
       }
-      return '#table<' + contents + '>'
+      return `#table<${contents}>`
     }
   }
   LISP.HashTable = HashTable
@@ -454,7 +454,7 @@
     if (!re.global) {
       const s = re.toString()
       const i = s.lastIndexOf('/')
-      re = new RegExp(s.slice(1, i), s.slice(i + 1) + 'g')
+      re = new RegExp(s.slice(1, i), `${s.slice(i + 1)}g`)
     }
     return str.replace(re, (match) => {
       return fn(() => {  // TODO: handle arguments.
@@ -543,8 +543,8 @@
   LISP.NoCloseParenException = function() {}
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
-  const kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])')
-  const kReSymbolOrNumber = RegExp('^([^' + kDelimitors + ']+)')
+  const kReSingleDot = RegExp(`^\\.(?=[${kDelimitors}])`)
+  const kReSymbolOrNumber = RegExp(`^([^${kDelimitors}]+)`)
   const kReadUnescapeTable = {
     't': '\t',
     'n': '\n',
@@ -748,7 +748,7 @@
       if (typeof fileSpec == 'string') {
         stream = LISP.open(fileSpec)
         if (!stream)
-          return LISP.error('Cannot open [' + fileName + ']')
+          return LISP.error(`Cannot open [${fileName}]`)
       } else if (fileSpec instanceof Stream)
         stream = fileSpec
       else

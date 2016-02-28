@@ -224,7 +224,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       key: 'toString',
       value: function toString(inspect) {
         var abbrev = Cons.canAbbrev(this);
-        if (abbrev) return abbrev + makeString(this.cdr.car, inspect);
+        if (abbrev) return '' + abbrev + makeString(this.cdr.car, inspect);
 
         var ss = [];
         var separator = '(';
@@ -426,7 +426,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       if (m in kEscapeCharTable) return kEscapeCharTable[m];
       return '\\x' + ('0' + m.charCodeAt(0).toString(16)).slice(-2);
     };
-    return '"' + str.replace(/[\x00-\x1f"\\]/g, f) + '"';
+    return '"' + str.replace(/[\x00-\x1f\"\\]/g, f) + '"';
   };
 
   LISP['x->string'] = makeString;
