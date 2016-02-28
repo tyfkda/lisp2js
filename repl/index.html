@@ -40,38 +40,35 @@
       <div style="width:400px; margin:0; float: left">
         <div id="code-area" style="width:400px; margin:0; background-color: #000040; font-size: 14px;">
 <textarea id="code" style="width: 400px; height: 400px;">
-(let* ((canvas (JS.document.getElementById "canvas"))
-       (context (canvas.getContext "2d")))
+(def canvas (JS.document.getElementById "canvas"))
+(def context (canvas.getContext "2d"))
 
-  ;; Load and draw image.
-  (let ((img (new Image)))
-    (set! img.src "smile.png")
-    (set! img.onload
-          (lambda ()
-            (let ((x 0)
-                  (draw nil))
-              (set! draw (lambda ()
-                           ;; Fill background.
-                           (set! context.fillStyle "rgb(0, 0, 255)")
-                           (context.fillRect 0 0 400 400)
+(let ((img (new Image))
+      (x 0))
+  (labels
+   ((draw ()
+          ;; Fill background.
+          (set! context.fillStyle "rgb(0, 0, 255)")
+          (context.fillRect 0 0 canvas.width canvas.height)
 
-                           ;; Draw line.
-                           (context.beginPath)
-                           (set! context.strokeStyle "#ff0000")
-                           (context.moveTo 0 0)
-                           (context.lineTo 400 400)
-                           (context.closePath)
-                           (context.stroke)
+          ;; Draw line.
+          (context.beginPath)
+          (set! context.strokeStyle "#ff0000")
+          (context.moveTo 0 0)
+          (context.lineTo canvas.width canvas.height)
+          (context.closePath)
+          (context.stroke)
 
-                           (context.drawImage img x
-                                              (* (- 400 img.height) 0.5))
+          (context.drawImage img x
+                             (* (- canvas.height img.height) 0.5))
 
-                           (set! x (let ((nextx (+ x 1)))
-                                     (if (&gt; nextx canvas.width) 0 nextx)))
+          (set! x (let ((nextx (+ x 1)))
+                    (if (> nextx canvas.width) 0 nextx)))
 
-                           (JS.window.requestAnimationFrame draw)))
+          (JS.window.requestAnimationFrame draw)))
 
-              (draw))))))
+   (set! img.src "smile.png")
+   (set! img.onload draw)))
 </textarea>
         </div>
         <button onClick="runTextAreaCode()">Run</button>
