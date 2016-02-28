@@ -1,4 +1,5 @@
 node_modules
+npm-debug.log
 /lisp2js.js.map
 
 # To work with `gh-pages` branch,
