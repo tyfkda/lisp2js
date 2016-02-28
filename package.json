@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Translate lisp code into Javascript",
   "main": "lisp2js.js",
+  "bin": {
+    "lisp2js": "jslisp"
+  },
   "directories": {
     "example": "examples",
     "test": "test"
