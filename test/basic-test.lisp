@@ -45,6 +45,7 @@
  (test "type of string" 'string (type "123"))
  (test "type of vector" 'vector (type #(1 2 3)))
  (test "type of table" 'table (type (make-hash-table)))
+ (test "type of lambda" 'function (type (lambda () 123)))
 
  ;; lambda
  (test "lambda" 123 ((lambda () 123)))
