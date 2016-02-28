@@ -32,6 +32,9 @@
   (and (symbol? sym)
        (scope-var? scope (get-receiver sym))))
 
+(defun special-var? (scope sym)
+  (member sym '(this)))
+
 ;; Get symbol which sits on the top of dot-concatenated symbol.
 ;;   ex. foo.bar.baz => foo
 (defun get-receiver (sym)
@@ -151,7 +154,8 @@
                       (lambda (m) (escape-sym-char (string-ref (m) 0)))))
 
 (defun compile-symbol (sym scope)
-  (if (local-var? scope sym)
+  (if (or (local-var? scope sym)
+          (special-var? scope sym))
       (escape-symbol sym)
     (let ((s (symbol->string sym)))
       (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
