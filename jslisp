@@ -102,9 +102,9 @@
   if (translator == null) {
     try {
       if (fs.statSync(__dirname + '/lisp2js.js').isFile())
-        translator = './lisp2js'
+        translator = __dirname + '/lisp2js'
     } catch (e) {
-      translator = './lisp2js.min'
+      translator = __dirname + '/lisp2js.min'
     }
   }
   LISP = require(translator)
