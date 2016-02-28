@@ -26,15 +26,6 @@
   }
 
   const jsBoolToS = x => x ? LISP.t : LISP.nil
-  const arguments2Array = (args, start) => {
-    const len = args.length - start
-    if (len <= 0)
-      return []
-    const array = new Array(len)
-    for (let i = 0; i < len; ++i)
-      array[i] = args[i + start]
-    return array
-  }
 
   const makeString = (x, inspect) => {
     if (x === LISP.nil)
@@ -82,7 +73,7 @@
   }
 
   LISP.error = function() {
-    throw arguments2Array(arguments, 0).join(', ')
+    throw Array.prototype.slice.call(arguments).join(', ')
   }
 
   // Base class.
@@ -357,7 +348,7 @@
   LISP['string?'] = x => jsBoolToS(typeof x === 'string')
   LISP['string=?'] = (x, y) => jsBoolToS(x === y)
   LISP['string-append'] = function() {
-    return arguments2Array(arguments, 0).join('')
+    return Array.prototype.slice.call(arguments).join('')
   }
   LISP['string-join'] = (list, separator) => {
     if (list === LISP.nil)
@@ -445,7 +436,7 @@
 
   // Vector.
   LISP.vector = function() {
-    return arguments2Array(arguments, 0)
+    return Array.prototype.slice.call(arguments)
   }
   LISP['make-vector'] = (count, value) => {
     if (value === undefined)

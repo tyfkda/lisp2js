@@ -36,14 +36,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var jsBoolToS = function jsBoolToS(x) {
     return x ? LISP.t : LISP.nil;
   };
-  var arguments2Array = function arguments2Array(args, start) {
-    var len = args.length - start;
-    if (len <= 0) return [];
-    var array = new Array(len);
-    for (var i = 0; i < len; ++i) {
-      array[i] = args[i + start];
-    }return array;
-  };
 
   var makeString = function makeString(x, inspect) {
     if (x === LISP.nil) return 'nil';
@@ -91,7 +83,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   }
 
   LISP.error = function () {
-    throw arguments2Array(arguments, 0).join(', ');
+    throw Array.prototype.slice.call(arguments).join(', ');
   };
 
   // Base class.
@@ -415,7 +407,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return jsBoolToS(x === y);
   };
   LISP['string-append'] = function () {
-    return arguments2Array(arguments, 0).join('');
+    return Array.prototype.slice.call(arguments).join('');
   };
   LISP['string-join'] = function (list, separator) {
     if (list === LISP.nil) return '';
@@ -531,7 +523,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   // Vector.
   LISP.vector = function () {
-    return arguments2Array(arguments, 0);
+    return Array.prototype.slice.call(arguments);
   };
   LISP['make-vector'] = function (count, value) {
     if (value === undefined) value = LISP.nil;
