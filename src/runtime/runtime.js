@@ -168,7 +168,7 @@
   LISP['eq?'] = (x, y) => jsBoolToS(x === y)
 
   // Cons cell.
-  const abbrevTable = {
+  const kAbbrevTable = {
     quote: '\'',
     quasiquote: '`',
     unquote: ',',
@@ -176,7 +176,7 @@
   }
   const canAbbrev = (s) => {
     return (s.car instanceof Symbol &&
-            s.car.name in abbrevTable &&
+            s.car.name in kAbbrevTable &&
             s.cdr instanceof Cons &&
             LISP['eq?'](s.cdr.cdr, LISP.nil))
   }
@@ -198,7 +198,7 @@
 
     toString(inspect) {
       if (canAbbrev(this))
-        return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
+        return kAbbrevTable[this.car.name] + makeString(this.cdr.car, inspect)
 
       const ss = []
       let separator = '('

@@ -214,14 +214,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   // Cons cell.
-  var abbrevTable = {
+  var kAbbrevTable = {
     quote: '\'',
     quasiquote: '`',
     unquote: ',',
     'unquote-splicing': ',@'
   };
   var canAbbrev = function canAbbrev(s) {
-    return s.car instanceof _Symbol && s.car.name in abbrevTable && s.cdr instanceof Cons && LISP['eq?'](s.cdr.cdr, LISP.nil);
+    return s.car instanceof _Symbol && s.car.name in kAbbrevTable && s.cdr instanceof Cons && LISP['eq?'](s.cdr.cdr, LISP.nil);
   };
 
   var Cons = function (_SObject3) {
@@ -245,7 +245,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     _createClass(Cons, [{
       key: 'toString',
       value: function toString(inspect) {
-        if (canAbbrev(this)) return abbrevTable[this.car.name] + makeString(this.cdr.car, inspect);
+        if (canAbbrev(this)) return kAbbrevTable[this.car.name] + makeString(this.cdr.car, inspect);
 
         var ss = [];
         var separator = '(';
