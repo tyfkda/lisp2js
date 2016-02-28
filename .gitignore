@@ -1,4 +1,4 @@
-/node_modules/
+node_modules
 /lisp2js.js.map
 
 # To work with `gh-pages` branch,
