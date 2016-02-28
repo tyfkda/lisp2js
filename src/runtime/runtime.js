@@ -4,21 +4,6 @@
 class SObject {
 }
 
-// Symbol.
-class Symbol extends SObject {
-  constructor(name) {
-    super()
-    this.name = name
-  }
-
-  static getTypeName() {
-    return 'symbol'
-  }
-
-  toString() {
-    return this.name
-  }
-}
 
 class Keyword extends SObject {
   constructor(name) {
@@ -34,6 +19,12 @@ class Keyword extends SObject {
     return inspect ? `:${this.name}` : this.name
   }
 }
+const kAbbrevTable = {}
+;[['quote', '\''],
+  ['quasiquote', '`'],
+  ['unquote', ','],
+  ['unquote-splicing', ',@']]
+      .forEach(([sym, abb]) => { kAbbrevTable[Symbol.for(sym)] = abb })
 
 // Cons cell.
 class Cons extends SObject {
@@ -81,16 +72,10 @@ class Cons extends SObject {
   }
 
   static canAbbrev(s) {
-    const kAbbrevTable = {
-      quote: '\'',
-      quasiquote: '`',
-      unquote: ',',
-      'unquote-splicing': ',@',
-    }
-    return (s.car instanceof Symbol &&
-            s.car.name in kAbbrevTable &&
+    return (typeof s.car == 'symbol' &&
+            s.car in kAbbrevTable &&
             s.cdr instanceof Cons &&
-            LISP['eq?'](s.cdr.cdr, LISP.nil)) ? kAbbrevTable[s.car.name] : false
+            LISP['eq?'](s.cdr.cdr, LISP.nil)) ? kAbbrevTable[s.car] : false
   }
 }
 
@@ -200,6 +185,8 @@ const makeString = (x, inspect) => {
     return 't'
 
   switch (typeof x) {
+  case 'symbol':
+    return Symbol.keyFor(x)
   case 'string':
     return inspect ? inspectString(x) : x
   case 'function':
@@ -263,16 +250,9 @@ const LISP = ((createLisp, installEval) => {
     return new (Function.prototype.bind.apply(klass, arguments))
   }
 
-  LISP['symbol->string'] = function symbol$2d$3estring(x) { return x.name }
+  LISP['symbol->string'] = x => Symbol.keyFor(x)
 
-  {
-    const symbolTable = {}  // key(string) => Symbol object
-    LISP.intern = function intern(name) {
-      if (name in symbolTable)
-        return symbolTable[name]
-      return symbolTable[name] = new Symbol(name)
-    }
-  }
+  LISP.intern = (name) => Symbol.for(name)
   {
     let index = 0
     LISP.gensym = function gensym() {
@@ -430,7 +410,7 @@ const LISP = ((createLisp, installEval) => {
   // String.
   LISP['string=?'] = function string$3d$3f(x, y) { return jsBoolToS(x === y) }
   LISP['string-append'] = function string_append() {
-    return Array.prototype.slice.call(arguments).join('')
+    return Array.prototype.slice.call(arguments).map(s => makeString(s)).join('')
   }
   LISP['string-join'] = function string$2djoin(list, separator) {
     if (list === LISP.nil)
