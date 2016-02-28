@@ -757,17 +757,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return c;
         });
       }
+    }, {
+      key: 'setMacroCharacter',
+      value: function setMacroCharacter(c, fn) {
+        readTable[c] = fn;
+      }
     }]);
 
     return Reader;
   }();
 
-  var setMacroCharacter = function setMacroCharacter(c, fn) {
-    readTable[c] = fn;
-  };
-  LISP['set-macro-character'] = setMacroCharacter;
+  LISP['set-macro-character'] = Reader.setMacroCharacter;
 
-  setMacroCharacter('(', function (stream, _c) {
+  Reader.setMacroCharacter('(', function (stream, _c) {
     return (// Left paren '('.
       Reader.readList(stream)
     );

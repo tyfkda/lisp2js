@@ -642,13 +642,16 @@
         return c
       })
     }
+
+    static setMacroCharacter(c, fn) {
+      readTable[c] = fn
+    }
   }
 
-  const setMacroCharacter = (c, fn) => { readTable[c] = fn }
-  LISP['set-macro-character'] = setMacroCharacter
+  LISP['set-macro-character'] = Reader.setMacroCharacter
 
-  setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
-                    Reader.readList(stream))
+  Reader.setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
+                           Reader.readList(stream))
 
   LISP.read = stream => Reader.read(stream || LISP['*stdin*'])
 
