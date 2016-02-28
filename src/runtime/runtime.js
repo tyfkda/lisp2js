@@ -12,6 +12,30 @@
     module.exports = LISP
   else
     g.LISP = LISP
+
+  // Running on browser: Execute inner text.
+  if (typeof document != 'undefined') {
+    const getMyCode = () => {
+      const currentScript = document.currentScript || (() => {
+        const nodeList = document.getElementsByTagName('script')
+        return nodeList.item(nodeList.length - 1)
+      })()
+      return currentScript.text
+    }
+
+    // Run Lisp codes.
+    const runCodes = (codes) => {
+      const stream = new LISP.StrStream(codes)
+      for (;;) {
+        const s = LISP.read(stream)
+        if (s === undefined)
+          break
+        LISP.eval(s)
+      }
+    }
+
+    runCodes(getMyCode())
+  }
 })((global) => {
   'use strict'
 

@@ -20,6 +20,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   installAux(LISP);
 
   if (typeof module !== 'undefined') module.exports = LISP;else g.LISP = LISP;
+
+  // Running on browser: Execute inner text.
+  if (typeof document != 'undefined') {
+    var getMyCode = function getMyCode() {
+      var currentScript = document.currentScript || function () {
+        var nodeList = document.getElementsByTagName('script');
+        return nodeList.item(nodeList.length - 1);
+      }();
+      return currentScript.text;
+    };
+
+    // Run Lisp codes.
+    var runCodes = function runCodes(codes) {
+      var stream = new LISP.StrStream(codes);
+      for (;;) {
+        var s = LISP.read(stream);
+        if (s === undefined) break;
+        LISP.eval(s);
+      }
+    };
+
+    runCodes(getMyCode());
+  }
 })(function (global) {
   'use strict';
 
