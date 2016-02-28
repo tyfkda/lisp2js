@@ -75,16 +75,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     console.log(str);
   };
 
-  var macroTable = {};
-  LISP['register-macro'] = function (name, func) {
-    macroTable[name] = func;
-    return name;
-  };
-  LISP['macroexpand-1'] = function (s) {
-    if (!LISP['pair?'](s) || !(s.car in macroTable)) return s;
-    var macrofn = macroTable[s.car];
-    return LISP.apply(macrofn, s.cdr);
-  };
+  {
+    (function () {
+      var macroTable = {};
+      LISP['register-macro'] = function (name, func) {
+        macroTable[name] = func;
+        return name;
+      };
+      LISP['macroexpand-1'] = function (s) {
+        if (!LISP['pair?'](s) || !(s.car in macroTable)) return s;
+        var macrofn = macroTable[s.car];
+        return LISP.apply(macrofn, s.cdr);
+      };
+    })();
+  }
 
   LISP.error = function () {
     throw arguments2Array(arguments, 0).join(', ');
@@ -130,19 +134,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return x.name;
   };
 
-  LISP.intern = function () {
-    var symbolTable = {}; // key(string) => Symbol object
-    return function (name) {
-      if (name in symbolTable) return symbolTable[name];
-      return symbolTable[name] = new _Symbol(name);
-    };
-  }();
-  LISP.gensym = function () {
-    var index = 0;
-    return function () {
-      return LISP.intern('__' + ++index);
-    };
-  }();
+  {
+    (function () {
+      var symbolTable = {}; // key(string) => Symbol object
+      LISP.intern = function (name) {
+        if (name in symbolTable) return symbolTable[name];
+        return symbolTable[name] = new _Symbol(name);
+      };
+    })();
+  }
+  {
+    (function () {
+      var index = 0;
+      LISP.gensym = function () {
+        return LISP.intern('__' + ++index);
+      };
+    })();
+  }
   LISP['symbol?'] = function (x) {
     return jsBoolToS(x instanceof _Symbol);
   };
@@ -174,13 +182,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return Keyword;
   }(SObject);
 
-  LISP['make-keyword'] = function () {
-    var keywordTable = {}; // key(string) => Keyword object
-    return function (name) {
-      if (name in keywordTable) return keywordTable[name];
-      return keywordTable[name] = new Keyword(name);
-    };
-  }();
+  {
+    (function () {
+      var keywordTable = {}; // key(string) => Keyword object
+      LISP['make-keyword'] = function (name) {
+        if (name in keywordTable) return keywordTable[name];
+        return keywordTable[name] = new Keyword(name);
+      };
+    })();
+  }
   LISP['keyword?'] = function (x) {
     return jsBoolToS(x instanceof Keyword);
   };

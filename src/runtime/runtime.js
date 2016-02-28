@@ -67,16 +67,18 @@
                     console.log(str)
                   })
 
-  const macroTable = {}
-  LISP['register-macro'] = (name, func) => {
-    macroTable[name] = func
-    return name
-  }
-  LISP['macroexpand-1'] = (s) => {
-    if (!LISP['pair?'](s) || !(s.car in macroTable))
-      return s
-    const macrofn = macroTable[s.car]
-    return LISP.apply(macrofn, s.cdr)
+  {
+    const macroTable = {}
+    LISP['register-macro'] = (name, func) => {
+      macroTable[name] = func
+      return name
+    }
+    LISP['macroexpand-1'] = (s) => {
+      if (!LISP['pair?'](s) || !(s.car in macroTable))
+        return s
+      const macrofn = macroTable[s.car]
+      return LISP.apply(macrofn, s.cdr)
+    }
   }
 
   LISP.error = function() {
@@ -105,20 +107,20 @@
 
   LISP['symbol->string'] = x => x.name
 
-  LISP.intern = (() => {
+  {
     const symbolTable = {}  // key(string) => Symbol object
-    return (name) => {
+    LISP.intern = (name) => {
       if (name in symbolTable)
         return symbolTable[name]
       return symbolTable[name] = new Symbol(name)
     }
-  })()
-  LISP.gensym = (() => {
+  }
+  {
     let index = 0
-    return () => {
+    LISP.gensym = () => {
       return LISP.intern('__' + (++index))
     }
-  })()
+  }
   LISP['symbol?'] = x => jsBoolToS(x instanceof Symbol)
 
   class Keyword extends SObject {
@@ -135,14 +137,15 @@
       return inspect ? ':' + this.name : this.name
     }
   }
-  LISP['make-keyword'] = (() => {
+
+  {
     const keywordTable = {}  // key(string) => Keyword object
-    return (name) => {
+    LISP['make-keyword'] = (name) => {
       if (name in keywordTable)
         return keywordTable[name]
       return keywordTable[name] = new Keyword(name)
     }
-  })()
+  }
   LISP['keyword?'] = x => jsBoolToS(x instanceof Keyword)
   LISP['keyword->string'] = x => x.name
 
