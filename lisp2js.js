@@ -465,12 +465,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   LISP.apply = function (fn) {
-    var params = [];
-    if (arguments.length > 1) {
-      for (var i = 1; i < arguments.length - 1; ++i) {
-        params.push(arguments[i]);
-      } // Last argument for `apply` is expected as list (or nil).
-      var last = arguments[arguments.length - 1];
+    for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      params[_key - 1] = arguments[_key];
+    }
+
+    if (params.length > 0) {
+      // Last argument for `apply` is expected as list (or nil).
+      var last = params.pop();
       if (last !== LISP.nil) params = params.concat(last.toArray());
     }
     return fn.apply(null, params);

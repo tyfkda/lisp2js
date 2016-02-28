@@ -404,13 +404,10 @@
     return x
   }
 
-  LISP.apply = function(fn) {
-    let params = []
-    if (arguments.length > 1) {
-      for (let i = 1; i < arguments.length - 1; ++i)
-        params.push(arguments[i])
+  LISP.apply = function(fn, ...params) {
+    if (params.length > 0) {
       // Last argument for `apply` is expected as list (or nil).
-      const last = arguments[arguments.length - 1]
+      const last = params.pop()
       if (last !== LISP.nil)
         params = params.concat(last.toArray())
     }
