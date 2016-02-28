@@ -941,6 +941,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   LISP["register-macro"](LISP.intern("defmacro"), function (name, params) {
     var body = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("register-macro"), LISP.list(LISP.intern("quote"), name), LISP["list*"](LISP.intern("lambda"), params, body));
   });
+  LISP.macroexpand = function (exp) {
+    return function (expanded) {
+      return LISP.isTrue(LISP["equal?"](expanded, exp)) ? exp : LISP.macroexpand(expanded);
+    }(LISP["macroexpand-1"](exp));
+  };
   LISP["set-macro-character"]("'", function (stream, _) {
     return LISP.list(LISP.intern("quote"), LISP.read(stream));
   });
@@ -1248,11 +1253,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP["null?"](result))) ? LISP.cons(LISP.intern("list"), items) : LISP.isTrue(LISP.isTrue(LISP["pair?"](result)) ? function (__16) {
       return LISP.isTrue(__16) ? __16 : LISP["eq?"](LISP.car(result), LISP.intern("list*"));
     }(LISP["eq?"](LISP.car(result), LISP.intern("list"))) : LISP.nil) ? LISP.cons(LISP.car(result), LISP.append(items, LISP.cdr(result))) : LISP.cons(LISP.intern("list*"), LISP.append(items, LISP.list(result)));
-  };
-  LISP.macroexpand = function (exp) {
-    return function (expanded) {
-      return LISP.isTrue(LISP["equal?"](expanded, exp)) ? exp : LISP.macroexpand(expanded);
-    }(LISP["macroexpand-1"](exp));
   };
   LISP["create-scope"] = function (parent$2dscope, params) {
     return LISP.vector(LISP["remove-if"](function () {

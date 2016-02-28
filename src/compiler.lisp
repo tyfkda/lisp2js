@@ -1,10 +1,3 @@
-
-(defun macroexpand (exp)
-  (let ((expanded (macroexpand-1 exp)))
-    (if (equal? expanded exp)
-        exp
-      (macroexpand expanded))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Scope
 

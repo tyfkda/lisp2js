@@ -1,7 +1,13 @@
 (register-macro 'defmacro
-                (lambda (name params &body body)
-                  `(register-macro ',name
-                                   (lambda ,params ,@body))))
+  (lambda (name params &body body)
+    `(register-macro ',name
+       (lambda ,params ,@body))))
+
+(defun macroexpand (exp)
+  (let ((expanded (macroexpand-1 exp)))
+    (if (equal? expanded exp)
+        exp
+      (macroexpand expanded))))
 
 ;; Reader macros
 (set-macro-character "'"
