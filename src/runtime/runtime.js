@@ -112,7 +112,6 @@
       return LISP.intern('__' + (++index))
     }
   }
-  LISP['symbol?'] = x => jsBoolToS(x instanceof Symbol)
 
   class Keyword extends SObject {
     constructor(name) {
@@ -137,7 +136,6 @@
       return keywordTable[name] = new Keyword(name)
     }
   }
-  LISP['keyword?'] = x => jsBoolToS(x instanceof Keyword)
   LISP['keyword->string'] = x => x.name
 
   LISP.type = (x) => {
@@ -149,6 +147,8 @@
       if (type === 'object') {
         if (x instanceof Array)
           type = 'vector'
+        if (x instanceof RegExp)
+          type = 'regexp'
         else if (x instanceof SObject)
           type = x.constructor.getTypeName()
       }
@@ -231,7 +231,6 @@
   LISP['set-car!'] = (s, x) => s.car = x
   LISP['set-cdr!'] = (s, x) => s.cdr = x
 
-  LISP['pair?'] = x => jsBoolToS(x instanceof Cons)
   LISP.list = function() {
     let result = LISP.nil
     for (let i = arguments.length; --i >= 0;)
@@ -249,7 +248,6 @@
     return rev
   }
 
-  LISP['number?'] = x => jsBoolToS(typeof x === 'number')
   LISP['number->string'] = (x, n) => x.toString(n)
   LISP['+'] = function() {
     if (arguments.length == 0)
@@ -347,7 +345,6 @@
   }
 
   // String.
-  LISP['string?'] = x => jsBoolToS(typeof x === 'string')
   LISP['string=?'] = (x, y) => jsBoolToS(x === y)
   LISP['string-append'] = function() {
     return Array.prototype.slice.call(arguments).join('')
@@ -429,7 +426,6 @@
 
   // Hash table.
   LISP['make-hash-table'] = () => new HashTable()
-  LISP['hash-table?'] = x => x instanceof HashTable
   LISP['hash-table-exists?'] = (hash, x) => x in hash ? LISP.t : LISP.nil
   LISP['hash-table-get'] = function(hash, x, valueForNonExist = LISP.nil) {
     return (x in hash) ? hash[x] : valueForNonExist
@@ -448,13 +444,11 @@
       vector[i] = value
     return vector
   }
-  LISP['vector?'] = x => jsBoolToS(x instanceof Array)
   LISP['vector-length'] = vector => vector.length
   LISP['vector-ref'] = (vector, index) => vector[index]
   LISP['vector-set!'] = (vector, index, value) => vector[index] = value
 
   // Regexp.
-  LISP['regexp?'] = x => jsBoolToS(x instanceof RegExp)
   LISP.rxmatch = (re, str) => jsBoolToS(re.exec(str))
   LISP['regexp-replace-all'] = (re, str, fn) => {
     if (!re.global) {

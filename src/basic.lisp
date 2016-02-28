@@ -310,3 +310,12 @@
               `(set! ,(car ls) (lambda ,@(cdr ls))))
             lss)
      ,@body))
+
+(defmacro deftype? (&rest types)
+  `(progn
+     ,@(map (lambda (tt)
+              `(defun ,(intern (string-append tt "?")) (x)
+                 (eq? (type x) ',tt)))
+            types)))
+
+(deftype? symbol pair number string keyword vector table regexp)
