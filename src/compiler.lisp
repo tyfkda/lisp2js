@@ -96,7 +96,6 @@
                  ((def name value)  (vector :DEF
                                             (traverse* name scope)
                                             (traverse* value scope)))
-                 ((new klass &rest args)  (vector :NEW klass (traverse-args args new-scope)))
                  (t (vector :FUNCALL
                             (traverse* (car s) scope)
                             (traverse-args (cdr s) scope))))))
@@ -290,13 +289,6 @@
                  " = "
                  (compile* value scope)))
 
-(defun compile-new (class-name args scope)
-  (string-append "new "
-                 (symbol->string class-name)
-                 "("
-                 (expand-args args scope)
-                 ")"))
-
 ;; If the given scope has quoted value, output them as local variable values,
 ;; and encapsulate with anonymous function.
 (defun compile-new-scope (compiled-body scope)
@@ -329,7 +321,6 @@
                   (compile-new-scope (compile-lambda params body scope extended-scope)
                                      extended-scope)))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
-    ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     (t  (compile-error "Unknown AST node:" s))))
 
 (defun compile-error (&rest args)

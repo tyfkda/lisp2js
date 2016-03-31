@@ -35,7 +35,7 @@
          '((lambda (x &rest y) (cons x y)) 1 2 3)')
     test('lambda-rest2', LISP.list(1), '((lambda (x &rest y) (cons x y)) 1)')
     test('def', 123, '(progn (def x 123) x)')
-    test('new', [,,,], '(new Array 3)')
+    test('new', [,,,], '(new JS.Array 3)')
     test('+', 6, '(+ 1 2 3)')
 
     // Vector.

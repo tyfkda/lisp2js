@@ -100,6 +100,10 @@
     throw Array.prototype.slice.call(arguments).join(', ')
   }
 
+  LISP.new = function(klass) {
+    return new (Function.prototype.bind.apply(klass, arguments))
+  }
+
   // Base class.
   class SObject {
   }

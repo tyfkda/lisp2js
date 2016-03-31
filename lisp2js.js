@@ -109,6 +109,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     throw Array.prototype.slice.call(arguments).join(', ');
   };
 
+  LISP.new = function (klass) {
+    return new (Function.prototype.bind.apply(klass, arguments))();
+  };
+
   // Base class.
 
   var SObject = function SObject() {
@@ -1367,8 +1371,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }();
           }, LISP.cdr(__21)) : LISP.isTrue(LISP["eq?"](__22, LISP.intern("def"))) ? LISP.apply(function (name, value) {
             return LISP.vector(LISP["make-keyword"]("DEF"), LISP["traverse*"](name, scope), LISP["traverse*"](value, scope));
-          }, LISP.cdr(__21)) : LISP.isTrue(LISP["eq?"](__22, LISP.intern("new"))) ? LISP.apply(function (klass) {
-            var args = LISP._getRestArgs(arguments, 1);return LISP.vector(LISP["make-keyword"]("NEW"), klass, traverse$2dargs(args, LISP["new-scope"]));
           }, LISP.cdr(__21)) : LISP.vector(LISP["make-keyword"]("FUNCALL"), LISP["traverse*"](LISP.car(s), scope), traverse$2dargs(LISP.cdr(s), scope));
         }(LISP.car(__21));
       }(s);
@@ -1490,9 +1492,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   LISP["compile-def"] = function (name, value, scope) {
     return LISP["string-append"](LISP["compile*"](name, scope), " = ", LISP["compile*"](value, scope));
   };
-  LISP["compile-new"] = function (class$2dname, args, scope) {
-    return LISP["string-append"]("new ", LISP["symbol->string"](class$2dname), "(", LISP["expand-args"](args, scope), ")");
-  };
   LISP["compile-new-scope"] = function (compiled$2dbody, scope) {
     return function (it) {
       return LISP.isTrue(it) ? LISP["string-append"]("(function() { var ", LISP["string-join"](LISP.map(function (x) {
@@ -1506,7 +1505,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return LISP["compile-if"](p, thn, els, scope);
       }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__29, LISP["make-keyword"]("FUNCALL"))) ? LISP["compile-funcall"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__29, LISP["make-keyword"]("SET!"))) ? LISP["compile-set!"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__29, LISP["make-keyword"]("LAMBDA"))) ? function (extended$2dscope, params, body) {
         return LISP["compile-new-scope"](LISP["compile-lambda"](params, body, scope, extended$2dscope), extended$2dscope);
-      }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__29, LISP["make-keyword"]("DEF"))) ? LISP["compile-def"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__29, LISP["make-keyword"]("NEW"))) ? LISP["compile-new"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP["compile-error"]("Unknown AST node:", s);
+      }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__29, LISP["make-keyword"]("DEF"))) ? LISP["compile-def"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP["compile-error"]("Unknown AST node:", s);
     }(LISP["vector-ref"](s, 0));
   };
   LISP["compile-error"] = function () {
