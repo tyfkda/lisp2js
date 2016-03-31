@@ -6,9 +6,8 @@
 
   let LISP
 
-  // Run codes.
-  const runCodes = (codes, compile) => {
-    const stream = new LISP.StrStream(codes)
+  // Run stream.
+  const runStream = (stream, compile) => {
     let result
     for (;;) {
       const s = LISP.read(stream)
@@ -23,6 +22,9 @@
       }
     }
   }
+
+  // Run codes.
+  const runCodes = (codes, compile) => runStream(new LISP.StrStream(codes), compile)
 
   // Read-Eval-Print loop.
   const repl = () => {
@@ -113,8 +115,12 @@
     const tty = require('tty')
     if (tty.isatty(0))
       return repl()
-    else
+    if (!compileOnly)
       return replNoPrompt()
+
+    process.stdin.resume()
+    process.stdin.setEncoding('utf8')
+    return runStream(LISP['*stdin*'], compileOnly)
   }
 
   // Process command line argument as a script file.
