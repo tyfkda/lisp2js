@@ -43,7 +43,7 @@
 (def canvas (JS.document.getElementById "canvas"))
 (def context (canvas.getContext "2d"))
 
-(let ((img (new Image))
+(let ((img (new JS.Image))
       (x 0))
   (labels
    ((draw ()
