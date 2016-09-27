@@ -128,7 +128,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function _Symbol(name) {
       _classCallCheck(this, _Symbol);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(_Symbol).call(this));
+      var _this = _possibleConstructorReturn(this, (_Symbol.__proto__ || Object.getPrototypeOf(_Symbol)).call(this));
 
       _this.name = name;
       return _this;
@@ -177,7 +177,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function Keyword(name) {
       _classCallCheck(this, Keyword);
 
-      var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Keyword).call(this));
+      var _this2 = _possibleConstructorReturn(this, (Keyword.__proto__ || Object.getPrototypeOf(Keyword)).call(this));
 
       _this2.name = name;
       return _this2;
@@ -212,7 +212,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   LISP.type = function (x) {
-    var type = undefined;
+    var type = void 0;
     if (x === LISP.nil || x === LISP.t) type = 'bool';else {
       type = typeof x === 'undefined' ? 'undefined' : _typeof(x);
       if (type === 'object') {
@@ -235,7 +235,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function Cons(car, cdr, lineNo, path) {
       _classCallCheck(this, Cons);
 
-      var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Cons).call(this));
+      var _this3 = _possibleConstructorReturn(this, (Cons.__proto__ || Object.getPrototypeOf(Cons)).call(this));
 
       _this3.car = car;
       _this3.cdr = cdr;
@@ -255,7 +255,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         var ss = [];
         var separator = '(';
-        var p = undefined;
+        var p = void 0;
         for (p = this; p instanceof Cons; p = p.cdr) {
           ss.push(separator);
           ss.push(makeString(p.car, inspect));
@@ -492,7 +492,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function HashTable() {
       _classCallCheck(this, HashTable);
 
-      return _possibleConstructorReturn(this, Object.getPrototypeOf(HashTable).apply(this, arguments));
+      return _possibleConstructorReturn(this, (HashTable.__proto__ || Object.getPrototypeOf(HashTable)).apply(this, arguments));
     }
 
     _createClass(HashTable, [{
@@ -585,7 +585,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function Stream() {
       _classCallCheck(this, Stream);
 
-      var _this5 = _possibleConstructorReturn(this, Object.getPrototypeOf(Stream).call(this));
+      var _this5 = _possibleConstructorReturn(this, (Stream.__proto__ || Object.getPrototypeOf(Stream)).call(this));
 
       _this5.str = '';
       _this5.lineNo = 0;
@@ -659,7 +659,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     function StrStream(str) {
       _classCallCheck(this, StrStream);
 
-      var _this6 = _possibleConstructorReturn(this, Object.getPrototypeOf(StrStream).call(this));
+      var _this6 = _possibleConstructorReturn(this, (StrStream.__proto__ || Object.getPrototypeOf(StrStream)).call(this));
 
       _this6.str = str;
       _this6.lineNo = 1;
@@ -706,7 +706,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var c = stream.peek();
         if (c in readTable) return readTable[c](stream, stream.getc());
 
-        var m = undefined;
+        var m = void 0;
         if (stream.match(/^;[^\n]*\n?/)) // Line comment.
           return Reader.read(stream);
         if (m = stream.match(/^"((\\.|[^"\\])*)"/)) // string.
@@ -841,7 +841,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function FileStream(fd, path) {
           _classCallCheck(this, FileStream);
 
-          var _this7 = _possibleConstructorReturn(this, Object.getPrototypeOf(FileStream).call(this));
+          var _this7 = _possibleConstructorReturn(this, (FileStream.__proto__ || Object.getPrototypeOf(FileStream)).call(this));
 
           _this7.fd = fd;
           _this7.path = path;
@@ -915,7 +915,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       };
 
       LISP.load = function (fileSpec) {
-        var stream = undefined;
+        var stream = void 0;
         if (typeof fileSpec == 'string') {
           stream = LISP.open(fileSpec);
           if (!stream) return LISP.error('Cannot open [' + fileName + ']');
@@ -923,7 +923,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
 
-        var result = undefined;
+        var result = void 0;
         for (;;) {
           var s = LISP.read(stream);
           if (s == null) break;
