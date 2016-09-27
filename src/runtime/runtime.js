@@ -2,7 +2,7 @@
   'use strict'
 
   const g = ((typeof window !== 'undefined') ? window :
-             (typeof GLOBAL !== 'undefined') ? GLOBAL : {})
+             (typeof global !== 'undefined') ? global : {})
 
   const LISP = createLisp(g)
   installEval(LISP)

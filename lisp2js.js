@@ -13,7 +13,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function (createLisp, installEval, installAux) {
   'use strict';
 
-  var g = typeof window !== 'undefined' ? window : typeof GLOBAL !== 'undefined' ? GLOBAL : {};
+  var g = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
 
   var LISP = createLisp(g);
   installEval(LISP);
