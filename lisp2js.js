@@ -1,6 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -526,7 +526,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return x in hash ? LISP.t : LISP.nil;
   };
   LISP['hash-table-get'] = function (hash, x) {
-    var valueForNonExist = arguments.length <= 2 || arguments[2] === undefined ? LISP.nil : arguments[2];
+    var valueForNonExist = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : LISP.nil;
 
     return x in hash ? hash[x] : valueForNonExist;
   };
@@ -815,13 +815,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   LISP['read-char'] = function () {
-    var stream = arguments.length <= 0 || arguments[0] === undefined ? LISP['*stdin*'] : arguments[0];
+    var stream = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : LISP['*stdin*'];
 
     return stream.getc();
   };
 
   LISP['unread-char'] = function (c) {
-    var stream = arguments.length <= 1 || arguments[1] === undefined ? LISP['*stdin*'] : arguments[1];
+    var stream = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : LISP['*stdin*'];
 
     stream.ungetc(c);
     return LISP.nil;
