@@ -91,18 +91,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   {
-    (function () {
-      var macroTable = {};
-      LISP['register-macro'] = function (name, func) {
-        macroTable[name] = func;
-        return name;
-      };
-      LISP['macroexpand-1'] = function (s) {
-        if (!LISP['pair?'](s) || !(s.car in macroTable)) return s;
-        var macrofn = macroTable[s.car];
-        return LISP.apply(macrofn, s.cdr);
-      };
-    })();
+    var macroTable = {};
+    LISP['register-macro'] = function (name, func) {
+      macroTable[name] = func;
+      return name;
+    };
+    LISP['macroexpand-1'] = function (s) {
+      if (!LISP['pair?'](s) || !(s.car in macroTable)) return s;
+      var macrofn = macroTable[s.car];
+      return LISP.apply(macrofn, s.cdr);
+    };
   }
 
   LISP.error = function () {
@@ -154,21 +152,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   {
-    (function () {
-      var symbolTable = {}; // key(string) => Symbol object
-      LISP.intern = function (name) {
-        if (name in symbolTable) return symbolTable[name];
-        return symbolTable[name] = new _Symbol(name);
-      };
-    })();
+    var symbolTable = {}; // key(string) => Symbol object
+    LISP.intern = function (name) {
+      if (name in symbolTable) return symbolTable[name];
+      return symbolTable[name] = new _Symbol(name);
+    };
   }
   {
-    (function () {
-      var index = 0;
-      LISP.gensym = function () {
-        return LISP.intern('__' + ++index);
-      };
-    })();
+    var index = 0;
+    LISP.gensym = function () {
+      return LISP.intern('__' + ++index);
+    };
   }
 
   var Keyword = function (_SObject2) {
@@ -199,13 +193,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   }(SObject);
 
   {
-    (function () {
-      var keywordTable = {}; // key(string) => Keyword object
-      LISP['make-keyword'] = function (name) {
-        if (name in keywordTable) return keywordTable[name];
-        return keywordTable[name] = new Keyword(name);
-      };
-    })();
+    var keywordTable = {}; // key(string) => Keyword object
+    LISP['make-keyword'] = function (name) {
+      if (name in keywordTable) return keywordTable[name];
+      return keywordTable[name] = new Keyword(name);
+    };
   }
   LISP['keyword->string'] = function (x) {
     return x.name;
@@ -829,117 +821,115 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   // For node JS.
   if (typeof process !== 'undefined') {
-    (function () {
-      var fs = require('fs');
+    var fs = require('fs');
 
-      var BUFFER_SIZE = 4096;
-      var buffer = new Buffer(BUFFER_SIZE);
+    var BUFFER_SIZE = 4096;
+    var buffer = new Buffer(BUFFER_SIZE);
 
-      var FileStream = function (_Stream2) {
-        _inherits(FileStream, _Stream2);
+    var FileStream = function (_Stream2) {
+      _inherits(FileStream, _Stream2);
 
-        function FileStream(fd, path) {
-          _classCallCheck(this, FileStream);
+      function FileStream(fd, path) {
+        _classCallCheck(this, FileStream);
 
-          var _this7 = _possibleConstructorReturn(this, (FileStream.__proto__ || Object.getPrototypeOf(FileStream)).call(this));
+        var _this7 = _possibleConstructorReturn(this, (FileStream.__proto__ || Object.getPrototypeOf(FileStream)).call(this));
 
-          _this7.fd = fd;
-          _this7.path = path;
-          _this7.lines = [];
-          _this7.index = 0;
-          return _this7;
+        _this7.fd = fd;
+        _this7.path = path;
+        _this7.lines = [];
+        _this7.index = 0;
+        return _this7;
+      }
+
+      _createClass(FileStream, [{
+        key: 'close',
+        value: function close() {
+          if (this.fd == null) return;
+          fs.closeSync(this.fd);
+          this.fd = null;
+          this.lines.length = this.index = 0;
+          this.str = null;
+          this.chomped = false;
         }
-
-        _createClass(FileStream, [{
-          key: 'close',
-          value: function close() {
-            if (this.fd == null) return;
-            fs.closeSync(this.fd);
-            this.fd = null;
-            this.lines.length = this.index = 0;
-            this.str = null;
-            this.chomped = false;
-          }
-        }, {
-          key: 'readLine',
-          value: function readLine() {
-            for (;;) {
-              var left = '';
-              if (this.index < this.lines.length) {
-                if (this.index < this.lines.length - 1 || !this.chomped) return this.lines[this.index++];
-                if (this.chomped) left = this.lines[this.index];
-              }
-
-              if (this.fd == null) return LISP.nil;
-              var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
-              if (n <= 0) return null;
-              var string = left + buffer.slice(0, n).toString();
-              this.chomped = false;
-              if (string.length > 0) {
-                if (string[string.length - 1] != '\n') this.chomped = true;else
-                  // Remove last '\n' to avoid last empty line.
-                  string = string.slice(0, string.length - 1);
-              }
-              this.lines = string.split('\n');
-              this.index = 0;
+      }, {
+        key: 'readLine',
+        value: function readLine() {
+          for (;;) {
+            var left = '';
+            if (this.index < this.lines.length) {
+              if (this.index < this.lines.length - 1 || !this.chomped) return this.lines[this.index++];
+              if (this.chomped) left = this.lines[this.index];
             }
+
+            if (this.fd == null) return LISP.nil;
+            var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
+            if (n <= 0) return null;
+            var string = left + buffer.slice(0, n).toString();
+            this.chomped = false;
+            if (string.length > 0) {
+              if (string[string.length - 1] != '\n') this.chomped = true;else
+                // Remove last '\n' to avoid last empty line.
+                string = string.slice(0, string.length - 1);
+            }
+            this.lines = string.split('\n');
+            this.index = 0;
           }
-        }, {
-          key: 'write',
-          value: function write(s) {
-            fs.write(this.fd, s);
-          }
-        }]);
-
-        return FileStream;
-      }(Stream);
-
-      LISP.FileStream = FileStream;
-
-      LISP['*stdin*'] = new FileStream(process.stdin.fd, '*stdin*');
-      LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*');
-      LISP['*stderr*'] = new FileStream(process.stderr.fd, '*stderr*');
-
-      LISP.open = function (path, flag) {
-        try {
-          var fd = fs.openSync(path, flag || 'r');
-          return new LISP.FileStream(fd, path);
-        } catch (e) {
-          return LISP.nil;
         }
-      };
-
-      LISP.close = function (stream) {
-        stream.close();
-        return stream;
-      };
-
-      LISP.load = function (fileSpec) {
-        var stream = void 0;
-        if (typeof fileSpec == 'string') {
-          stream = LISP.open(fileSpec);
-          if (!stream) return LISP.error('Cannot open [' + fileName + ']');
-        } else if (fileSpec instanceof Stream) stream = fileSpec;else return LISP.error('Illegal fileSpec: ' + fileSpec);
-
-        if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
-
-        var result = void 0;
-        for (;;) {
-          var s = LISP.read(stream);
-          if (s == null) break;
-          result = LISP.eval(s);
+      }, {
+        key: 'write',
+        value: function write(s) {
+          fs.write(this.fd, s);
         }
-        if (stream !== fileSpec) LISP.close(stream);
-        return result;
-      };
+      }]);
 
-      // System
-      LISP.exit = function (code) {
-        return process.exit(code);
-      };
+      return FileStream;
+    }(Stream);
 
-      LISP.jsrequire = require;
-    })();
+    LISP.FileStream = FileStream;
+
+    LISP['*stdin*'] = new FileStream(process.stdin.fd, '*stdin*');
+    LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*');
+    LISP['*stderr*'] = new FileStream(process.stderr.fd, '*stderr*');
+
+    LISP.open = function (path, flag) {
+      try {
+        var fd = fs.openSync(path, flag || 'r');
+        return new LISP.FileStream(fd, path);
+      } catch (e) {
+        return LISP.nil;
+      }
+    };
+
+    LISP.close = function (stream) {
+      stream.close();
+      return stream;
+    };
+
+    LISP.load = function (fileSpec) {
+      var stream = void 0;
+      if (typeof fileSpec == 'string') {
+        stream = LISP.open(fileSpec);
+        if (!stream) return LISP.error('Cannot open [' + fileName + ']');
+      } else if (fileSpec instanceof Stream) stream = fileSpec;else return LISP.error('Illegal fileSpec: ' + fileSpec);
+
+      if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
+
+      var result = void 0;
+      for (;;) {
+        var s = LISP.read(stream);
+        if (s == null) break;
+        result = LISP.eval(s);
+      }
+      if (stream !== fileSpec) LISP.close(stream);
+      return result;
+    };
+
+    // System
+    LISP.exit = function (code) {
+      return process.exit(code);
+    };
+
+    LISP.jsrequire = require;
   }
 
   return LISP;
