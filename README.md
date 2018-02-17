@@ -16,7 +16,7 @@ Translate Lisp code into JavaScript.
 
 ### No
 * Continuation
-* Tail call optimization
+* Tail call optimization (depends on JS environment)
 * Argument count check (because of JavaScript nature)
 * Multiple values
 
