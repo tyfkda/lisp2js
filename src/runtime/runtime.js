@@ -533,20 +533,40 @@ const LISP = ((createLisp, installEval) => {
   }
 
   // Reader.
-  LISP.NoCloseParenException = function() {}
-  LISP.NoCloseParenException.prototype.toString = function() {
-    return 'No close paren'
+  class NoCloseParenException extends Error {
+    constructor(...args) {
+      super(...args)
+      Error.captureStackTrace(this, NoCloseParenException)
+    }
+    toString() {
+      return 'No close paren'
+    }
   }
-  LISP.NoCloseQuoteException = function() {}
-  LISP.NoCloseQuoteException.prototype.toString = function() {
-    return 'No close quote'
+  //NoCloseParenException.prototype = Error.prototype
+  LISP.NoCloseParenException = NoCloseParenException
+  class NoCloseQuoteException extends Error {
+    constructor(...args) {
+      super(...args)
+      Error.captureStackTrace(this, NoCloseQuoteException)
+    }
+    toString() {
+      return 'No close quote'
+    }
   }
-  LISP.UnexpectedCharacterException = function(char) {
-    this.char = char
+  //NoCloseQuoteException.prototype = Error.prototype
+  LISP.NoCloseQuoteException = NoCloseQuoteException
+  class UnexpectedCharacterException extends Error {
+    constructor(char) {
+      super()
+      this.char = char
+      Error.captureStackTrace(this, UnexpectedCharacterException)
+    }
+    toString() {
+      return `Unexpected character: ${this.char.toString()}`
+    }
   }
-  LISP.UnexpectedCharacterException.prototype.toString = function() {
-    return `Unexpected character: ${this.char.toString()}`
-  }
+  //UnexpectedCharacterException.prototype = Error.prototype
+  LISP.UnexpectedCharacterException = UnexpectedCharacterException
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
   const kReSymbolOrNumber = new RegExp(`^([^.${kDelimitors}][^${kDelimitors}]*)`)
