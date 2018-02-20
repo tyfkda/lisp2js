@@ -545,7 +545,7 @@
       if (this.str == null)
         return null
 
-      if (this.str === '') {
+      while (this.str === '') {
         if ((this.str = this.readLine()) == null)
           return undefined
         ++this.lineNo
@@ -582,11 +582,17 @@
   const readTable = {}
 
   class Reader {
-    static read(stream) {
+    static skipWhitespaces(stream) {
       do {
         if (stream.eof())
-          return null
+          return false
       } while (stream.match(/^(\s+|$)/))
+      return true
+    }
+
+    static read(stream) {
+      if (!Reader.skipWhitespaces(stream))
+        return null
 
       const c = stream.peek()
       if (c in readTable)

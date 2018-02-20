@@ -634,7 +634,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function fetch() {
         if (this.str == null) return null;
 
-        if (this.str === '') {
+        while (this.str === '') {
           if ((this.str = this.readLine()) == null) return undefined;
           ++this.lineNo;
         }
@@ -690,11 +690,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
 
     _createClass(Reader, null, [{
+      key: 'skipWhitespaces',
+      value: function skipWhitespaces(stream) {
+        do {
+          if (stream.eof()) return false;
+        } while (stream.match(/^(\s+|$)/));
+        return true;
+      }
+    }, {
       key: 'read',
       value: function read(stream) {
-        do {
-          if (stream.eof()) return null;
-        } while (stream.match(/^(\s+|$)/));
+        if (!Reader.skipWhitespaces(stream)) return null;
 
         var c = stream.peek();
         if (c in readTable) return readTable[c](stream, stream.getc());
