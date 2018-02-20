@@ -672,6 +672,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   // Reader.
   LISP.NoCloseParenException = function () {};
+  LISP.NoCloseQuoteException = function () {};
 
   var kDelimitors = '\\s(){}\\[\\]\'`,;#"';
   var kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])');
@@ -701,8 +702,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var m = void 0;
         if (stream.match(/^;[^\n]*\n?/)) // Line comment.
           return Reader.read(stream);
-        if (m = stream.match(/^"((\\.|[^"\\])*)"/)) // string.
-          return Reader.unescape(m[1]);
+        if (m = stream.match(/^"/)) // string.
+          return Reader.readString(stream);
         if (stream.match(/^#\(/)) // vector.
           return Reader.readVector(stream);
         if (m = stream.match(/^#\/([^\/]*)\//)) // regexp
@@ -751,6 +752,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
         // Error
         throw new LISP.NoCloseParenException();
+      }
+    }, {
+      key: 'readString',
+      value: function readString(stream) {
+        var m = void 0;
+        if (m = stream.match(/^((\\.|[^"\\])*)"/)) return Reader.unescape(m[1]);
+        // Error
+        throw new LISP.NoCloseQuoteException();
       }
     }, {
       key: 'readVector',

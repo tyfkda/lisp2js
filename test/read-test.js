@@ -47,5 +47,6 @@
     test('regexp', /abc/, '#/abc/')
 
     fail('no close paren', LISP.NoCloseParenException, '(1 2 3')
+    fail('no close quote', LISP.NoCloseQuoteException, '"foo')
   })
 })()

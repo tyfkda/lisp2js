@@ -569,6 +569,7 @@
 
   // Reader.
   LISP.NoCloseParenException = function() {}
+  LISP.NoCloseQuoteException = function() {}
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
   const kReSingleDot = RegExp(`^\\.(?=[${kDelimitors}])`)
@@ -594,8 +595,8 @@
       let m
       if (stream.match(/^;[^\n]*\n?/))  // Line comment.
         return Reader.read(stream)
-      if (m = stream.match(/^"((\\.|[^"\\])*)"/))  // string.
-        return Reader.unescape(m[1])
+      if (m = stream.match(/^"/))  // string.
+        return Reader.readString(stream)
       if (stream.match(/^#\(/))  // vector.
         return Reader.readVector(stream)
       if (m = stream.match(/^#\/([^\/]*)\//))  // regexp
@@ -644,6 +645,14 @@
       }
       // Error
       throw new LISP.NoCloseParenException()
+    }
+
+    static readString(stream) {
+      let m
+      if (m = stream.match(/^((\\.|[^"\\])*)"/))
+        return Reader.unescape(m[1])
+      // Error
+      throw new LISP.NoCloseQuoteException()
     }
 
     static readVector(stream) {
