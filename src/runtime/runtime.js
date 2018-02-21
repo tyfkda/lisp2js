@@ -97,7 +97,7 @@
   }
 
   LISP.error = function() {
-    throw Array.prototype.slice.call(arguments).join(', ')
+    throw new Error(Array.prototype.slice.call(arguments).join(', '))
   }
 
   LISP.new = function(klass) {

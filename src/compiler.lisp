@@ -99,9 +99,11 @@
                  ((def name value)  (vector :DEF
                                             (traverse* name scope)
                                             (traverse* value scope)))
-                 (t (vector :FUNCALL
-                            (traverse* (car s) scope)
-                            (traverse-args (cdr s) scope))))))
+                 (t (if (or (null? s) (proper-list? s))
+                        (vector :FUNCALL
+                                (traverse* (car s) scope)
+                                (traverse-args (cdr s) scope))
+                      (compile-error "funcall must be proper list, but" s))))))
 
 (defun traverse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))
