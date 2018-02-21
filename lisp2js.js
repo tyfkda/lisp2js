@@ -737,25 +737,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function readList(stream) {
         var result = LISP.nil;
         for (;;) {
+          Reader.skipWhitespaces(stream);
+          var c = stream.peek();
+          if (c === ')') {
+            // Close paren.
+            stream.getc();
+            return LISP['reverse!'](result);
+          }
+          if (stream.match(kReSingleDot)) {
+            // Dot.
+            var last = Reader.read(stream);
+            if (last != null) {
+              if (stream.match(/^\s*\)/)) {
+                // Close paren.
+                var reversed = LISP['reverse!'](result);
+                result.cdr = last;
+                return reversed;
+              }
+            }
+            break;
+          }
+
           var x = Reader.read(stream);
           if (x == null) break;
           result = new Cons(x, result, stream.lineNo, stream.path);
         }
 
-        if (stream.match(/^\s*\)/)) // Close paren.
-          return LISP['reverse!'](result);
-        if (stream.match(kReSingleDot)) {
-          // Dot.
-          var last = Reader.read(stream);
-          if (last != null) {
-            if (stream.match(/^\s*\)/)) {
-              // Close paren.
-              var reversed = LISP['reverse!'](result);
-              result.cdr = last;
-              return reversed;
-            }
-          }
-        }
         // Error
         throw new LISP.NoCloseParenException();
       }
