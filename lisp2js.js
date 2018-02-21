@@ -779,13 +779,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function readVector(stream) {
         var result = [];
         for (;;) {
+          if (stream.match(/^\s*\)/)) // Close paren.
+            return result;
+
           var x = Reader.read(stream);
           if (x == null) break;
           result.push(x);
         }
 
-        if (stream.match(/^\s*\)/)) // Close paren.
-          return result;
         // Error
         throw new LISP.NoCloseParenException();
       }

@@ -670,14 +670,15 @@
     static readVector(stream) {
       const result = []
       for (;;) {
+        if (stream.match(/^\s*\)/))  // Close paren.
+          return result
+
         const x = Reader.read(stream)
         if (x == null)
           break
         result.push(x)
       }
 
-      if (stream.match(/^\s*\)/))  // Close paren.
-        return result
       // Error
       throw new LISP.NoCloseParenException()
     }
