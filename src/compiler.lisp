@@ -72,8 +72,11 @@
                                    (compile-error "function parameter must be symbol, but" (car params)))))
          (traverse-quoted-value (x)
                                 (if (pair? x)
-                                    (vector :FUNCALL (vector :REF (if (proper-list? x) 'list 'list*))
-                                            (map traverse-quoted-value (dotted->proper x)))
+                                    (if (proper-list? x)
+                                        (vector :FUNCALL (vector :REF 'list)
+                                                (map traverse-quoted-value x))
+                                      (vector :FUNCALL (vector :REF (if (pair? (cdr x)) 'list* 'cons))
+                                              (map traverse-quoted-value (dotted->proper x))))
                                   (vector :CONST x))))
 
   (defun traverse-list (s scope)

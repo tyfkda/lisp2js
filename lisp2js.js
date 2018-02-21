@@ -1358,7 +1358,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, _confirm$2dvalid$2dparams = function confirm$2dvalid$2dparams(params) {
       return LISP.isTrue(params) ? LISP.isTrue(LISP["symbol?"](LISP.car(params))) ? _confirm$2dvalid$2dparams(LISP.cdr(params)) : LISP["compile-error"]("function parameter must be symbol, but", LISP.car(params)) : LISP.nil;
     }, _traverse$2dquoted$2dvalue = function traverse$2dquoted$2dvalue(x) {
-      return LISP.isTrue(LISP["pair?"](x)) ? LISP.vector(LISP["make-keyword"]("FUNCALL"), LISP.vector(LISP["make-keyword"]("REF"), LISP.isTrue(LISP["proper-list?"](x)) ? LISP.intern("list") : LISP.intern("list*")), LISP.map(_traverse$2dquoted$2dvalue, LISP["dotted->proper"](x))) : LISP.vector(LISP["make-keyword"]("CONST"), x);
+      return LISP.isTrue(LISP["pair?"](x)) ? LISP.isTrue(LISP["proper-list?"](x)) ? LISP.vector(LISP["make-keyword"]("FUNCALL"), LISP.vector(LISP["make-keyword"]("REF"), LISP.intern("list")), LISP.map(_traverse$2dquoted$2dvalue, x)) : LISP.vector(LISP["make-keyword"]("FUNCALL"), LISP.vector(LISP["make-keyword"]("REF"), LISP.isTrue(LISP["pair?"](LISP.cdr(x))) ? LISP.intern("list*") : LISP.intern("cons")), LISP.map(_traverse$2dquoted$2dvalue, LISP["dotted->proper"](x))) : LISP.vector(LISP["make-keyword"]("CONST"), x);
     }, LISP["traverse-list"] = function (s, scope) {
       return function (__21) {
         return function (__22) {
