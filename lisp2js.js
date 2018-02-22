@@ -963,7 +963,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return eval(LISP.compile(exp));
   };
 }, function ( /*eslint no-unused-vars: 0*/LISP) {
-  /*==== EMBED COMPILED CODE HERE ====*/
   LISP["register-macro"](LISP.intern("defmacro"), function (name, params) {
     var body = LISP._getRestArgs(arguments, 2);return LISP.list(LISP.intern("register-macro"), LISP.list(LISP.intern("quote"), name), LISP["list*"](LISP.intern("lambda"), params, body));
   });

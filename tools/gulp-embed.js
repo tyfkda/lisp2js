@@ -1,5 +1,6 @@
 import glutil from 'gulp-util'
 import through from 'through2'
+import ejs from 'ejs'
 
 import fs from 'fs'
 
@@ -24,13 +25,14 @@ module.exports = (() => {
       } else if (file.isBuffer()) {
         const template = fs.readFileSync(opts.template).toString('utf8')
         const contents = file.contents
-        const results = []
-        template.split('\n').forEach(line => {
-          results.push(line)
-          if (opts.pattern.test(line))
-            results.push(contents)
-        })
-        file.contents = new Buffer(results.join('\n'))
+
+        const data = {
+          contents
+        }
+        const options = null
+        const rendered = ejs.render(template, data, options)
+
+        file.contents = new Buffer(rendered)
         return callback(null, file)
       }
     })

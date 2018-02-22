@@ -36,7 +36,6 @@ gulp.task('build', () => {
     .pipe(jslisp())
     .pipe(embed({
       template: 'src/runtime/runtime.js',
-      pattern: /EMBED COMPILED CODE HERE/,
     }))
     .pipe(babel())
     .pipe(sourcemaps.write('./'))

@@ -1,3 +1,4 @@
+<%# EJS template %>
 ((createLisp, installEval, installAux) => {
   'use strict'
 
@@ -834,5 +835,5 @@
   // so put such code here.
   LISP.eval = (exp) => eval(LISP.compile(exp))
 }, (/*eslint no-unused-vars: 0*/LISP) => {
-  /*==== EMBED COMPILED CODE HERE ====*/
+  <%- contents %>
 })
