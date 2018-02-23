@@ -61,6 +61,18 @@
                         (record (cdr ,value) ,(cdar clause) ,@(cdr clause))))))
                 clauses)))))
 
+(defun traverse-quoted-value (x)
+  (cond ((pair? x)
+         (if (proper-list? x)
+             (vector :FUNCALL (vector :REF 'list)
+                     (map traverse-quoted-value x))
+             (vector :FUNCALL (vector :REF (if (pair? (cdr x)) 'list* 'cons))
+                     (map traverse-quoted-value (dotted->proper x)))))
+        ((vector? x)
+         (vector :FUNCALL (vector :REF 'vector)
+                 (map traverse-quoted-value (vector->list x))))
+        (t (vector :CONST x))))
+
 (labels ((traverse-args (args scope)
                         (map (lambda (x)
                                (traverse* x scope))
@@ -69,20 +81,13 @@
                                (when params
                                  (if (symbol? (car params))
                                      (confirm-valid-params (cdr params))
-                                   (compile-error "function parameter must be symbol, but" (car params)))))
-         (traverse-quoted-value (x)
-                                (if (pair? x)
-                                    (if (proper-list? x)
-                                        (vector :FUNCALL (vector :REF 'list)
-                                                (map traverse-quoted-value x))
-                                      (vector :FUNCALL (vector :REF (if (pair? (cdr x)) 'list* 'cons))
-                                              (map traverse-quoted-value (dotted->proper x))))
-                                  (vector :CONST x))))
+                                   (compile-error "function parameter must be symbol, but" (car params))))))
 
   (defun traverse-list (s scope)
     (record-case s
-                 ((quote x)   (cond ((pair? x)  (vector :REF (scope-add-var scope (traverse-quoted-value x))))
-                                    (t (vector :CONST x))))
+                 ((quote x)   (if (or (pair? x) (vector? x))
+                                  (vector :REF (scope-add-var scope (traverse-quoted-value x)))
+                                (vector :CONST x)))
                  ((if p thn &body els)  (vector :IF
                                                 (traverse* p scope)
                                                 (traverse* thn scope)
@@ -114,7 +119,7 @@
                              (traverse-list expanded scope)
                            (traverse* expanded scope)))))
         ((symbol? s) (vector :REF s))
-        (t           (vector :CONST s))))
+        (t           (traverse-quoted-value s))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Compiler

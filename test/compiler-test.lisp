@@ -15,6 +15,9 @@
    (test "traverse* g-ref" #(:REF x) (traverse* 'x scope))
    (test "traverse* l-ref" #(:REF lvar) (traverse* 'lvar scope))
    (test "traverse* if" #(:IF #(:REF x) #(:REF y) #(:CONST 3)) (traverse* '(if x y 3) scope))
+   (test "traverse* vector"
+         #(:FUNCALL #(:REF vector) (#(:CONST 1) #(:FUNCALL #(:REF list) (#(:CONST quote) #(:CONST a)))))
+         (traverse* #(1 'a) scope))
    )
 
 ;;;; Test for Compiler
