@@ -1,4 +1,4 @@
-<%# EJS template %>
+/*<%# EJS template %>*/
 ((createLisp, installEval, installAux) => {
   'use strict'
 
