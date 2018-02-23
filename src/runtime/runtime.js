@@ -704,12 +704,12 @@
   Reader.setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
                            Reader.readList(stream))
 
-  LISP.read = stream => Reader.read(stream || LISP['*stdin*'])
+  LISP.read = (stream = LISP['*stdin*']) => Reader.read(stream)
 
   LISP['read-from-string'] = str => Reader.read(new StrStream(str))
 
-  LISP['read-line'] = (stream) => {
-    return (stream || LISP['*stdin*']).getLine()
+  LISP['read-line'] = (stream = LISP['*stdin*']) => {
+    return stream.getLine()
   }
 
   LISP['read-char'] = (stream = LISP['*stdin*']) => {

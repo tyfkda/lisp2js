@@ -817,16 +817,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     );
   });
 
-  LISP.read = function (stream) {
-    return Reader.read(stream || LISP['*stdin*']);
+  LISP.read = function () {
+    var stream = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : LISP['*stdin*'];
+    return Reader.read(stream);
   };
 
   LISP['read-from-string'] = function (str) {
     return Reader.read(new StrStream(str));
   };
 
-  LISP['read-line'] = function (stream) {
-    return (stream || LISP['*stdin*']).getLine();
+  LISP['read-line'] = function () {
+    var stream = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : LISP['*stdin*'];
+
+    return stream.getLine();
   };
 
   LISP['read-char'] = function () {
