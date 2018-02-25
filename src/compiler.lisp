@@ -253,16 +253,27 @@
          (compile-keyword x))
         (t (compile-literal x scope))))
 
-(defun compile-if (pred-node then-node else-node scope)
-  (string-append "(LISP.isTrue("
-                 (compile* pred-node scope)
-                 ") ? ("
-                 (compile* then-node scope)
-                 ") : ("
-                 (if else-node
-                     (compile* else-node scope)
-                   "LISP.nil")
-                 "))"))
+(labels ((compile-pred (pnode scope)
+                       (cond ((and (eq? (vector-ref pnode 0) :IF)
+                                   (let1 enode (vector-ref pnode 3)
+                                     (or (not enode)
+                                         (and (eq? (vector-ref enode 0) :CONST)
+                                              (eq? (vector-ref enode 1) nil)))))
+                              (string-append (compile-pred (vector-ref pnode 1) scope)
+                                             " && " (compile-pred (vector-ref pnode 2) scope)))
+                             (t (string-append "LISP.isTrue("
+                                               (compile* pnode scope)
+                                               ")")))))
+  (defun compile-if (pred-node then-node else-node scope)
+    (string-append "("
+                   (compile-pred pred-node scope)
+                   " ? "
+                   (compile* then-node scope)
+                   " : "
+                   (if else-node
+                       (compile* else-node scope)
+                     "LISP.nil")
+                   ")")))
 
 (defun compile-set! (sym val scope)
   (string-append (compile* sym scope)
