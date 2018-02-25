@@ -1478,14 +1478,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP["compile*"](x, scope);
     }, args), LISP["string-append"](" ", LISP["symbol->string"](fn), " ")), ")");
   };
-  LISP["do-compile-funcall"] = function (fn, args, scope) {
+  (function (do$2dcompile$2dfuncall) {
+    return LISP["compile-funcall"] = function (fn, args, scope) {
+      return LISP.isTrue(LISP.isTrue(LISP["eq?"](LISP["vector-ref"](fn, 0), LISP["make-keyword"]("REF"))) ? LISP.isTrue(LISP.not(LISP["local-var?"](scope, LISP["vector-ref"](fn, 1)))) ? LISP.not(LISP["null?"](args)) : LISP.nil : LISP.nil) ? function (fnsym) {
+        return LISP.isTrue(LISP.isTrue(LISP["binop?"](fnsym)) ? LISP.not(LISP["null?"](LISP.cdr(args))) : LISP.nil) ? LISP["compile-binop"](fnsym, args, scope) : LISP.isTrue(LISP.isTrue(LISP["unary-op?"](fnsym)) ? LISP["null?"](LISP.cdr(args)) : LISP.nil) ? LISP["compile-unary-op"](fnsym, LISP.car(args), scope) : do$2dcompile$2dfuncall(fn, args, scope);
+      }(LISP["vector-ref"](fn, 1)) : do$2dcompile$2dfuncall(fn, args, scope);
+    };
+  })(function (fn, args, scope) {
     return LISP["string-append"](LISP["compile*"](fn, scope), "(", LISP["expand-args"](args, scope), ")");
-  };
-  LISP["compile-funcall"] = function (fn, args, scope) {
-    return LISP.isTrue(LISP.isTrue(LISP["eq?"](LISP["vector-ref"](fn, 0), LISP["make-keyword"]("REF"))) ? LISP.isTrue(LISP.not(LISP["local-var?"](scope, LISP["vector-ref"](fn, 1)))) ? LISP.not(LISP["null?"](args)) : LISP.nil : LISP.nil) ? function (fnsym) {
-      return LISP.isTrue(LISP.isTrue(LISP["binop?"](fnsym)) ? LISP.not(LISP["null?"](LISP.cdr(args))) : LISP.nil) ? LISP["compile-binop"](fnsym, args, scope) : LISP.isTrue(LISP.isTrue(LISP["unary-op?"](fnsym)) ? LISP["null?"](LISP.cdr(args)) : LISP.nil) ? LISP["compile-unary-op"](fnsym, LISP.car(args), scope) : LISP["do-compile-funcall"](fn, args, scope);
-    }(LISP["vector-ref"](fn, 1)) : LISP["do-compile-funcall"](fn, args, scope);
-  };
+  });
   LISP["compile-quote"] = function (x, scope) {
     return LISP.isTrue(LISP["pair?"](x)) ? LISP["compile*"](LISP.list(LISP.intern("cons"), LISP.list(LISP.intern("quote"), LISP.car(x)), LISP.list(LISP.intern("quote"), LISP.cdr(x))), scope) : LISP.isTrue(LISP["symbol?"](x)) ? LISP["string-append"]("LISP.intern(\"", LISP["escape-string"](LISP["symbol->string"](x)), "\")") : LISP.isTrue(LISP["keyword?"](x)) ? LISP["compile-keyword"](x) : LISP["compile-literal"](x, scope);
   };
