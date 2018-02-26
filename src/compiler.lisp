@@ -35,14 +35,23 @@
          (pl (string-length padding)))
     (substring s (- sl pl) sl)))
 
-(defun escape-symbol (sym)
-  (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
-                      (lambda (m) (escape-sym-char (string-ref (m) 0)))))
+(def JS-RESERVED-WORDS
+     ;; `this` can be used in local scope.
+     '(null true false
+       break case catch continue debugger default delete do else
+       finally for function if in instanceof new return switch
+       throw try typeof var void while with))
+
+(defun escape-param-name (sym)
+  (if (member sym JS-RESERVED-WORDS)
+      (string-append "__" (symbol->string sym))
+    (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
+                        (lambda (m) (escape-sym-char (string-ref (m) 0))))))
 
 (defun compile-symbol (sym scope)
   (if (or (local-var? scope sym)
           (special-var? scope sym))
-      (escape-symbol sym)
+      (escape-param-name sym)
     (let ((s (symbol->string sym)))
       (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
           (string-append "LISP."
@@ -194,14 +203,14 @@
                            params))
           (rest (and rest-pos (elt (+ rest-pos 1) params))))
       (string-append "(function("
-                     (string-join (map (lambda (x) (escape-symbol x))
+                     (string-join (map (lambda (x) (escape-param-name x))
                                        proper-params)
                                   ", ")
                      "){"
                      (if (null? rest)
                          ""
                        (string-append "var "
-                                      (escape-symbol rest)
+                                      (escape-param-name rest)
                                       " = LISP._getRestArgs(arguments, "
                                       (number->string (length proper-params))
                                       "); "))
@@ -220,7 +229,7 @@
   (aif (scope-get-var scope)
        (string-append "(function() { var "
                       (string-join (map (lambda (x)
-                                          (string-append (escape-symbol (car x))
+                                          (string-append (escape-param-name (car x))
                                                          " = "
                                                          (compile* (cdr x) scope)))
                                         (reverse it))
