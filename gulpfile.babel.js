@@ -23,15 +23,8 @@ const kRuntimeFiles = [
   'src/runtime/*.js',
 ]
 
-gulp.task('default', ['build', 'watch'])
-
-gulp.task('watch', [], () => {
-  gulp.watch(kSrcLispFiles.concat(kRuntimeFiles),
-             ['build'])
-})
-
 gulp.task('build', () => {
-  gulp.src(kSrcLispFiles)
+  return gulp.src(kSrcLispFiles)
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(concat('lisp2js.js'))
     .pipe(jslisp())
@@ -43,15 +36,15 @@ gulp.task('build', () => {
     .pipe(gulp.dest(destDir))
 })
 
-gulp.task('release', ['build'], () => {
-  gulp.src('./lisp2js.js')
+gulp.task('release', gulp.series('build', () => {
+  return gulp.src('./lisp2js.js')
     .pipe(sourcemaps.init({loadMaps: true}))
     .pipe(babel())
     .pipe(uglify().on('error', gutil.log))
     .pipe(rename('lisp2js.min.js'))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(destDir))
-})
+}))
 
 gulp.task('lint', () => {
   return gulp.src(['src/**/*.js',
@@ -61,3 +54,10 @@ gulp.task('lint', () => {
     .pipe(eslint.format())
     .pipe(eslint.failOnError())
 })
+
+gulp.task('watch', () => {
+  gulp.watch(kSrcLispFiles.concat(kRuntimeFiles),
+             gulp.series('build'))
+})
+
+gulp.task('default', gulp.series('build', 'watch'))
