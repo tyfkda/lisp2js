@@ -1455,33 +1455,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   LISP["compile-literal"] = function (s, scope) {
     return LISP.isTrue(LISP["number?"](s)) ? LISP["number->string"](s) : LISP.isTrue(LISP["symbol?"](s)) ? LISP["compile-symbol"](s, scope) : LISP.isTrue(LISP["keyword?"](s)) ? LISP["compile-keyword"](s) : LISP.isTrue(LISP["string?"](s)) ? LISP["x->string"](s, LISP.t) : LISP.isTrue(LISP["vector?"](s)) ? LISP["compile-vector"](s, scope) : LISP.isTrue(LISP["regexp?"](s)) ? LISP["compile-regexp"](s) : LISP.isTrue(LISP["null?"](s)) ? "LISP.nil" : LISP.isTrue(LISP["eq?"](s, LISP.t)) ? "LISP.t" : LISP.error(LISP["string-append"]("compile-literal: [", s, "]"));
   };
-  LISP["unary-op?"] = function () {
-    var __28 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("!"), LISP.intern("~"));return function (sym) {
-      return LISP.member(sym, __28);
-    };
-  }();
   LISP["compile-unary-op"] = function (fn, arg, scope) {
     return LISP["string-append"]("(", LISP["symbol->string"](fn), LISP["compile*"](arg, scope), ")");
   };
-  LISP["binop?"] = function () {
-    var __29 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("*"), LISP.intern("/"), LISP.intern("%"));return function (sym) {
-      return LISP.member(sym, __29);
-    };
-  }();
   LISP["compile-binop"] = function (fn, args, scope) {
     return LISP["string-append"]("(", LISP["string-join"](LISP.map(function (x) {
       return LISP["compile*"](x, scope);
     }, args), LISP["string-append"](" ", LISP["symbol->string"](fn), " ")), ")");
   };
-  (function (do$2dcompile$2dfuncall) {
+  (function (do$2dcompile$2dfuncall, unary$2dop$3f, binop$3f) {
     return LISP["compile-funcall"] = function (fn, args, scope) {
       return LISP.isTrue(LISP["eq?"](LISP["vector-ref"](fn, 0), LISP["make-keyword"]("REF"))) && LISP.isTrue(LISP.not(LISP["local-var?"](scope, LISP["vector-ref"](fn, 1)))) && LISP.isTrue(LISP.not(LISP["null?"](args))) ? function (fnsym) {
-        return LISP.isTrue(LISP["binop?"](fnsym)) && LISP.isTrue(LISP.not(LISP["null?"](LISP.cdr(args)))) ? LISP["compile-binop"](fnsym, args, scope) : LISP.isTrue(LISP["unary-op?"](fnsym)) && LISP.isTrue(LISP["null?"](LISP.cdr(args))) ? LISP["compile-unary-op"](fnsym, LISP.car(args), scope) : do$2dcompile$2dfuncall(fn, args, scope);
+        return LISP.isTrue(binop$3f(fnsym)) && LISP.isTrue(LISP.not(LISP["null?"](LISP.cdr(args)))) ? LISP["compile-binop"](fnsym, args, scope) : LISP.isTrue(unary$2dop$3f(fnsym)) && LISP.isTrue(LISP["null?"](LISP.cdr(args))) ? LISP["compile-unary-op"](fnsym, LISP.car(args), scope) : do$2dcompile$2dfuncall(fn, args, scope);
       }(LISP["vector-ref"](fn, 1)) : do$2dcompile$2dfuncall(fn, args, scope);
     };
   })(function (fn, args, scope) {
     return LISP["string-append"](LISP["compile*"](fn, scope), "(", LISP["expand-args"](args, scope), ")");
-  });
+  }, function () {
+    var __28 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("!"), LISP.intern("~"));return function (sym) {
+      return LISP.member(sym, __28);
+    };
+  }(), function () {
+    var __29 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("*"), LISP.intern("/"), LISP.intern("%"));return function (sym) {
+      return LISP.member(sym, __29);
+    };
+  }());
   LISP["compile-quote"] = function (x, scope) {
     return LISP.isTrue(LISP["pair?"](x)) ? LISP["compile*"](LISP.list(LISP.intern("cons"), LISP.list(LISP.intern("quote"), LISP.car(x)), LISP.list(LISP.intern("quote"), LISP.cdr(x))), scope) : LISP.isTrue(LISP["symbol?"](x)) ? LISP["string-append"]("LISP.intern(\"", LISP["escape-string"](LISP["symbol->string"](x)), "\")") : LISP.isTrue(LISP["keyword?"](x)) ? LISP["compile-keyword"](x) : LISP["compile-literal"](x, scope);
   };

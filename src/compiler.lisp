@@ -88,17 +88,11 @@
         ((eq? s t)    "LISP.t")
         (t (error (string-append "compile-literal: [" s "]")))))
 
-(defun unary-op? (sym)
-  (member sym '(+ - ! ~)))
-
 (defun compile-unary-op (fn arg scope)
   (string-append "("
                  (symbol->string fn)
                  (compile* arg scope)
                  ")"))
-
-(defun binop? (sym)
-  (member sym '(+ - * / %)))
 
 (defun compile-binop (fn args scope)
   (string-append "("
@@ -111,7 +105,11 @@
                             (string-append (compile* fn scope)
                                            "("
                                            (expand-args args scope)
-                                           ")"))))
+                                           ")")))
+      (unary-op? (lambda (sym)
+                   (member sym '(+ - ! ~))))
+      (binop? (lambda (sym)
+                (member sym '(+ - * / %)))))
   (defun compile-funcall (fn args scope)
     (if (and (eq? (vector-ref fn 0) :REF)
              (not (local-var? scope (vector-ref fn 1)))
