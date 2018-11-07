@@ -29,7 +29,7 @@ gulp.task('build', () => {
     .pipe(concat('lisp2js.js'))
     .pipe(jslisp())
     .pipe(embed({
-      template: 'src/runtime/runtime.js',
+      template: 'src/runtime/runtime.tmpl.js',
     }))
     .pipe(babel())
     .pipe(sourcemaps.write('./'))
