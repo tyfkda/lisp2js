@@ -48,7 +48,7 @@
 
     fail('no close paren', LISP.NoCloseParenException, '(1 2 3')
     fail('no close paren', LISP.NoCloseParenException, '(1 2 .')
-    fail('no value after dot', LISP.NoCloseParenException, '(1 2 .)')
+    fail('no value after dot', LISP.UnexpectedCharacterException, '(1 2 .)')
     fail('no close quote', LISP.NoCloseQuoteException, '"foo')
     fail('no close paren for vector', LISP.NoCloseParenException, '#(1 2 3')
   })

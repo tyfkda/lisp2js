@@ -571,6 +571,9 @@
   // Reader.
   LISP.NoCloseParenException = function() {}
   LISP.NoCloseQuoteException = function() {}
+  LISP.UnexpectedCharacterException = function(char) {
+    this.char = char
+  }
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
   const kReSingleDot = RegExp(`^\\.(?=[${kDelimitors}])`)
@@ -596,6 +599,8 @@
         return null
 
       const c = stream.peek()
+      if (c == null)
+        return null
       if (c in readTable)
         return readTable[c](stream, stream.getc())
 
@@ -614,7 +619,8 @@
         return undefined
       if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
         return Reader.readSymbolOrNumber(m[1])
-      return undefined
+
+      throw new LISP.UnexpectedCharacterException(stream.peek())
     }
 
     static readSymbolOrNumber(str) {

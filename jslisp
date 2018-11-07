@@ -26,6 +26,18 @@
   // Run codes.
   const runCodes = (codes, compile) => runStream(new LISP.StrStream(codes), compile)
 
+  const dumpException = (e) => {
+    if (e instanceof LISP.UnexpectedCharacterException) {
+      console.error(`Unexpected character: ${e.char.toString()}`)
+    } else if (e instanceof LISP.NoCloseParenException) {
+      console.error('No close paren')
+    } else if (e instanceof LISP.NoCloseQuoteException) {
+      console.error('No close quote')
+    } else {
+      console.error(e)
+    }
+  }
+
   // Read-Eval-Print loop.
   const repl = () => {
     const readline = require('readline')
@@ -60,7 +72,7 @@
           // a user keep typing so inputs should be kept.
           rl.setPrompt(prompt2)
         } else {
-          console.error(e)
+          dumpException(e)
           inputs.length = 0
           rl.setPrompt(prompt)
         }
@@ -78,7 +90,12 @@
   const replNoPrompt = () => {
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
-    return LISP.load(LISP['*stdin*'])
+    try {
+      return LISP.load(LISP['*stdin*'])
+    } catch (e) {
+      dumpException(e)
+      process.exit(1)
+    }
   }
 
   // Run script.
@@ -120,7 +137,12 @@
 
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
-    return runStream(LISP['*stdin*'], compileOnly)
+    try {
+      return runStream(LISP['*stdin*'], compileOnly)
+    } catch (e) {
+      dumpException(e)
+      process.exit(1)
+    }
   }
 
   // Process command line argument as a script file.
@@ -141,7 +163,7 @@
     if (status)
       process.exit(status)
   } catch (e) {
-    process.stderr.write(e.toString() + '\n')
+    dumpException(e)
     process.exit(1)
   }
 })()

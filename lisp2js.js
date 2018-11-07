@@ -674,6 +674,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   // Reader.
   LISP.NoCloseParenException = function () {};
   LISP.NoCloseQuoteException = function () {};
+  LISP.UnexpectedCharacterException = function (char) {
+    this.char = char;
+  };
 
   var kDelimitors = '\\s(){}\\[\\]\'`,;#"';
   var kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])');
@@ -704,6 +707,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (!Reader.skipWhitespaces(stream)) return null;
 
         var c = stream.peek();
+        if (c == null) return null;
         if (c in readTable) return readTable[c](stream, stream.getc());
 
         var m = void 0;
@@ -721,7 +725,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return undefined;
         if (m = stream.match(kReSymbolOrNumber)) // Symbol or number.
           return Reader.readSymbolOrNumber(m[1]);
-        return undefined;
+
+        throw new LISP.UnexpectedCharacterException(stream.peek());
       }
     }, {
       key: 'readSymbolOrNumber',
