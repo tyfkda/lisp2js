@@ -81,7 +81,7 @@
              (when params
                (if (symbol? (car params))
                    (confirm-valid-params (cdr params))
-                 (compile-error "function parameter must be symbol, but" (car params))))))
+                 (compile-error "function parameter must be symbol, but " (car params))))))
 
     (defun parse-list (s scope)
       (record-case s
@@ -108,7 +108,7 @@
                           (vector :FUNCALL
                                   (parse* (car s) scope)
                                   (parse-args (cdr s) scope))
-                        (compile-error "funcall must be proper list, but" s)))))))
+                        (compile-error "funcall must be proper list, but " s)))))))
 
 (defun parse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))

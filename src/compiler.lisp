@@ -265,7 +265,7 @@
     (t  (compile-error "Unknown AST node:" s))))
 
 (defun compile-error (&rest args)
-  (error args))
+  (apply error args))
 
 (defun compile (s)
   (let* ((top-scope (create-scope nil ()))

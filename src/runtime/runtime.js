@@ -256,7 +256,7 @@ const LISP = ((createLisp, installEval) => {
                   })
 
   LISP.error = function error() {
-    throw new Error(Array.prototype.slice.call(arguments).join(', '))
+    throw new Error(Array.prototype.slice.call(arguments).map(x => makeString(x, true)).join(' '))
   }
 
   LISP.new = function _new(klass) {
