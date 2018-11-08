@@ -23,7 +23,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   if (typeof module !== 'undefined') module.exports = LISP;else g.LISP = LISP;
 
   // Running on browser: Execute inner text.
-  if (typeof document != 'undefined') {
+  if (typeof document !== 'undefined') {
     var getMyCode = function getMyCode() {
       var currentScript = document.currentScript || function () {
         var nodeList = document.getElementsByTagName('script');
@@ -64,7 +64,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var makeString = function makeString(x, inspect) {
     if (x === LISP.nil) return 'nil';
     if (x === LISP.t) return 't';
-    if (typeof x == 'string') return inspect ? inspectString(x) : x;
+    if (typeof x === 'string') return inspect ? inspectString(x) : x;
     if (x instanceof Array) return '#(' + x.map(function (v) {
       return makeString(v, inspect);
     }).join(' ') + ')';
@@ -329,39 +329,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return x.toString(n);
   };
   LISP['+'] = function () {
-    if (arguments.length == 0) return 0;
+    if (arguments.length === 0) return 0;
     var result = arguments[0];
     for (var i = 1; i < arguments.length; ++i) {
       result += arguments[i];
     }return result;
   };
   LISP['*'] = function () {
-    if (arguments.length == 0) return 1;
+    if (arguments.length === 0) return 1;
     var result = arguments[0];
     for (var i = 1; i < arguments.length; ++i) {
       result *= arguments[i];
     }return result;
   };
   LISP['-'] = function () {
-    if (arguments.length == 0) return 0;
+    if (arguments.length === 0) return 0;
     var result = arguments[0];
-    if (arguments.length == 1) return -result;
+    if (arguments.length === 1) return -result;
     for (var i = 1; i < arguments.length; ++i) {
       result -= arguments[i];
     }return result;
   };
   LISP['/'] = function () {
-    if (arguments.length == 0) return 1;
+    if (arguments.length === 0) return 1;
     var result = arguments[0];
-    if (arguments.length == 1) return 1.0 / result;
+    if (arguments.length === 1) return 1.0 / result;
     for (var i = 1; i < arguments.length; ++i) {
       result /= arguments[i];
     }return result;
   };
   LISP['%'] = function () {
-    if (arguments.length == 0) return 0;
+    if (arguments.length === 0) return 0;
     var result = arguments[0];
-    if (arguments.length == 1) return result;
+    if (arguments.length === 1) return result;
     for (var i = 1; i < arguments.length; ++i) {
       result %= arguments[i];
     }return result;
@@ -916,7 +916,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             var string = left + buffer.slice(0, n).toString();
             this.chomped = false;
             if (string.length > 0) {
-              if (string[string.length - 1] != '\n') this.chomped = true;else
+              if (string[string.length - 1] !== '\n') this.chomped = true;else
                 // Remove last '\n' to avoid last empty line.
                 string = string.slice(0, string.length - 1);
             }
@@ -956,7 +956,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     LISP.load = function (fileSpec) {
       var stream = void 0;
-      if (typeof fileSpec == 'string') {
+      if (typeof fileSpec === 'string') {
         stream = LISP.open(fileSpec);
         if (!stream) return LISP.error('Cannot open [' + fileName + ']');
       } else if (fileSpec instanceof Stream) stream = fileSpec;else return LISP.error('Illegal fileSpec: ' + fileSpec);

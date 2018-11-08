@@ -15,7 +15,7 @@
     g.LISP = LISP
 
   // Running on browser: Execute inner text.
-  if (typeof document != 'undefined') {
+  if (typeof document !== 'undefined') {
     const getMyCode = () => {
       const currentScript = document.currentScript || (() => {
         const nodeList = document.getElementsByTagName('script')
@@ -57,7 +57,7 @@
       return 'nil'
     if (x === LISP.t)
       return 't'
-    if (typeof x == 'string')
+    if (typeof x === 'string')
       return inspect ? inspectString(x) : x
     if (x instanceof Array)
       return `#(${x.map(v => makeString(v, inspect)).join(' ')})`
@@ -279,7 +279,7 @@
 
   LISP['number->string'] = (x, n) => x.toString(n)
   LISP['+'] = function() {
-    if (arguments.length == 0)
+    if (arguments.length === 0)
       return 0
     let result = arguments[0]
     for (let i = 1; i < arguments.length; ++i)
@@ -287,7 +287,7 @@
     return result
   }
   LISP['*'] = function() {
-    if (arguments.length == 0)
+    if (arguments.length === 0)
       return 1
     let result = arguments[0]
     for (let i = 1; i < arguments.length; ++i)
@@ -295,30 +295,30 @@
     return result
   }
   LISP['-'] = function() {
-    if (arguments.length == 0)
+    if (arguments.length === 0)
       return 0
     let result = arguments[0]
-    if (arguments.length == 1)
+    if (arguments.length === 1)
       return -result
     for (let i = 1; i < arguments.length; ++i)
       result -= arguments[i]
     return result
   }
   LISP['/'] = function() {
-    if (arguments.length == 0)
+    if (arguments.length === 0)
       return 1
     let result = arguments[0]
-    if (arguments.length == 1)
+    if (arguments.length === 1)
       return 1.0 / result
     for (let i = 1; i < arguments.length; ++i)
       result /= arguments[i]
     return result
   }
   LISP['%'] = function() {
-    if (arguments.length == 0)
+    if (arguments.length === 0)
       return 0
     let result = arguments[0]
-    if (arguments.length == 1)
+    if (arguments.length === 1)
       return result
     for (let i = 1; i < arguments.length; ++i)
       result %= arguments[i]
@@ -784,7 +784,7 @@
           let string = left + buffer.slice(0, n).toString()
           this.chomped = false
           if (string.length > 0) {
-            if (string[string.length - 1] != '\n')
+            if (string[string.length - 1] !== '\n')
               this.chomped = true
             else
               // Remove last '\n' to avoid last empty line.
@@ -820,7 +820,7 @@
 
     LISP.load = (fileSpec) => {
       let stream
-      if (typeof fileSpec == 'string') {
+      if (typeof fileSpec === 'string') {
         stream = LISP.open(fileSpec)
         if (!stream)
           return LISP.error(`Cannot open [${fileName}]`)
