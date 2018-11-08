@@ -1272,6 +1272,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }, _loop10(LISP.nil);
     }(LISP.nil);
   });
+  LISP["set-dispatch-macro-character"]("#", ".", function (stream, _c1, _c2) {
+    return LISP.eval(LISP.read(stream));
+  });
   LISP.nreconc = function (ls, tail) {
     return function (top) {
       return LISP["set-cdr!"](ls, tail), top;

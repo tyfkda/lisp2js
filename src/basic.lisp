@@ -349,3 +349,8 @@
                       (equal? c "\n"))
                   (error "Regexp not terminated"))
                  (t (loop (cons c cs))))))))
+
+;; sharp-dot: Read time evaluation.
+(set-dispatch-macro-character "#" "."
+  (lambda (stream _c1 _c2)
+    (eval (read stream))))
