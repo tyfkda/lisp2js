@@ -823,7 +823,7 @@
       if (typeof fileSpec === 'string') {
         stream = LISP.open(fileSpec)
         if (!stream)
-          return LISP.error(`Cannot open [${fileName}]`)
+          return LISP.error(`Cannot open [${fileSpec}]`)
       } else if (fileSpec instanceof Stream)
         stream = fileSpec
       else

@@ -958,7 +958,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var stream = void 0;
       if (typeof fileSpec === 'string') {
         stream = LISP.open(fileSpec);
-        if (!stream) return LISP.error('Cannot open [' + fileName + ']');
+        if (!stream) return LISP.error('Cannot open [' + fileSpec + ']');
       } else if (fileSpec instanceof Stream) stream = fileSpec;else return LISP.error('Illegal fileSpec: ' + fileSpec);
 
       if (stream.match(/^#!/, true)) stream.getLine(); // Skip Shebang.
