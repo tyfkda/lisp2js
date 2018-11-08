@@ -549,6 +549,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   // Regexp.
+  LISP.regexp = function (str) {
+    return new RegExp(str);
+  };
   LISP.rxmatch = function (re, str) {
     return jsBoolToS(re.exec(str));
   };
@@ -679,8 +682,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
 
   var kDelimitors = '\\s(){}\\[\\]\'`,;#"';
-  var kReSingleDot = RegExp('^\\.(?=[' + kDelimitors + '])');
-  var kReSymbolOrNumber = RegExp('^([^' + kDelimitors + ']+)');
+  var kReSingleDot = new RegExp('^\\.(?=[' + kDelimitors + '])');
+  var kReSymbolOrNumber = new RegExp('^([^' + kDelimitors + ']+)');
   var kReadUnescapeTable = {
     't': '\t',
     'n': '\n'
@@ -718,7 +721,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (stream.match(/^#\(/)) // vector.
           return Reader.readVector(stream);
         if (m = stream.match(/^#\/([^\/]*)\//)) // regexp
-          return new RegExp(m[1]); // TODO: Implement properly.
+          return LISP.regexp(m[1]); // TODO: Implement properly.
         if (stream.match(/^#\|(.|[\n\r])*?\|#/)) // Block comment.
           return Reader.read(stream);
         if (stream.match(kReSingleDot, true)) // Single dot.

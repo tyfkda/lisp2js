@@ -478,6 +478,7 @@
   LISP['vector-set!'] = (vector, index, value) => vector[index] = value
 
   // Regexp.
+  LISP.regexp = (str) => new RegExp(str)
   LISP.rxmatch = (re, str) => jsBoolToS(re.exec(str))
   LISP['regexp-replace-all'] = (re, str, fn) => {
     if (!re.global) {
@@ -576,8 +577,8 @@
   }
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
-  const kReSingleDot = RegExp(`^\\.(?=[${kDelimitors}])`)
-  const kReSymbolOrNumber = RegExp(`^([^${kDelimitors}]+)`)
+  const kReSingleDot = new RegExp(`^\\.(?=[${kDelimitors}])`)
+  const kReSymbolOrNumber = new RegExp(`^([^${kDelimitors}]+)`)
   const kReadUnescapeTable = {
     't': '\t',
     'n': '\n',
@@ -612,7 +613,7 @@
       if (stream.match(/^#\(/))  // vector.
         return Reader.readVector(stream)
       if (m = stream.match(/^#\/([^\/]*)\//))  // regexp
-        return new RegExp(m[1])  // TODO: Implement properly.
+        return LISP.regexp(m[1])  // TODO: Implement properly.
       if (stream.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
         return Reader.read(stream)
       if (stream.match(kReSingleDot, true))  // Single dot.
