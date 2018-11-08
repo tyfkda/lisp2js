@@ -46,6 +46,8 @@
 
     test('regexp', /abc/, '#/abc/')
 
+    test('sharp-dot', 3, '#.(+ 1 2)')
+
     fail('no close paren', LISP.NoCloseParenException, '(1 2 3')
     fail('no close paren', LISP.NoCloseParenException, '(1 2 .')
     fail('no value after dot', LISP.UnexpectedCharacterException, '(1 2 .)')

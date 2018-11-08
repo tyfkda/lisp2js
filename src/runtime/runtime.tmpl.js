@@ -584,7 +584,18 @@
     'n': '\n',
   }
 
-  const readTable = {}
+  const readTable = {
+    dispatchTable: {},
+  }
+
+  const dispatchMacroCharacter = function(stream, c) {
+    const table = readTable.dispatchTable[c]
+    const subc = stream.peek()
+    if (subc in table)
+      return table[subc](stream, c, stream.getc())
+    // Throw
+    throw new Error(`No dispatch macro character: ${c}${subc}`)
+  }
 
   class Reader {
     static skipWhitespaces(stream) {
@@ -610,12 +621,6 @@
         return Reader.read(stream)
       if (m = stream.match(/^"/))  // string.
         return Reader.readString(stream)
-      if (stream.match(/^#\(/))  // vector.
-        return Reader.readVector(stream)
-      if (m = stream.match(/^#\/([^\/]*)\//))  // regexp
-        return LISP.regexp(m[1])  // TODO: Implement properly.
-      if (stream.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
-        return Reader.read(stream)
       if (stream.match(kReSingleDot, true))  // Single dot.
         return undefined
       if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
@@ -704,9 +709,18 @@
     static setMacroCharacter(c, fn) {
       readTable[c] = fn
     }
+
+    static setDispatchMacroCharacter(c, subc, fn) {
+      if (!(c in readTable.dispatchTable)) {
+        readTable.dispatchTable[c] = {}
+      }
+      readTable.dispatchTable[c][subc] = fn
+      readTable[c] = dispatchMacroCharacter
+    }
   }
 
   LISP['set-macro-character'] = Reader.setMacroCharacter
+  LISP['set-dispatch-macro-character'] = Reader.setDispatchMacroCharacter
 
   Reader.setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
                            Reader.readList(stream))
