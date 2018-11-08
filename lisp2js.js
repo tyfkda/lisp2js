@@ -728,12 +728,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return Reader.read(stream);
         if (m = stream.match(/^"/)) // string.
           return Reader.readString(stream);
-        if (stream.match(/^#\(/)) // vector.
-          return Reader.readVector(stream);
-        if (m = stream.match(/^#\/([^\/]*)\//)) // regexp
-          return LISP.regexp(m[1]); // TODO: Implement properly.
-        if (stream.match(/^#\|(.|[\n\r])*?\|#/)) // Block comment.
-          return Reader.read(stream);
         if (stream.match(kReSingleDot, true)) // Single dot.
           return undefined;
         if (m = stream.match(kReSymbolOrNumber)) // Symbol or number.
@@ -1255,6 +1249,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP["eq?"](LISP.type(x), LISP.intern("regexp"));
     };
   })();
+  LISP["set-dispatch-macro-character"]("#", "|", function (stream, _c1, _c2) {
+    return function (_loop9) {
+      return _loop9 = function loop(c1) {
+        return function (c2) {
+          return LISP.isTrue(LISP["null?"](c2)) ? LISP.error("Block comment not closed") : LISP.isTrue(LISP["equal?"](c1, "|")) && LISP.isTrue(LISP["equal?"](c2, "#")) ? LISP.read(stream) : _loop9(c2);
+        }(LISP["read-char"](stream));
+      }, _loop9(LISP.nil);
+    }(LISP.nil);
+  });
+  LISP["set-dispatch-macro-character"]("#", "(", function (stream, _c1, _c2) {
+    return LISP["unread-char"]("(", stream), function (args) {
+      return LISP.apply(LISP.vector, args);
+    }(LISP.read(stream));
+  });
+  LISP["set-dispatch-macro-character"]("#", "/", function (stream, _c1, _c2) {
+    return function (_loop10) {
+      return _loop10 = function loop(cs) {
+        return function (c) {
+          return LISP.isTrue(LISP["equal?"](c, "/")) ? LISP.regexp(LISP["string-join"](LISP["reverse!"](cs), "")) : LISP.isTrue(LISP["null?"](c)) || LISP.isTrue(LISP["equal?"](c, "\n")) ? LISP.error("Regexp not terminated") : _loop10(LISP.cons(c, cs));
+        }(LISP["read-char"](stream));
+      }, _loop10(LISP.nil);
+    }(LISP.nil);
+  });
   LISP.nreconc = function (ls, tail) {
     return function (top) {
       return LISP["set-cdr!"](ls, tail), top;
@@ -1275,14 +1292,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return LISP["bq-simplify"](LISP["bq-process"](x));
   };
   LISP["bq-process"] = function (x) {
-    return LISP.isTrue(LISP.not(LISP["pair?"](x))) ? LISP.list(LISP.intern("quote"), x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("quasiquote"))) ? LISP["bq-process"](LISP["bq-completely-process"](LISP.cadr(x))) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote"))) ? LISP.cadr(x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing"))) ? LISP.error(",@~S after `", LISP.cadr(x)) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"))) ? LISP.error(",.~S after `", LISP.cadr(x)) : function (_loop9) {
-      return _loop9 = function loop(p, q) {
+    return LISP.isTrue(LISP.not(LISP["pair?"](x))) ? LISP.list(LISP.intern("quote"), x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("quasiquote"))) ? LISP["bq-process"](LISP["bq-completely-process"](LISP.cadr(x))) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote"))) ? LISP.cadr(x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing"))) ? LISP.error(",@~S after `", LISP.cadr(x)) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"))) ? LISP.error(",.~S after `", LISP.cadr(x)) : function (_loop11) {
+      return _loop11 = function loop(p, q) {
         return LISP.isTrue(LISP.not(LISP["pair?"](p))) ? LISP.cons(LISP.intern("append"), LISP.nreconc(q, LISP.list(LISP.list(LISP.intern("quote"), p)))) : LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote"))) ? function () {
           return LISP.isTrue(LISP["null?"](LISP.cddr(p))) ? LISP.nil : LISP.error("Malformed ,~S", p), LISP.cons(LISP.intern("append"), LISP.nreconc(q, LISP.list(LISP.cadr(p))));
         }() : function () {
-          return LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-splicing"))) ? LISP.error("Dotted ,@~S", p) : LISP.nil, LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-dot"))) ? LISP.error("Dotted ,.~S", p) : LISP.nil, _loop9(LISP.cdr(p), LISP.cons(LISP.bracket(LISP.car(p)), q));
+          return LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-splicing"))) ? LISP.error("Dotted ,@~S", p) : LISP.nil, LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-dot"))) ? LISP.error("Dotted ,.~S", p) : LISP.nil, _loop11(LISP.cdr(p), LISP.cons(LISP.bracket(LISP.car(p)), q));
         }();
-      }, _loop9(x, LISP.nil);
+      }, _loop11(x, LISP.nil);
     }(LISP.nil);
   };
   LISP.bracket = function (x) {
@@ -1294,14 +1311,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(fn(LISP.car(x)), LISP.maptree(fn, LISP.cdr(x)));
   };
   LISP["bq-splicing-frob"] = function (x) {
-    return LISP.isTrue(LISP["pair?"](x)) ? function (__12) {
-      return LISP.isTrue(__12) ? __12 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
+    return LISP.isTrue(LISP["pair?"](x)) ? function (__13) {
+      return LISP.isTrue(__13) ? __13 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
     }(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing"))) : LISP.nil;
   };
   LISP["bq-frob"] = function (x) {
-    return LISP.isTrue(LISP["pair?"](x)) ? function (__13) {
-      return LISP.isTrue(__13) ? __13 : function (__14) {
-        return LISP.isTrue(__14) ? __14 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
+    return LISP.isTrue(LISP["pair?"](x)) ? function (__14) {
+      return LISP.isTrue(__14) ? __14 : function (__15) {
+        return LISP.isTrue(__15) ? __15 : LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"));
       }(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing")));
     }(LISP["eq?"](LISP.car(x), LISP.intern("unquote"))) : LISP.nil;
   };
@@ -1311,15 +1328,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("quote"))) ? x : LISP.maptree(LISP["bq-simplify"], x)) : x;
   };
   LISP["bq-simplify-args"] = function (x) {
-    return function (_loop10) {
-      return _loop10 = function loop(args, result) {
-        return LISP.isTrue(LISP.not(LISP["null?"](args))) ? _loop10(LISP.cdr(args), LISP.isTrue(LISP.not(LISP["pair?"](LISP.car(args)))) ? LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.cdar(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list*"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.reverse(LISP.cdr(LISP.reverse(LISP.cdar(args)))), LISP["bq-attach-append"](LISP.intern("append"), LISP.car(LISP.last(LISP.car(args))), result)) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("quote"))) && LISP.isTrue(LISP["pair?"](LISP.cadar(args))) && LISP.isTrue(LISP.not(LISP["bq-frob"](LISP.cadar(args)))) && LISP.isTrue(LISP.not(LISP.cddar(args))) ? LISP["bq-attach-conses"](LISP.list(LISP.list(LISP.intern("quote"), LISP.caadar(args))), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP["*bq-clobberable*"])) ? LISP["bq-attach-append"](LISP.intern("append!"), LISP.cadar(args), result) : LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result)) : result;
-      }, _loop10(LISP.reverse(LISP.cdr(x)), LISP.nil);
+    return function (_loop12) {
+      return _loop12 = function loop(args, result) {
+        return LISP.isTrue(LISP.not(LISP["null?"](args))) ? _loop12(LISP.cdr(args), LISP.isTrue(LISP.not(LISP["pair?"](LISP.car(args)))) ? LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.cdar(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list*"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.reverse(LISP.cdr(LISP.reverse(LISP.cdar(args)))), LISP["bq-attach-append"](LISP.intern("append"), LISP.car(LISP.last(LISP.car(args))), result)) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("quote"))) && LISP.isTrue(LISP["pair?"](LISP.cadar(args))) && LISP.isTrue(LISP.not(LISP["bq-frob"](LISP.cadar(args)))) && LISP.isTrue(LISP.not(LISP.cddar(args))) ? LISP["bq-attach-conses"](LISP.list(LISP.list(LISP.intern("quote"), LISP.caadar(args))), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP["*bq-clobberable*"])) ? LISP["bq-attach-append"](LISP.intern("append!"), LISP.cadar(args), result) : LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result)) : result;
+      }, _loop12(LISP.reverse(LISP.cdr(x)), LISP.nil);
     }(LISP.nil);
   };
   LISP["null-or-quoted"] = function (x) {
-    return function (__15) {
-      return LISP.isTrue(__15) ? __15 : LISP.isTrue(LISP["pair?"](x)) ? LISP["eq?"](LISP.car(x), LISP.intern("quote")) : LISP.nil;
+    return function (__16) {
+      return LISP.isTrue(__16) ? __16 : LISP.isTrue(LISP["pair?"](x)) ? LISP["eq?"](LISP.car(x), LISP.intern("quote")) : LISP.nil;
     }(LISP["null?"](x));
   };
   LISP["bq-attach-append"] = function (op, item, result) {
@@ -1330,8 +1347,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
   LISP["create-scope"] = function (parent$2dscope, params) {
     return LISP.vector(LISP["remove-if"](function () {
-      var __19 = LISP.list(LISP.intern("&rest"), LISP.intern("&body"));return function (x) {
-        return LISP.member(x, __19);
+      var __20 = LISP.list(LISP.intern("&rest"), LISP.intern("&body"));return function (x) {
+        return LISP.member(x, __20);
       };
     }(), params), LISP.nil, parent$2dscope);
   };
@@ -1356,8 +1373,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return LISP.isTrue(LISP["symbol?"](sym)) ? LISP["scope-var?"](scope, LISP["get-receiver"](sym)) : LISP.nil;
   };
   LISP["special-var?"] = function () {
-    var __20 = LISP.list(LISP.intern("this"));return function (scope, sym) {
-      return LISP.member(sym, __20);
+    var __21 = LISP.list(LISP.intern("this"));return function (scope, sym) {
+      return LISP.member(sym, __21);
     };
   }();
   LISP["get-receiver"] = function (sym) {
@@ -1390,24 +1407,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, _confirm$2dvalid$2dparams = function confirm$2dvalid$2dparams(params) {
       return LISP.isTrue(params) ? LISP.isTrue(LISP["symbol?"](LISP.car(params))) ? _confirm$2dvalid$2dparams(LISP.cdr(params)) : LISP["compile-error"]("function parameter must be symbol, but", LISP.car(params)) : LISP.nil;
     }, LISP["parse-list"] = function (s, scope) {
-      return function (__21) {
-        return function (__22) {
-          return LISP.isTrue(LISP["eq?"](__22, LISP.intern("quote"))) ? LISP.apply(function (x) {
+      return function (__22) {
+        return function (__23) {
+          return LISP.isTrue(LISP["eq?"](__23, LISP.intern("quote"))) ? LISP.apply(function (x) {
             return LISP.isTrue(LISP["pair?"](x)) || LISP.isTrue(LISP["vector?"](x)) ? LISP.vector(LISP["make-keyword"]("REF"), LISP["scope-add-var"](scope, LISP["parse-quoted-value"](x))) : LISP.vector(LISP["make-keyword"]("CONST"), x);
-          }, LISP.cdr(__21)) : LISP.isTrue(LISP["eq?"](__22, LISP.intern("if"))) ? LISP.apply(function (p, thn) {
+          }, LISP.cdr(__22)) : LISP.isTrue(LISP["eq?"](__23, LISP.intern("if"))) ? LISP.apply(function (p, thn) {
             var els = LISP._getRestArgs(arguments, 2);return LISP.vector(LISP["make-keyword"]("IF"), LISP["parse*"](p, scope), LISP["parse*"](thn, scope), LISP.isTrue(LISP["null?"](els)) ? LISP.nil : LISP["parse*"](LISP.car(els), scope));
-          }, LISP.cdr(__21)) : LISP.isTrue(LISP["eq?"](__22, LISP.intern("set!"))) ? LISP.apply(function (x, v) {
+          }, LISP.cdr(__22)) : LISP.isTrue(LISP["eq?"](__23, LISP.intern("set!"))) ? LISP.apply(function (x, v) {
             return LISP.vector(LISP["make-keyword"]("SET!"), LISP["parse*"](x, scope), LISP["parse*"](v, scope));
-          }, LISP.cdr(__21)) : LISP.isTrue(LISP["eq?"](__22, LISP.intern("lambda"))) ? LISP.apply(function (params) {
+          }, LISP.cdr(__22)) : LISP.isTrue(LISP["eq?"](__23, LISP.intern("lambda"))) ? LISP.apply(function (params) {
             var body = LISP._getRestArgs(arguments, 1);return function () {
               return _confirm$2dvalid$2dparams(params), function (new$2dscope) {
                 return LISP.vector(LISP["make-keyword"]("LAMBDA"), new$2dscope, params, parse$2dargs(body, new$2dscope));
               }(LISP["create-scope"](scope, params));
             }();
-          }, LISP.cdr(__21)) : LISP.isTrue(LISP["eq?"](__22, LISP.intern("def"))) ? LISP.apply(function (name, value) {
+          }, LISP.cdr(__22)) : LISP.isTrue(LISP["eq?"](__23, LISP.intern("def"))) ? LISP.apply(function (name, value) {
             return LISP.vector(LISP["make-keyword"]("DEF"), LISP["parse*"](name, scope), LISP["parse*"](value, scope));
-          }, LISP.cdr(__21)) : LISP.isTrue(LISP["null?"](s)) || LISP.isTrue(LISP["proper-list?"](s)) ? LISP.vector(LISP["make-keyword"]("FUNCALL"), LISP["parse*"](LISP.car(s), scope), parse$2dargs(LISP.cdr(s), scope)) : LISP["compile-error"]("funcall must be proper list, but", s);
-        }(LISP.car(__21));
+          }, LISP.cdr(__22)) : LISP.isTrue(LISP["null?"](s)) || LISP.isTrue(LISP["proper-list?"](s)) ? LISP.vector(LISP["make-keyword"]("FUNCALL"), LISP["parse*"](LISP.car(s), scope), parse$2dargs(LISP.cdr(s), scope)) : LISP["compile-error"]("funcall must be proper list, but", s);
+        }(LISP.car(__22));
       }(s);
     };
   })(LISP.nil, LISP.nil);
@@ -1429,8 +1446,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   };
   (function (table) {
     return LISP["hash-table-put!"](table, "\\", "\\\\"), LISP["hash-table-put!"](table, "\t", "\\t"), LISP["hash-table-put!"](table, "\n", "\\n"), LISP["hash-table-put!"](table, "\"", "\\\""), LISP["escape-char"] = function (c) {
-      return function (__25) {
-        return LISP.isTrue(__25) ? __25 : c;
+      return function (__26) {
+        return LISP.isTrue(__26) ? __26 : c;
       }(LISP["hash-table-get"](table, c));
     };
   })(LISP["make-hash-table"]());
@@ -1452,7 +1469,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP["string-append"](padding, LISP["number->string"](x, 16)));
   };
   (function () {
-    var __26 = LISP.list(LISP.intern("null"), LISP.intern("true"), LISP.intern("false"), LISP.intern("break"), LISP.intern("case"), LISP.intern("catch"), LISP.intern("continue"), LISP.intern("debugger"), LISP.intern("default"), LISP.intern("delete"), LISP.intern("do"), LISP.intern("else"), LISP.intern("finally"), LISP.intern("for"), LISP.intern("function"), LISP.intern("if"), LISP.intern("in"), LISP.intern("instanceof"), LISP.intern("new"), LISP.intern("return"), LISP.intern("switch"), LISP.intern("throw"), LISP.intern("try"), LISP.intern("typeof"), LISP.intern("var"), LISP.intern("void"), LISP.intern("while"), LISP.intern("with"));return LISP["JS-RESERVED-WORDS"] = __26;
+    var __27 = LISP.list(LISP.intern("null"), LISP.intern("true"), LISP.intern("false"), LISP.intern("break"), LISP.intern("case"), LISP.intern("catch"), LISP.intern("continue"), LISP.intern("debugger"), LISP.intern("default"), LISP.intern("delete"), LISP.intern("do"), LISP.intern("else"), LISP.intern("finally"), LISP.intern("for"), LISP.intern("function"), LISP.intern("if"), LISP.intern("in"), LISP.intern("instanceof"), LISP.intern("new"), LISP.intern("return"), LISP.intern("switch"), LISP.intern("throw"), LISP.intern("try"), LISP.intern("typeof"), LISP.intern("var"), LISP.intern("void"), LISP.intern("while"), LISP.intern("with"));return LISP["JS-RESERVED-WORDS"] = __27;
   })();
   LISP["escape-param-name"] = function (sym) {
     return LISP.isTrue(LISP.member(sym, LISP["JS-RESERVED-WORDS"])) ? LISP["string-append"]("__", LISP["symbol->string"](sym)) : LISP["regexp-replace-all"](/[^0-9A-Za-z_.]/, LISP["symbol->string"](sym), function (m) {
@@ -1495,12 +1512,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   })(function (fn, args, scope) {
     return LISP["string-append"](LISP["compile*"](fn, scope), "(", LISP["expand-args"](args, scope), ")");
   }, function () {
-    var __28 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("!"), LISP.intern("~"));return function (sym) {
-      return LISP.member(sym, __28);
+    var __29 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("!"), LISP.intern("~"));return function (sym) {
+      return LISP.member(sym, __29);
     };
   }(), function () {
-    var __29 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("*"), LISP.intern("/"), LISP.intern("%"));return function (sym) {
-      return LISP.member(sym, __29);
+    var __30 = LISP.list(LISP.intern("+"), LISP.intern("-"), LISP.intern("*"), LISP.intern("/"), LISP.intern("%"));return function (sym) {
+      return LISP.member(sym, __30);
     };
   }());
   LISP["compile-quote"] = function (x, scope) {
@@ -1511,8 +1528,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP["eq?"](LISP["vector-ref"](ast, 0), type);
     }, _compile$2dpred = function compile$2dpred(pnode, scope) {
       return LISP.isTrue(ast$3f(LISP["make-keyword"]("IF"), pnode)) && LISP.isTrue(function (enode) {
-        return function (__30) {
-          return LISP.isTrue(__30) ? __30 : LISP.isTrue(ast$3f(LISP["make-keyword"]("CONST"), enode)) ? LISP["eq?"](LISP["vector-ref"](enode, 1), LISP.nil) : LISP.nil;
+        return function (__31) {
+          return LISP.isTrue(__31) ? __31 : LISP.isTrue(ast$3f(LISP["make-keyword"]("CONST"), enode)) ? LISP["eq?"](LISP["vector-ref"](enode, 1), LISP.nil) : LISP.nil;
         }(LISP.not(enode));
       }(LISP["vector-ref"](pnode, 3))) ? LISP["string-append"]("(", _compile$2dpred(LISP["vector-ref"](pnode, 1), scope), " && ", _compile$2dpred(LISP["vector-ref"](pnode, 2), scope), ")") : LISP.isTrue(ast$3f(LISP["make-keyword"]("FUNCALL"), pnode)) && LISP.isTrue(ast$3f(LISP["make-keyword"]("LAMBDA"), LISP["vector-ref"](pnode, 1))) && LISP.isTrue(LISP["eq?"](LISP.length(LISP["scope-param"](LISP["vector-ref"](LISP["vector-ref"](pnode, 1), 1))), 1)) && LISP.isTrue(LISP["eq?"](LISP.length(LISP["vector-ref"](pnode, 2)), 1)) && LISP.isTrue(LISP["eq?"](LISP.length(LISP["vector-ref"](LISP["vector-ref"](pnode, 1), 3)), 1)) && LISP.isTrue(function (ifnode) {
         return ast$3f(LISP["make-keyword"]("IF"), ifnode), ast$3f(LISP["make-keyword"]("REF"), LISP["vector-ref"](ifnode, 1)), LISP["eq?"](LISP["vector-ref"](LISP["vector-ref"](ifnode, 1), 1), LISP.car(LISP["scope-param"](LISP["vector-ref"](LISP["vector-ref"](pnode, 1), 1)))), LISP["equal?"](LISP["vector-ref"](ifnode, 1), LISP["vector-ref"](ifnode, 2));
@@ -1536,8 +1553,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, proper$2dparams), ", "), "){", LISP.isTrue(LISP["null?"](rest)) ? "" : LISP["string-append"]("var ", LISP["escape-param-name"](rest), " = LISP._getRestArgs(arguments, ", LISP["number->string"](LISP.length(proper$2dparams)), "); "), "return (", LISP["expand-body"](bodies, extended$2dscope), ");})");
       }(LISP.isTrue(rest$2dpos) ? LISP.take(rest$2dpos, params) : params, LISP.isTrue(rest$2dpos) ? LISP.elt(rest$2dpos + 1, params) : LISP.nil);
     }(LISP["position-if"](function () {
-      var __33 = LISP.list(LISP.intern("&rest"), LISP.intern("&body"));return function (sym) {
-        return LISP.member(sym, __33);
+      var __34 = LISP.list(LISP.intern("&rest"), LISP.intern("&body"));return function (sym) {
+        return LISP.member(sym, __34);
       };
     }(), params));
   };
@@ -1552,12 +1569,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP["scope-get-var"](scope));
   };
   LISP["compile*"] = function (s, scope) {
-    return function (__34) {
-      return LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("CONST"))) ? LISP["compile-quote"](LISP["vector-ref"](s, 1), scope) : LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("REF"))) ? LISP["compile-symbol"](LISP["vector-ref"](s, 1), scope) : LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("IF"))) ? function (p, thn, els) {
+    return function (__35) {
+      return LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("CONST"))) ? LISP["compile-quote"](LISP["vector-ref"](s, 1), scope) : LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("REF"))) ? LISP["compile-symbol"](LISP["vector-ref"](s, 1), scope) : LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("IF"))) ? function (p, thn, els) {
         return LISP["compile-if"](p, thn, els, scope);
-      }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("FUNCALL"))) ? LISP["compile-funcall"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("SET!"))) ? LISP["compile-set!"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("LAMBDA"))) ? function (extended$2dscope, params, body) {
+      }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("FUNCALL"))) ? LISP["compile-funcall"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("SET!"))) ? LISP["compile-set!"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("LAMBDA"))) ? function (extended$2dscope, params, body) {
         return LISP["compile-new-scope"](LISP["compile-lambda"](params, body, scope, extended$2dscope), extended$2dscope);
-      }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__34, LISP["make-keyword"]("DEF"))) ? LISP["compile-def"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP["compile-error"]("Unknown AST node:", s);
+      }(LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), LISP["vector-ref"](s, 3)) : LISP.isTrue(LISP["eq?"](__35, LISP["make-keyword"]("DEF"))) ? LISP["compile-def"](LISP["vector-ref"](s, 1), LISP["vector-ref"](s, 2), scope) : LISP["compile-error"]("Unknown AST node:", s);
     }(LISP["vector-ref"](s, 0));
   };
   LISP["compile-error"] = function () {

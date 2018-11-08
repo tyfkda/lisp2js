@@ -621,12 +621,6 @@
         return Reader.read(stream)
       if (m = stream.match(/^"/))  // string.
         return Reader.readString(stream)
-      if (stream.match(/^#\(/))  // vector.
-        return Reader.readVector(stream)
-      if (m = stream.match(/^#\/([^\/]*)\//))  // regexp
-        return LISP.regexp(m[1])  // TODO: Implement properly.
-      if (stream.match(/^#\|(.|[\n\r])*?\|#/))  // Block comment.
-        return Reader.read(stream)
       if (stream.match(kReSingleDot, true))  // Single dot.
         return undefined
       if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.

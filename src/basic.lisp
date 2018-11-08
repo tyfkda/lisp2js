@@ -319,3 +319,33 @@
             types)))
 
 (deftype? symbol pair number string keyword vector table regexp)
+
+;; sharp-|: Block comment.
+(set-dispatch-macro-character "#" "|"
+  (lambda (stream _c1 _c2)
+    (let loop ((c1 nil))
+         (let1 c2 (read-char stream)
+           (cond ((null? c2) (error "Block comment not closed"))
+                 ((and (equal? c1 "|")
+                       (equal? c2 "#"))
+                  (read stream))
+                 (t (loop c2)))))))
+
+;; sharp-paren: Vector literal.
+(set-dispatch-macro-character "#" "("
+  (lambda (stream _c1 _c2)
+    (unread-char "(" stream)
+    (let1 args (read stream)
+      (apply vector args))))
+
+;; sharp-slash: Regexp.
+(set-dispatch-macro-character "#" "/"
+  (lambda (stream _c1 _c2)
+    (let loop ((cs ()))
+         (let1 c (read-char stream)
+           (cond ((equal? c "/")
+                  (regexp (string-join (reverse! cs) "")))
+                 ((or (null? c)
+                      (equal? c "\n"))
+                  (error "Regexp not terminated"))
+                 (t (loop (cons c cs))))))))
