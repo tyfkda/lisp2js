@@ -689,7 +689,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     'n': '\n'
   };
 
-  var readTable = {};
+  var readTable = {
+    dispatchTable: {}
+  };
+
+  var dispatchMacroCharacter = function dispatchMacroCharacter(stream, c) {
+    var table = readTable.dispatchTable[c];
+    var subc = stream.peek();
+    if (subc in table) return table[subc](stream, c, stream.getc());
+    // Throw
+    throw new Error('No dispatch macro character: ' + c + subc);
+  };
 
   var Reader = function () {
     function Reader() {
@@ -813,12 +823,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function setMacroCharacter(c, fn) {
         readTable[c] = fn;
       }
+    }, {
+      key: 'setDispatchMacroCharacter',
+      value: function setDispatchMacroCharacter(c, subc, fn) {
+        if (!(c in readTable.dispatchTable)) {
+          readTable.dispatchTable[c] = {};
+        }
+        readTable.dispatchTable[c][subc] = fn;
+        readTable[c] = dispatchMacroCharacter;
+      }
     }]);
 
     return Reader;
   }();
 
   LISP['set-macro-character'] = Reader.setMacroCharacter;
+  LISP['set-dispatch-macro-character'] = Reader.setDispatchMacroCharacter;
 
   Reader.setMacroCharacter('(', function (stream, _c) {
     return (// Left paren '('.
