@@ -31,9 +31,13 @@ function run() {
 ################################################################
 # Test cases.
 
-run 'hello' 'Hello, world!' '../examples/hello.lisp'
-run 'fib' '6765' '../examples/fib.lisp'
-run 'echo' 'foo bar baz' '../examples/echo.lisp' foo bar baz
+run 'hello' 'Hello, world!' ../examples/hello.lisp
+run 'fib' 6765 ../examples/fib.lisp
+run 'echo' 'foo bar baz' ../examples/echo.lisp foo bar baz
+
+content=`cat ../examples/fib.lisp`
+run 'cat' "$content" '../examples/cat.lisp' ../examples/fib.lisp
+
 
 ################################################################
 # All tests succeeded.
