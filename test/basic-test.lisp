@@ -36,6 +36,14 @@
  (test "nil isnt proper-list" nil (proper-list? nil))
  (test "abbrev" "'a" (x->string ''a))
 
+ ;; number
+(test "number->string" "123" (number->string 123))
+
+ ;; string
+(test "string->number" 123 (string->number "123"))
+(test "string->number (float)" 123.45 (string->number "123.45"))
+(test "string->number (hex)" 291 (string->number "123" 16))
+
  ;; type
  (test "type of nil" 'bool (type nil))
  (test "type of t" 'bool (type t))

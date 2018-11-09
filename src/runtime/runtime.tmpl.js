@@ -390,6 +390,9 @@
     const index = str.indexOf(item)
     return index >= 0 ? index : LISP.nil
   }
+  LISP['string->number'] = function(str, radix) {
+    return radix ? parseInt(str, radix) : parseFloat(str)
+  }
 
   LISP['char->integer'] = (char, index) => char.charCodeAt(index)
 
