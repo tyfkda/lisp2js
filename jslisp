@@ -150,7 +150,7 @@
     LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1))
     let status = 0
     if (compileOnly) {
-      const text = fs.readFileSync(process.argv[index], 'utf-8')
+      let text = fs.readFileSync(process.argv[index], 'utf-8')
       const matchShebang = text.match(/^#!(.*)\n/)
       if (matchShebang)
         text = text.slice(matchShebang[0].length)
