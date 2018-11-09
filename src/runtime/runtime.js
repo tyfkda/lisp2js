@@ -560,10 +560,6 @@ const LISP = ((createLisp, installEval) => {
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
   const kReSingleDot = new RegExp(`^\\.(?=([${kDelimitors}]|$))`)
   const kReSymbolOrNumber = new RegExp(`^([^.${kDelimitors}][^${kDelimitors}]*)`)
-  const kReadUnescapeTable = {
-    't': '\t',
-    'n': '\n',
-  }
 
   const readTable = {
     dispatchTable: {},
@@ -598,8 +594,6 @@ const LISP = ((createLisp, installEval) => {
         return readTable[c](stream, stream.getc())
 
       let m
-      if (m = stream.match(/^"/))  // string.
-        return Reader.readString(stream)
       if (stream.match(kReSingleDot, true))  // Single dot.
         return undefined
       if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
@@ -649,24 +643,6 @@ const LISP = ((createLisp, installEval) => {
 
       // Error
       throw new LISP.NoCloseParenException()
-    }
-
-    static readString(stream) {
-      let m
-      if (m = stream.match(/^((\\.|[^"\\])*)"/))
-        return Reader.unescape(m[1])
-      // Error
-      throw new LISP.NoCloseQuoteException()
-    }
-
-    static unescape(str) {
-      return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, (_1, _2, hex, c) => {
-        if (hex)
-          return String.fromCharCode(parseInt(hex, 16))
-        if (c in kReadUnescapeTable)
-          return kReadUnescapeTable[c]
-        return c
-      })
     }
 
     static setMacroCharacter(c, fn) {

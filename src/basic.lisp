@@ -38,6 +38,26 @@
         (progn (unread-char c2 stream)
                (list 'unquote (read stream)))))))
 
+;; String literal
+(set-macro-character "\""
+  (lambda (stream _)
+    (labels ((unescape (c)
+                       (case c
+                         (("x")
+                          (let* ((c1 (read-char stream))
+                                 (c2 (read-char stream)))
+                            (number->char (string->number (string-append c1 c2) 16))))
+                         (("t") "\t")
+                         (("n") "\n")
+                         (t c))))
+      (let loop ((acc '()))
+           (let1 c (read-char stream)
+             (cond ((null? c) (error "NoCloseQuoteException"))
+                   ((eq? c "\"") (string-join (reverse! acc) ""))
+                   ((eq? c "\\")
+                    (loop (cons (unescape (read-char stream)) acc)))
+                   (t (loop (cons c acc)))))))))
+
 ;; Block comment.
 (set-dispatch-macro-character "#" "|"
   (lambda (stream _c1 _c2)
