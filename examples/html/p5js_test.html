@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Use p5.js test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+  <body>
+    <h1>Use p5.js test</h1>
+
+    <script type="text/javascript" src="../../lisp2js.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
+
+    <script src="jslisp.js">
+(set! P5 JS)
+(hash-table-put! P5 "setup" (lambda () (if setup (setup))))
+(hash-table-put! P5 "draw"
+                 (lambda ()
+                   (when draw
+                     (hash-table-put! P5 "draw" draw)
+                     (draw))))
+
+(defun setup ()
+  (P5.createCanvas 600 600))
+
+(defun draw ()
+  (P5.ellipse 50 50 80))
+    </script>
+  </body>
+</html>

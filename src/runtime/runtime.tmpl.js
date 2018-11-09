@@ -29,7 +29,7 @@
       const stream = new LISP.StrStream(codes)
       for (;;) {
         const s = LISP.read(stream)
-        if (s === undefined)
+        if (s == null)
           break
         LISP.eval(s)
       }

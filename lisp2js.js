@@ -37,7 +37,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var stream = new LISP.StrStream(codes);
       for (;;) {
         var s = LISP.read(stream);
-        if (s === undefined) break;
+        if (s == null) break;
         LISP.eval(s);
       }
     };
