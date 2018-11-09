@@ -1,4 +1,213 @@
-((createLisp, installEval) => {
+'use strict'
+
+// Base class.
+class SObject {
+}
+
+// Symbol.
+class Symbol extends SObject {
+  constructor(name) {
+    super()
+    this.name = name
+  }
+
+  static getTypeName() {
+    return 'symbol'
+  }
+
+  toString() {
+    return this.name
+  }
+}
+
+class Keyword extends SObject {
+  constructor(name) {
+    super()
+    this.name = name
+  }
+
+  static getTypeName() {
+    return 'keyword'
+  }
+
+  toString(inspect) {
+    return inspect ? `:${this.name}` : this.name
+  }
+}
+
+// Cons cell.
+class Cons extends SObject {
+  constructor(car, cdr, lineNo, path) {
+    super()
+    this.car = car
+    this.cdr = cdr
+
+    if (lineNo != null) {
+      this.lineNo = lineNo
+      this.path = path
+    }
+  }
+
+  static getTypeName() {
+    return 'pair'
+  }
+
+  toString(inspect) {
+    const abbrev = Cons.canAbbrev(this)
+    if (abbrev)
+      return `${abbrev}${makeString(this.cdr.car, inspect)}`
+
+    const ss = []
+    let separator = '('
+    let p
+    for (p = this; p instanceof Cons; p = p.cdr) {
+      ss.push(separator)
+      ss.push(makeString(p.car, inspect))
+      separator = ' '
+    }
+    if (p !== LISP.nil) {
+      ss.push(' . ')
+      ss.push(makeString(p, inspect))
+    }
+    ss.push(')')
+    return ss.join('')
+  }
+
+  toArray() {
+    const result = []
+    for (let p = this; p instanceof Cons; p = p.cdr)
+      result.push(p.car)
+    return result
+  }
+
+  static canAbbrev(s) {
+    const kAbbrevTable = {
+      quote: '\'',
+      quasiquote: '`',
+      unquote: ',',
+      'unquote-splicing': ',@',
+    }
+    return (s.car instanceof Symbol &&
+            s.car.name in kAbbrevTable &&
+            s.cdr instanceof Cons &&
+            LISP['eq?'](s.cdr.cdr, LISP.nil)) ? kAbbrevTable[s.car.name] : false
+  }
+}
+
+class HashTable extends SObject {
+  static getTypeName() {
+    return 'table'
+  }
+
+  toString() {
+    let contents = ''
+    for (const k in this) {
+      if (!(this.hasOwnProperty(k)))
+        continue
+      if (contents.length > 0)
+        contents += ', '
+      contents += `${k}:${this[k]}`
+    }
+    return `#table<${contents}>`
+  }
+}
+
+// Stream.
+class Stream extends SObject {
+  constructor() {
+    super()
+    this.str = ''
+    this.lineNo = 0
+  }
+
+  close() {}
+  peek() {
+    const result = this.fetch()
+    if (result == null)
+      return result
+    return this.str[0]
+  }
+  getc() {
+    const c = this.peek()
+    if (c == null)
+      return c
+    this.str = this.str.slice(1)
+    return c
+  }
+  ungetc(c) {
+    if (this.str)
+      this.str = c + this.str
+    else
+      this.str = c
+  }
+  match(regexp, keep) {
+    const result = this.fetch()
+    if (result == null)
+      return result
+
+    const m = this.str.match(regexp)
+    if (m && !keep)
+      this.str = RegExp.rightContext
+    return m
+  }
+  eof() {
+    return this.str == null
+  }
+  getLine() {
+    const result = this.str || this.readLine()
+    this.str = ''
+    return result
+  }
+  fetch() {
+    if (this.str == null)
+      return null
+
+    while (this.str === '') {
+      if ((this.str = this.readLine()) == null)
+        return undefined
+      ++this.lineNo
+    }
+    return this.str
+  }
+}
+
+class StrStream extends Stream {
+  constructor(str) {
+    super()
+    this.str = str
+    this.lineNo = 1
+  }
+
+  readLine() {
+    return null
+  }
+}
+
+const inspectString = (str) => {
+  const kEscapeCharTable = {'\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"'}
+  const f = (m) => {
+    if (m in kEscapeCharTable)
+      return kEscapeCharTable[m]
+    return `\\x${('0' + m.charCodeAt(0).toString(16)).slice(-2)}`
+  }
+  return `"${str.replace(/[\x00-\x1f\"\\]/g, f)}"`
+}
+
+const makeString = (x, inspect) => {
+  if (x === LISP.nil)
+    return 'nil'
+  if (x === LISP.t)
+    return 't'
+  if (typeof x === 'string')
+    return inspect ? inspectString(x) : x
+  if (x instanceof Array)
+    return `#(${x.map(v => makeString(v, inspect)).join(' ')})`
+  if (x == null)  // null or undefined
+    return '' + x
+  return x.toString(inspect)
+}
+
+const LISP = ((createLisp, installEval) => {
   'use strict'
 
   const g = ((typeof window !== 'undefined') ? window :
@@ -7,10 +216,7 @@
   const LISP = createLisp(g)
   installEval(LISP)
 
-  if (typeof module !== 'undefined')
-    module.exports = LISP
-  else
-    g.LISP = LISP
+  return LISP
 })((global) => {
   'use strict'
 
@@ -25,20 +231,6 @@
   }
 
   const jsBoolToS = x => x ? LISP.t : LISP.nil
-
-  const makeString = (x, inspect) => {
-    if (x === LISP.nil)
-      return 'nil'
-    if (x === LISP.t)
-      return 't'
-    if (typeof x === 'string')
-      return inspect ? inspectString(x) : x
-    if (x instanceof Array)
-      return `#(${x.map(v => makeString(v, inspect)).join(' ')})`
-    if (x == null)  // null or undefined
-      return '' + x
-    return x.toString(inspect)
-  }
 
   LISP.nil = false
   LISP.t = true
@@ -79,26 +271,6 @@
     return new (Function.prototype.bind.apply(klass, arguments))
   }
 
-  // Base class.
-  class SObject {
-  }
-
-  // Symbol.
-  class Symbol extends SObject {
-    constructor(name) {
-      super()
-      this.name = name
-    }
-
-    static getTypeName() {
-      return 'symbol'
-    }
-
-    toString() {
-      return this.name
-    }
-  }
-
   LISP['symbol->string'] = x => x.name
 
   {
@@ -113,21 +285,6 @@
     let index = 0
     LISP.gensym = () => {
       return LISP.intern(`__${++index}`)
-    }
-  }
-
-  class Keyword extends SObject {
-    constructor(name) {
-      super()
-      this.name = name
-    }
-
-    static getTypeName() {
-      return 'keyword'
-    }
-
-    toString(inspect) {
-      return inspect ? `:${this.name}` : this.name
     }
   }
 
@@ -160,65 +317,6 @@
   }
 
   LISP['eq?'] = (x, y) => jsBoolToS(x === y)
-
-  // Cons cell.
-  class Cons extends SObject {
-    constructor(car, cdr, lineNo, path) {
-      super()
-      this.car = car
-      this.cdr = cdr
-
-      if (lineNo != null) {
-        this.lineNo = lineNo
-        this.path = path
-      }
-    }
-
-    static getTypeName() {
-      return 'pair'
-    }
-
-    toString(inspect) {
-      const abbrev = Cons.canAbbrev(this)
-      if (abbrev)
-        return `${abbrev}${makeString(this.cdr.car, inspect)}`
-
-      const ss = []
-      let separator = '('
-      let p
-      for (p = this; p instanceof Cons; p = p.cdr) {
-        ss.push(separator)
-        ss.push(makeString(p.car, inspect))
-        separator = ' '
-      }
-      if (p !== LISP.nil) {
-        ss.push(' . ')
-        ss.push(makeString(p, inspect))
-      }
-      ss.push(')')
-      return ss.join('')
-    }
-
-    toArray() {
-      const result = []
-      for (let p = this; p instanceof Cons; p = p.cdr)
-        result.push(p.car)
-      return result
-    }
-
-    static canAbbrev(s) {
-      const kAbbrevTable = {
-        quote: '\'',
-        quasiquote: '`',
-        unquote: ',',
-        'unquote-splicing': ',@',
-      }
-      return (s.car instanceof Symbol &&
-              s.car.name in kAbbrevTable &&
-              s.cdr instanceof Cons &&
-              LISP['eq?'](s.cdr.cdr, LISP.nil)) ? kAbbrevTable[s.car.name] : false
-    }
-  }
 
   LISP.cons = (car, cdr) => new Cons(car, cdr)
   LISP.car = (s) => {
@@ -371,16 +469,6 @@
   LISP['char->number'] = (char, index = 0) => char.charCodeAt(index)
   LISP['number->char'] = (num) => String.fromCharCode(num)
 
-  const kEscapeCharTable = {'\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"'}
-  const inspectString = (str) => {
-    const f = (m) => {
-      if (m in kEscapeCharTable)
-        return kEscapeCharTable[m]
-      return `\\x${('0' + m.charCodeAt(0).toString(16)).slice(-2)}`
-    }
-    return `"${str.replace(/[\x00-\x1f\"\\]/g, f)}"`
-  }
-
   LISP['x->string'] = makeString
   LISP.print = (x, stream) => {
     const s = makeString(x)
@@ -411,24 +499,6 @@
     return fn.apply(null, params)
   }
   LISP.JS = global
-
-  class HashTable extends SObject {
-    static getTypeName() {
-      return 'table'
-    }
-
-    toString() {
-      let contents = ''
-      for (const k in this) {
-        if (!(this.hasOwnProperty(k)))
-          continue
-        if (contents.length > 0)
-          contents += ', '
-        contents += `${k}:${this[k]}`
-      }
-      return `#table<${contents}>`
-    }
-  }
 
   // Hash table.
   LISP['make-hash-table'] = () => new HashTable()
@@ -472,77 +542,6 @@
   LISP['regexp->string'] = (x) => {
     const s = x.toString()
     return s.slice(1, s.length - 1)
-  }
-
-  // Stream.
-  class Stream extends SObject {
-    constructor() {
-      super()
-      this.str = ''
-      this.lineNo = 0
-    }
-
-    close() {}
-    peek() {
-      const result = this.fetch()
-      if (result == null)
-        return result
-      return this.str[0]
-    }
-    getc() {
-      const c = this.peek()
-      if (c == null)
-        return c
-      this.str = this.str.slice(1)
-      return c
-    }
-    ungetc(c) {
-      if (this.str)
-        this.str = c + this.str
-      else
-        this.str = c
-    }
-    match(regexp, keep) {
-      const result = this.fetch()
-      if (result == null)
-        return result
-
-      const m = this.str.match(regexp)
-      if (m && !keep)
-        this.str = RegExp.rightContext
-      return m
-    }
-    eof() {
-      return this.str == null
-    }
-    getLine() {
-      const result = this.str || this.readLine()
-      this.str = ''
-      return result
-    }
-    fetch() {
-      if (this.str == null)
-        return null
-
-      while (this.str === '') {
-        if ((this.str = this.readLine()) == null)
-          return undefined
-        ++this.lineNo
-      }
-      return this.str
-    }
-  }
-
-  class StrStream extends Stream {
-    constructor(str) {
-      super()
-      this.str = str
-      this.lineNo = 1
-    }
-
-    readLine() {
-      return null
-    }
   }
 
   LISP['make-string-input-stream'] = function(str, start, end) {
@@ -723,7 +722,11 @@
 
   // For node JS.
   if (typeof process !== 'undefined') {
-    const fs = require('fs')
+    let fs
+    if (typeof __non_webpack_require__ === 'undefined')
+      fs = require('fs')
+    else
+      fs = __non_webpack_require__('fs')
 
     const BUFFER_SIZE = 4096
     class FileStream extends Stream {
@@ -837,3 +840,8 @@
   // so put such code here.
   LISP.eval = (exp) => eval(LISP.compile(exp))
 })
+
+module.exports = {
+  LISP,
+  Stream,
+}

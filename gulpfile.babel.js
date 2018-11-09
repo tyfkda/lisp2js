@@ -11,8 +11,15 @@ import jslisp from './tools/gulp-jslisp'
 import embed from './tools/gulp-embed'
 import concat from 'gulp-concat'
 
+import webpack from 'webpack'
+import webpackStream from 'webpack-stream'
+import {webpackJsLispConfig, webpackLisp2JsConfig} from './webpack.config.babel'
+
+import plumber from 'gulp-plumber'
+
 const destDir = '.'
 const GEN_DIR = 'gen'
+const DIST_DIR = 'dist'
 
 const kSrcLispFiles = [
   'src/basic.lisp',
@@ -56,3 +63,27 @@ gulp.task('watch', () => {
 })
 
 gulp.task('default', gulp.series('build', 'watch'))
+
+
+
+
+gulp.task('pack-jslisp', () => {
+  const config = webpackJsLispConfig
+  //delete config.output.sourceMapFilename
+  return gulp.src('./src/runtime/jslisp.js')
+    .pipe(plumber())
+    .pipe(webpackStream(config, webpack))
+    .pipe(rename('jslisp'))
+    .pipe(gulp.dest(DIST_DIR))
+})
+
+gulp.task('pack-lisp2js', () => {
+  const config = webpackLisp2JsConfig
+  return gulp.src('./src/runtime/lisp2js.js')
+    .pipe(plumber())
+    .pipe(webpackStream(config, webpack))
+    .pipe(rename('lisp2js.js'))
+    .pipe(gulp.dest(DIST_DIR))
+})
+
+gulp.task('pack', gulp.parallel('pack-jslisp', 'pack-lisp2js'))
