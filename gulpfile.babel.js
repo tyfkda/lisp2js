@@ -12,6 +12,7 @@ import embed from './tools/gulp-embed'
 import concat from 'gulp-concat'
 
 const destDir = '.'
+const GEN_DIR = 'gen'
 
 const kSrcLispFiles = [
   'src/basic.lisp',
@@ -24,16 +25,10 @@ const kRuntimeFiles = [
 ]
 
 gulp.task('build', () => {
-  return gulp.src(kSrcLispFiles)
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(concat('lisp2js.js'))
+  return gulp.src(kSrcLispFiles, {base: 'src'})
     .pipe(jslisp())
-    .pipe(embed({
-      template: 'src/runtime/runtime.tmpl.js',
-    }))
-    .pipe(babel())
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(destDir))
+    .pipe(rename({extname: '.js'}))
+    .pipe(gulp.dest(GEN_DIR))
 })
 
 gulp.task('release', gulp.series('build', () => {

@@ -1,5 +1,4 @@
-/*<%# EJS template %>*/
-((createLisp, installEval, installAux) => {
+((createLisp, installEval) => {
   'use strict'
 
   const g = ((typeof window !== 'undefined') ? window :
@@ -7,36 +6,11 @@
 
   const LISP = createLisp(g)
   installEval(LISP)
-  installAux(LISP)
 
   if (typeof module !== 'undefined')
     module.exports = LISP
   else
     g.LISP = LISP
-
-  // Running on browser: Execute inner text.
-  if (typeof document !== 'undefined') {
-    const getMyCode = () => {
-      const currentScript = document.currentScript || (() => {
-        const nodeList = document.getElementsByTagName('script')
-        return nodeList.item(nodeList.length - 1)
-      })()
-      return currentScript.text
-    }
-
-    // Run Lisp codes.
-    const runCodes = (codes) => {
-      const stream = LISP['make-string-input-stream'](codes)
-      for (;;) {
-        const s = LISP.read(stream)
-        if (s === LISP.nil)
-          break
-        LISP.eval(s)
-      }
-    }
-
-    runCodes(getMyCode())
-  }
 })((global) => {
   'use strict'
 
@@ -862,6 +836,4 @@
   // Using eval JS function prevent uglify to mangle local variable names,
   // so put such code here.
   LISP.eval = (exp) => eval(LISP.compile(exp))
-}, (/*eslint no-unused-vars: 0*/LISP) => {
-  <%- contents %>
 })
