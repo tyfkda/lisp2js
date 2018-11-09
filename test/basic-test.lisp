@@ -38,8 +38,10 @@
 
  ;; number
 (test "number->string" "123" (number->string 123))
+(test "number->char" "A" (number->char 65))
 
  ;; string
+(test "char->number" 65 (char->number "A"))
 (test "string->number" 123 (string->number "123"))
 (test "string->number (float)" 123.45 (string->number "123.45"))
 (test "string->number (hex)" 291 (string->number "123" 16))

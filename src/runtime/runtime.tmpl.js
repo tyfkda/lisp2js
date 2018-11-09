@@ -394,7 +394,8 @@
     return radix ? parseInt(str, radix) : parseFloat(str)
   }
 
-  LISP['char->integer'] = (char, index) => char.charCodeAt(index)
+  LISP['char->number'] = (char, index = 0) => char.charCodeAt(index)
+  LISP['number->char'] = (num) => String.fromCharCode(num)
 
   const kEscapeCharTable = {'\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"'}
   const inspectString = (str) => {

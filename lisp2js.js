@@ -439,8 +439,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return radix ? parseInt(str, radix) : parseFloat(str);
   };
 
-  LISP['char->integer'] = function (char, index) {
+  LISP['char->number'] = function (char) {
+    var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     return char.charCodeAt(index);
+  };
+  LISP['number->char'] = function (num) {
+    return String.fromCharCode(num);
   };
 
   var kEscapeCharTable = { '\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"' };
@@ -1483,7 +1487,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     });
   };
   LISP["escape-sym-char"] = function (c) {
-    return LISP["string-append"]("$", LISP["integer->hex-string"](LISP["char->integer"](c), "00"));
+    return LISP["string-append"]("$", LISP["integer->hex-string"](LISP["char->number"](c), "00"));
   };
   LISP["integer->hex-string"] = function (x, padding) {
     return function (s) {

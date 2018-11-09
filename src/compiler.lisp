@@ -26,7 +26,7 @@
 
 (defun escape-sym-char (c)
   (string-append "$"
-                 (integer->hex-string (char->integer c) "00")))
+                 (integer->hex-string (char->number c) "00")))
 
 (defun integer->hex-string (x padding)
   (let* ((s (string-append padding
