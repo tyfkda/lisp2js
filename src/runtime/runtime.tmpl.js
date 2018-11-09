@@ -617,8 +617,6 @@
         return readTable[c](stream, stream.getc())
 
       let m
-      if (stream.match(/^;[^\n]*\n?/))  // Line comment.
-        return Reader.read(stream)
       if (m = stream.match(/^"/))  // string.
         return Reader.readString(stream)
       if (stream.match(kReSingleDot, true))  // Single dot.

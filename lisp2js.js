@@ -724,8 +724,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (c in readTable) return readTable[c](stream, stream.getc());
 
         var m = void 0;
-        if (stream.match(/^;[^\n]*\n?/)) // Line comment.
-          return Reader.read(stream);
         if (m = stream.match(/^"/)) // string.
           return Reader.readString(stream);
         if (stream.match(kReSingleDot, true)) // Single dot.
@@ -1010,6 +1008,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return LISP.isTrue(LISP["equal?"](expanded, exp)) ? exp : LISP.macroexpand(expanded);
     }(LISP["macroexpand-1"](exp));
   };
+  LISP["set-macro-character"](";", function (stream, _) {
+    return function (_loop) {
+      return _loop = function loop() {
+        return function (c) {
+          return LISP.isTrue(LISP["null?"](c)) ? c : LISP.isTrue(LISP["eq?"](c, "\n")) ? LISP.read(stream) : _loop();
+        }(LISP["read-char"](stream));
+      }, _loop();
+    }(LISP.nil);
+  });
   LISP["set-macro-character"]("'", function (stream, _) {
     return LISP.list(LISP.intern("quote"), LISP.read(stream));
   });
@@ -1116,22 +1123,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return LISP.isTrue(LISP["eq?"](x, y)) ? LISP.t : function (xtype) {
       return LISP.isTrue(LISP["eq?"](xtype, LISP.type(y))) ? function (__4) {
         return LISP.isTrue(LISP["eq?"](__4, LISP.intern("pair"))) ? LISP.isTrue(LISP["equal?"](LISP.car(x), LISP.car(y))) ? LISP["equal?"](LISP.cdr(x), LISP.cdr(y)) : LISP.nil : LISP.isTrue(LISP["eq?"](__4, LISP.intern("vector"))) ? function (n) {
-          return LISP.isTrue(LISP["eq?"](n, LISP["vector-length"](y))) ? function (_loop) {
-            return _loop = function loop(i) {
+          return LISP.isTrue(LISP["eq?"](n, LISP["vector-length"](y))) ? function (_loop2) {
+            return _loop2 = function loop(i) {
               return function (__5) {
-                return LISP.isTrue(__5) ? __5 : LISP.isTrue(LISP["equal?"](LISP["vector-ref"](x, i), LISP["vector-ref"](y, i))) ? _loop(i + 1) : LISP.nil;
+                return LISP.isTrue(__5) ? __5 : LISP.isTrue(LISP["equal?"](LISP["vector-ref"](x, i), LISP["vector-ref"](y, i))) ? _loop2(i + 1) : LISP.nil;
               }(LISP[">="](i, n));
-            }, _loop(0);
+            }, _loop2(0);
           }(LISP.nil) : LISP.nil;
         }(LISP["vector-length"](x)) : LISP.nil;
       }(xtype) : LISP.nil;
     }(LISP.type(x));
   };
   LISP.length = function (ls) {
-    return function (_loop2) {
-      return _loop2 = function loop(ls, acc) {
-        return LISP.isTrue(LISP["pair?"](ls)) ? _loop2(LISP.cdr(ls), acc + 1) : acc;
-      }, _loop2(ls, 0);
+    return function (_loop3) {
+      return _loop3 = function loop(ls, acc) {
+        return LISP.isTrue(LISP["pair?"](ls)) ? _loop3(LISP.cdr(ls), acc + 1) : acc;
+      }, _loop3(ls, 0);
     }(LISP.nil);
   };
   LISP["last-pair"] = function (ls) {
@@ -1153,19 +1160,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var rest = LISP._getRestArgs(arguments, 1);return LISP.isTrue(LISP["null?"](rest)) ? ls : LISP.isTrue(LISP["null?"](ls)) ? LISP.apply(LISP.append, rest) : LISP.cons(LISP.car(ls), LISP.apply(LISP.append, LISP.cdr(ls), rest));
   };
   LISP.reverse = function (ls) {
-    return function (_loop3) {
-      return _loop3 = function loop(ls, acc) {
-        return LISP.isTrue(LISP["pair?"](ls)) ? _loop3(LISP.cdr(ls), LISP.cons(LISP.car(ls), acc)) : acc;
-      }, _loop3(ls, LISP.nil);
+    return function (_loop4) {
+      return _loop4 = function loop(ls, acc) {
+        return LISP.isTrue(LISP["pair?"](ls)) ? _loop4(LISP.cdr(ls), LISP.cons(LISP.car(ls), acc)) : acc;
+      }, _loop4(ls, LISP.nil);
     }(LISP.nil);
   };
   LISP["list*"] = function () {
-    var args = LISP._getRestArgs(arguments, 0);return LISP.isTrue(LISP["null?"](args)) ? LISP.nil : LISP.isTrue(LISP["null?"](LISP.cdr(args))) ? LISP.car(args) : function (_loop4) {
-      return _loop4 = function loop(p, q) {
+    var args = LISP._getRestArgs(arguments, 0);return LISP.isTrue(LISP["null?"](args)) ? LISP.nil : LISP.isTrue(LISP["null?"](LISP.cdr(args))) ? LISP.car(args) : function (_loop5) {
+      return _loop5 = function loop(p, q) {
         return LISP.isTrue(LISP["null?"](LISP.cdr(q))) ? function () {
           return LISP["set-cdr!"](p, LISP.car(q)), args;
-        }() : _loop4(q, LISP.cdr(q));
-      }, _loop4(args, LISP.cdr(args));
+        }() : _loop5(q, LISP.cdr(q));
+      }, _loop5(args, LISP.cdr(args));
     }(LISP.nil);
   };
   LISP["last-pair"] = function (ls) {
@@ -1182,24 +1189,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP.cdr(LISP["last-pair"](ls)), LISP.reverse(ls)) : LISP.list(ls);
   };
   LISP["vector->list"] = function (vect) {
-    return function (_loop5) {
-      return _loop5 = function loop(i, acc) {
-        return LISP.isTrue(LISP["<"](i, 0)) ? acc : _loop5(i - 1, LISP.cons(LISP["vector-ref"](vect, i), acc));
-      }, _loop5(LISP["vector-length"](vect) - 1, LISP.nil);
+    return function (_loop6) {
+      return _loop6 = function loop(i, acc) {
+        return LISP.isTrue(LISP["<"](i, 0)) ? acc : _loop6(i - 1, LISP.cons(LISP["vector-ref"](vect, i), acc));
+      }, _loop6(LISP["vector-length"](vect) - 1, LISP.nil);
     }(LISP.nil);
   };
   LISP["position-if"] = function (pred, seq) {
-    return function (_loop6) {
-      return _loop6 = function loop(p, i) {
-        return LISP.isTrue(p) ? LISP.isTrue(pred(LISP.car(p))) ? i : _loop6(LISP.cdr(p), i + 1) : LISP.nil;
-      }, _loop6(seq, 0);
+    return function (_loop7) {
+      return _loop7 = function loop(p, i) {
+        return LISP.isTrue(p) ? LISP.isTrue(pred(LISP.car(p))) ? i : _loop7(LISP.cdr(p), i + 1) : LISP.nil;
+      }, _loop7(seq, 0);
     }(LISP.nil);
   };
   LISP.take = function (n, ls) {
-    return function (_loop7) {
-      return _loop7 = function loop(n, ls, acc) {
-        return LISP.isTrue(LISP["<="](n, 0)) || LISP.isTrue(LISP["null?"](ls)) ? LISP["reverse!"](acc) : _loop7(n - 1, LISP.cdr(ls), LISP.cons(LISP.car(ls), acc));
-      }, _loop7(n, ls, LISP.nil);
+    return function (_loop8) {
+      return _loop8 = function loop(n, ls, acc) {
+        return LISP.isTrue(LISP["<="](n, 0)) || LISP.isTrue(LISP["null?"](ls)) ? LISP["reverse!"](acc) : _loop8(n - 1, LISP.cdr(ls), LISP.cons(LISP.car(ls), acc));
+      }, _loop8(n, ls, LISP.nil);
     }(LISP.nil);
   };
   LISP.drop = function (n, ls) {
@@ -1209,10 +1216,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return LISP.car(LISP.drop(n, ls));
   };
   LISP["remove-if"] = function (test, seq) {
-    return function (_loop8) {
-      return _loop8 = function loop(seq, acc) {
-        return LISP.isTrue(LISP["null?"](seq)) ? LISP["reverse!"](acc) : _loop8(LISP.cdr(seq), LISP.isTrue(test(LISP.car(seq))) ? acc : LISP.cons(LISP.car(seq), acc));
-      }, _loop8(seq, LISP.nil);
+    return function (_loop9) {
+      return _loop9 = function loop(seq, acc) {
+        return LISP.isTrue(LISP["null?"](seq)) ? LISP["reverse!"](acc) : _loop9(LISP.cdr(seq), LISP.isTrue(test(LISP.car(seq))) ? acc : LISP.cons(LISP.car(seq), acc));
+      }, _loop9(seq, LISP.nil);
     }(LISP.nil);
   };
   LISP["register-macro"](LISP.intern("dotimes"), function (params) {
@@ -1263,12 +1270,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     };
   })();
   LISP["set-dispatch-macro-character"]("#", "|", function (stream, _c1, _c2) {
-    return function (_loop9) {
-      return _loop9 = function loop(c1) {
+    return function (_loop10) {
+      return _loop10 = function loop(c1) {
         return function (c2) {
-          return LISP.isTrue(LISP["null?"](c2)) ? LISP.error("Block comment not closed") : LISP.isTrue(LISP["equal?"](c1, "|")) && LISP.isTrue(LISP["equal?"](c2, "#")) ? LISP.read(stream) : _loop9(c2);
+          return LISP.isTrue(LISP["null?"](c2)) ? LISP.error("Block comment not closed") : LISP.isTrue(LISP["equal?"](c1, "|")) && LISP.isTrue(LISP["equal?"](c2, "#")) ? LISP.read(stream) : _loop10(c2);
         }(LISP["read-char"](stream));
-      }, _loop9(LISP.nil);
+      }, _loop10(LISP.nil);
     }(LISP.nil);
   });
   LISP["set-dispatch-macro-character"]("#", "(", function (stream, _c1, _c2) {
@@ -1277,12 +1284,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP.read(stream));
   });
   LISP["set-dispatch-macro-character"]("#", "/", function (stream, _c1, _c2) {
-    return function (_loop10) {
-      return _loop10 = function loop(cs) {
+    return function (_loop11) {
+      return _loop11 = function loop(cs) {
         return function (c) {
-          return LISP.isTrue(LISP["equal?"](c, "/")) ? LISP.regexp(LISP["string-join"](LISP["reverse!"](cs), "")) : LISP.isTrue(LISP["null?"](c)) || LISP.isTrue(LISP["equal?"](c, "\n")) ? LISP.error("Regexp not terminated") : _loop10(LISP.cons(c, cs));
+          return LISP.isTrue(LISP["equal?"](c, "/")) ? LISP.regexp(LISP["string-join"](LISP["reverse!"](cs), "")) : LISP.isTrue(LISP["null?"](c)) || LISP.isTrue(LISP["equal?"](c, "\n")) ? LISP.error("Regexp not terminated") : _loop11(LISP.cons(c, cs));
         }(LISP["read-char"](stream));
-      }, _loop10(LISP.nil);
+      }, _loop11(LISP.nil);
     }(LISP.nil);
   });
   LISP["set-dispatch-macro-character"]("#", ".", function (stream, _c1, _c2) {
@@ -1308,14 +1315,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return LISP["bq-simplify"](LISP["bq-process"](x));
   };
   LISP["bq-process"] = function (x) {
-    return LISP.isTrue(LISP.not(LISP["pair?"](x))) ? LISP.list(LISP.intern("quote"), x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("quasiquote"))) ? LISP["bq-process"](LISP["bq-completely-process"](LISP.cadr(x))) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote"))) ? LISP.cadr(x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing"))) ? LISP.error(",@~S after `", LISP.cadr(x)) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"))) ? LISP.error(",.~S after `", LISP.cadr(x)) : function (_loop11) {
-      return _loop11 = function loop(p, q) {
+    return LISP.isTrue(LISP.not(LISP["pair?"](x))) ? LISP.list(LISP.intern("quote"), x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("quasiquote"))) ? LISP["bq-process"](LISP["bq-completely-process"](LISP.cadr(x))) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote"))) ? LISP.cadr(x) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-splicing"))) ? LISP.error(",@~S after `", LISP.cadr(x)) : LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("unquote-dot"))) ? LISP.error(",.~S after `", LISP.cadr(x)) : function (_loop12) {
+      return _loop12 = function loop(p, q) {
         return LISP.isTrue(LISP.not(LISP["pair?"](p))) ? LISP.cons(LISP.intern("append"), LISP.nreconc(q, LISP.list(LISP.list(LISP.intern("quote"), p)))) : LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote"))) ? function () {
           return LISP.isTrue(LISP["null?"](LISP.cddr(p))) ? LISP.nil : LISP.error("Malformed ,~S", p), LISP.cons(LISP.intern("append"), LISP.nreconc(q, LISP.list(LISP.cadr(p))));
         }() : function () {
-          return LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-splicing"))) ? LISP.error("Dotted ,@~S", p) : LISP.nil, LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-dot"))) ? LISP.error("Dotted ,.~S", p) : LISP.nil, _loop11(LISP.cdr(p), LISP.cons(LISP.bracket(LISP.car(p)), q));
+          return LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-splicing"))) ? LISP.error("Dotted ,@~S", p) : LISP.nil, LISP.isTrue(LISP["eq?"](LISP.car(p), LISP.intern("unquote-dot"))) ? LISP.error("Dotted ,.~S", p) : LISP.nil, _loop12(LISP.cdr(p), LISP.cons(LISP.bracket(LISP.car(p)), q));
         }();
-      }, _loop11(x, LISP.nil);
+      }, _loop12(x, LISP.nil);
     }(LISP.nil);
   };
   LISP.bracket = function (x) {
@@ -1344,10 +1351,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }(LISP.isTrue(LISP["eq?"](LISP.car(x), LISP.intern("quote"))) ? x : LISP.maptree(LISP["bq-simplify"], x)) : x;
   };
   LISP["bq-simplify-args"] = function (x) {
-    return function (_loop12) {
-      return _loop12 = function loop(args, result) {
-        return LISP.isTrue(LISP.not(LISP["null?"](args))) ? _loop12(LISP.cdr(args), LISP.isTrue(LISP.not(LISP["pair?"](LISP.car(args)))) ? LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.cdar(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list*"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.reverse(LISP.cdr(LISP.reverse(LISP.cdar(args)))), LISP["bq-attach-append"](LISP.intern("append"), LISP.car(LISP.last(LISP.car(args))), result)) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("quote"))) && LISP.isTrue(LISP["pair?"](LISP.cadar(args))) && LISP.isTrue(LISP.not(LISP["bq-frob"](LISP.cadar(args)))) && LISP.isTrue(LISP.not(LISP.cddar(args))) ? LISP["bq-attach-conses"](LISP.list(LISP.list(LISP.intern("quote"), LISP.caadar(args))), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP["*bq-clobberable*"])) ? LISP["bq-attach-append"](LISP.intern("append!"), LISP.cadar(args), result) : LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result)) : result;
-      }, _loop12(LISP.reverse(LISP.cdr(x)), LISP.nil);
+    return function (_loop13) {
+      return _loop13 = function loop(args, result) {
+        return LISP.isTrue(LISP.not(LISP["null?"](args))) ? _loop13(LISP.cdr(args), LISP.isTrue(LISP.not(LISP["pair?"](LISP.car(args)))) ? LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.cdar(args), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("list*"))) && LISP.isTrue(LISP.not(LISP.any(LISP["bq-splicing-frob"], LISP.cdar(args)))) ? LISP["bq-attach-conses"](LISP.reverse(LISP.cdr(LISP.reverse(LISP.cdar(args)))), LISP["bq-attach-append"](LISP.intern("append"), LISP.car(LISP.last(LISP.car(args))), result)) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP.intern("quote"))) && LISP.isTrue(LISP["pair?"](LISP.cadar(args))) && LISP.isTrue(LISP.not(LISP["bq-frob"](LISP.cadar(args)))) && LISP.isTrue(LISP.not(LISP.cddar(args))) ? LISP["bq-attach-conses"](LISP.list(LISP.list(LISP.intern("quote"), LISP.caadar(args))), result) : LISP.isTrue(LISP["eq?"](LISP.caar(args), LISP["*bq-clobberable*"])) ? LISP["bq-attach-append"](LISP.intern("append!"), LISP.cadar(args), result) : LISP["bq-attach-append"](LISP.intern("append"), LISP.car(args), result)) : result;
+      }, _loop13(LISP.reverse(LISP.cdr(x)), LISP.nil);
     }(LISP.nil);
   };
   LISP["null-or-quoted"] = function (x) {

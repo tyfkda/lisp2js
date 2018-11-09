@@ -9,15 +9,27 @@
         exp
       (macroexpand expanded))))
 
-;; Reader macros
+;;;; Reader macros
+;; Line comment
+(set-macro-character ";"
+  (lambda (stream _)
+    (let loop ()
+         (let1 c (read-char stream)
+           (cond ((null? c) c)  ; eof
+                 ((eq? c "\n") (read stream))  ; EOL
+                 (t (loop)))))))  ; Continue
+
+;; Quote
 (set-macro-character "'"
   (lambda (stream _)
     (list 'quote (read stream))))
 
+;; Backquote
 (set-macro-character "`"
   (lambda (stream _)
     (list `quasiquote (read stream))))
 
+;; Comma
 (set-macro-character ","
   (lambda (stream _)
     (let ((c2 (read-char stream)))
