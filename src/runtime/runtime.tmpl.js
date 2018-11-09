@@ -577,8 +577,8 @@
   }
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
-  const kReSingleDot = new RegExp(`^\\.(?=[${kDelimitors}])`)
-  const kReSymbolOrNumber = new RegExp(`^([^${kDelimitors}]+)`)
+  const kReSingleDot = new RegExp(`^\\.(?=([${kDelimitors}]|$))`)
+  const kReSymbolOrNumber = new RegExp(`^([^.${kDelimitors}][^${kDelimitors}]*)`)
   const kReadUnescapeTable = {
     't': '\t',
     'n': '\n',
