@@ -730,11 +730,18 @@
   LISP['read-from-string'] = str => Reader.read(new StrStream(str))
 
   LISP['read-line'] = (stream = LISP['*stdin*']) => {
-    return stream.getLine()
+    let line = stream.getLine()
+    if (line == null)
+      return LISP.nil
+    // chomp
+    if (line.length > 0 && line[line.length - 1] === '\n')
+      line = line.slice(0, line.length - 1)
+    return line
   }
 
   LISP['read-char'] = (stream = LISP['*stdin*']) => {
-    return stream.getc()
+    let c = stream.getc()
+    return c != null ? c : LISP.nil
   }
 
   LISP['unread-char'] = (c, stream = LISP['*stdin*']) => {
@@ -764,33 +771,36 @@
         this.fd = null
         this.lines.length = this.index = 0
         this.str = null
-        this.chomped = false
       }
+      // Include '\n' at line end
       readLine() {
         for (;;) {
           let left = ''
           if (this.index < this.lines.length) {
-            if (this.index < this.lines.length - 1 || !this.chomped)
+            if (this.index < this.lines.length - 1)  // Not last.
               return this.lines[this.index++]
-            if (this.chomped)
-              left = this.lines[this.index]
+
+            left = this.lines[this.index]
+            this.lines.length = this.index = 0
           }
 
           if (this.fd == null)
             return LISP.nil
           const n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE)
           if (n <= 0)
-            return null
+            return left !== '' ? left : null
+
           let string = left + buffer.slice(0, n).toString()
-          this.chomped = false
-          if (string.length > 0) {
-            if (string[string.length - 1] !== '\n')
-              this.chomped = true
-            else
-              // Remove last '\n' to avoid last empty line.
-              string = string.slice(0, string.length - 1)
+          let start = 0
+          for (;;) {
+            const pos = string.indexOf('\n', start)
+            if (pos < 0) {
+              this.lines.push(start === 0 ? string : string.slice(start))
+              break
+            }
+            this.lines.push(string.slice(start, pos + 1))
+            start = pos + 1
           }
-          this.lines = string.split('\n')
           this.index = 0
         }
       }
