@@ -682,22 +682,6 @@
       throw new LISP.NoCloseQuoteException()
     }
 
-    static readVector(stream) {
-      const result = []
-      for (;;) {
-        if (stream.match(/^\s*\)/))  // Close paren.
-          return result
-
-        const x = Reader.read(stream)
-        if (x == null)
-          break
-        result.push(x)
-      }
-
-      // Error
-      throw new LISP.NoCloseParenException()
-    }
-
     static unescape(str) {
       return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, (_1, _2, hex, c) => {
         if (hex)

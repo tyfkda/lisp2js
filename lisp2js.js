@@ -793,22 +793,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         throw new LISP.NoCloseQuoteException();
       }
     }, {
-      key: 'readVector',
-      value: function readVector(stream) {
-        var result = [];
-        for (;;) {
-          if (stream.match(/^\s*\)/)) // Close paren.
-            return result;
-
-          var x = Reader.read(stream);
-          if (x == null) break;
-          result.push(x);
-        }
-
-        // Error
-        throw new LISP.NoCloseParenException();
-      }
-    }, {
       key: 'unescape',
       value: function unescape(str) {
         return str.replace(/\\(x([0-9a-fA-F]{2})|(.))/g, function (_1, _2, hex, c) {
