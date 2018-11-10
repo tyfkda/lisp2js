@@ -740,7 +740,6 @@
     const fs = require('fs')
 
     const BUFFER_SIZE = 4096
-    const buffer = new Buffer(BUFFER_SIZE)
     class FileStream extends Stream {
       constructor(fd, path) {
         super()
@@ -748,6 +747,7 @@
         this.path = path
         this.lines = []
         this.index = 0
+        this.buffer = new Buffer(BUFFER_SIZE)
       }
 
       close() {
@@ -772,11 +772,11 @@
 
           if (this.fd == null)
             return LISP.nil
-          const n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE)
+          const n = fs.readSync(this.fd, this.buffer, 0, BUFFER_SIZE)
           if (n <= 0)
             return left !== '' ? left : null
 
-          let string = left + buffer.slice(0, n).toString()
+          let string = left + this.buffer.slice(0, n).toString()
           let start = 0
           for (;;) {
             const pos = string.indexOf('\n', start)

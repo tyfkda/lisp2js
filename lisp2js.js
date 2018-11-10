@@ -867,7 +867,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var fs = require('fs');
 
     var BUFFER_SIZE = 4096;
-    var buffer = new Buffer(BUFFER_SIZE);
 
     var FileStream = function (_Stream2) {
       _inherits(FileStream, _Stream2);
@@ -881,6 +880,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _this7.path = path;
         _this7.lines = [];
         _this7.index = 0;
+        _this7.buffer = new Buffer(BUFFER_SIZE);
         return _this7;
       }
 
@@ -909,10 +909,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
 
             if (this.fd == null) return LISP.nil;
-            var n = fs.readSync(this.fd, buffer, 0, BUFFER_SIZE);
+            var n = fs.readSync(this.fd, this.buffer, 0, BUFFER_SIZE);
             if (n <= 0) return left !== '' ? left : null;
 
-            var string = left + buffer.slice(0, n).toString();
+            var string = left + this.buffer.slice(0, n).toString();
             var start = 0;
             for (;;) {
               var pos = string.indexOf('\n', start);
