@@ -24,7 +24,7 @@
   }
 
   // Run codes.
-  const runCodes = (codes, compile) => runStream(new LISP.StrStream(codes), compile)
+  const runCodes = (codes, compile = false) => runStream(new LISP.StrStream(codes), compile)
 
   const dumpException = (e) => {
     if (e instanceof LISP.UnexpectedCharacterException) {
@@ -59,7 +59,7 @@
         if (code.match(/^\s*$/)) {
           inputs.length = 0
         } else {
-          const result = runCodes(code, compileOnly)
+          const result = runCodes(code)
           // Otherwise input should be consumed.
           inputs.length = 0
           console.log(LISP['x->string'](result, 10))
