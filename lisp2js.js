@@ -516,9 +516,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return HashTable;
   }(SObject);
 
-  LISP.HashTable = HashTable;
-
   // Hash table.
+
+
   LISP['make-hash-table'] = function () {
     return new HashTable();
   };
@@ -947,8 +947,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return FileStream;
     }(Stream);
 
-    LISP.FileStream = FileStream;
-
     LISP['*stdin*'] = new FileStream(process.stdin.fd, '*stdin*');
     LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*');
     LISP['*stderr*'] = new FileStream(process.stderr.fd, '*stderr*');
@@ -956,7 +954,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     LISP.open = function (path, flag) {
       try {
         var fd = fs.openSync(path, flag || 'r');
-        return new LISP.FileStream(fd, path);
+        return new FileStream(fd, path);
       } catch (e) {
         return LISP.nil;
       }

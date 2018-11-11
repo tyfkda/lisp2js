@@ -455,7 +455,6 @@
       return `#table<${contents}>`
     }
   }
-  LISP.HashTable = HashTable
 
   // Hash table.
   LISP['make-hash-table'] = () => new HashTable()
@@ -807,7 +806,6 @@
         fs.write(this.fd, s)
       }
     }
-    LISP.FileStream = FileStream
 
     LISP['*stdin*'] = new FileStream(process.stdin.fd, '*stdin*')
     LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*')
@@ -816,7 +814,7 @@
     LISP.open = (path, flag) => {
       try {
         const fd = fs.openSync(path, flag || 'r')
-        return new LISP.FileStream(fd, path)
+        return new FileStream(fd, path)
       } catch (e) {
         return LISP.nil
       }
