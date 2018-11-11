@@ -5,11 +5,12 @@
   const U = require('./test-util')
 
   const evalExpression = (expression) => {
+    const eos = LISP['make-keyword']('EOS')
     const stream = LISP['make-string-input-stream'](expression)
     let result
     for (;;) {
-      const s = LISP.read(stream)
-      if (s == null)
+      const s = LISP.read(stream, LISP.nil, eos)
+      if (s === eos)
         return result
       result = LISP.eval(s)
     }

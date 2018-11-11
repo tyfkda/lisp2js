@@ -37,7 +37,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var stream = LISP['make-string-input-stream'](codes);
       for (;;) {
         var s = LISP.read(stream);
-        if (s == null) break;
+        if (s === LISP.nil) break;
         LISP.eval(s);
       }
     };
@@ -834,7 +834,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
   LISP.read = function () {
     var stream = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : LISP['*stdin*'];
-    return Reader.read(stream);
+    var err = arguments[1];
+    var eofval = arguments[2];
+
+    var result = Reader.read(stream);
+    if (result != null) return result;
+    if (LISP.isTrue(err)) {
+      throw new Error('EOF');
+    }
+    return eofval != null ? eofval : LISP.nil;
   };
 
   LISP['read-from-string'] = function (str) {
@@ -971,7 +979,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var result = void 0;
       for (;;) {
         var s = LISP.read(stream);
-        if (s == null) break;
+        if (s === LISP.nil) break;
         result = LISP.eval(s);
       }
       if (stream !== fileSpec) LISP.close(stream);

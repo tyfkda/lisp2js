@@ -11,7 +11,7 @@
     let result
     for (;;) {
       const s = LISP.read(stream)
-      if (s == null)
+      if (s === LISP.nil)
         return result
 
       if (compile) {

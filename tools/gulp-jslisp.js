@@ -12,7 +12,7 @@ module.exports = (() => {
     const results = []
     for (;;) {
       const s = LISP.read(stream)
-      if (s == null)
+      if (s === LISP.nil)
         return results
 
       const result = LISP.compile(s)

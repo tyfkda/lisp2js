@@ -12,7 +12,7 @@
     var stream = LISP['make-string-input-stream'](codes)
     for (;;) {
       var s = LISP.read(stream)
-      if (s == null)
+      if (s === LISP.nil)
         break
 
       LISP.eval(s)

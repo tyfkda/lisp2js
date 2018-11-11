@@ -29,7 +29,7 @@
       const stream = LISP['make-string-input-stream'](codes)
       for (;;) {
         const s = LISP.read(stream)
-        if (s == null)
+        if (s === LISP.nil)
           break
         LISP.eval(s)
       }
@@ -716,7 +716,15 @@
   Reader.setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
                            Reader.readList(stream))
 
-  LISP.read = (stream = LISP['*stdin*']) => Reader.read(stream)
+  LISP.read = (stream = LISP['*stdin*'], err, eofval) => {
+    const result = Reader.read(stream)
+    if (result != null)
+      return result
+    if (LISP.isTrue(err)) {
+      throw new Error('EOF')
+    }
+    return eofval != null ? eofval : LISP.nil
+  }
 
   LISP['read-from-string'] = str => Reader.read(new StrStream(str))
 
@@ -836,7 +844,7 @@
       let result
       for (;;) {
         const s = LISP.read(stream)
-        if (s == null)
+        if (s === LISP.nil)
           break
         result = LISP.eval(s)
       }
