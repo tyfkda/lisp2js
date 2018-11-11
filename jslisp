@@ -24,7 +24,7 @@
   }
 
   // Run codes.
-  const runCodes = (codes, compile = false) => runStream(new LISP.StrStream(codes), compile)
+  const runCodes = (codes, compile = false) => runStream(LISP['make-string-input-stream'](codes), compile)
 
   const dumpException = (e) => {
     if (e instanceof LISP.UnexpectedCharacterException) {

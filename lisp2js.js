@@ -34,7 +34,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     // Run Lisp codes.
     var runCodes = function runCodes(codes) {
-      var stream = new LISP.StrStream(codes);
+      var stream = LISP['make-string-input-stream'](codes);
       for (;;) {
         var s = LISP.read(stream);
         if (s == null) break;
@@ -679,7 +679,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return StrStream;
   }(Stream);
 
-  LISP.StrStream = StrStream;
+  LISP['make-string-input-stream'] = function (str, start, end) {
+    if (typeof start !== 'undefined' || typeof end !== 'undefined') str = str.slice(start | 0, end | str.length);
+    return new StrStream(str);
+  };
 
   // Reader.
   LISP.NoCloseParenException = function () {};

@@ -8,7 +8,7 @@ module.exports = (() => {
   const LISP = require('../lisp2js')
 
   const compile = (codes) => {
-    const stream = new LISP.StrStream(codes)
+    const stream = LISP['make-string-input-stream'](codes)
     const results = []
     for (;;) {
       const s = LISP.read(stream)

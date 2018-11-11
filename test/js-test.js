@@ -5,7 +5,7 @@
   const U = require('./test-util')
 
   const evalExpression = (expression) => {
-    const stream = new LISP.StrStream(expression)
+    const stream = LISP['make-string-input-stream'](expression)
     let result
     for (;;) {
       const s = LISP.read(stream)

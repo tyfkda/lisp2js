@@ -26,7 +26,7 @@
 
     // Run Lisp codes.
     const runCodes = (codes) => {
-      const stream = new LISP.StrStream(codes)
+      const stream = LISP['make-string-input-stream'](codes)
       for (;;) {
         const s = LISP.read(stream)
         if (s == null)
@@ -571,7 +571,12 @@
       return null
     }
   }
-  LISP.StrStream = StrStream
+
+  LISP['make-string-input-stream'] = function(str, start, end) {
+    if (typeof start !== 'undefined' || typeof end !== 'undefined')
+      str = str.slice(start | 0, end | str.length)
+    return new StrStream(str)
+  }
 
   // Reader.
   LISP.NoCloseParenException = function() {}

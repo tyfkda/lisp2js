@@ -9,7 +9,7 @@
   'use strict'
   // Run Lisp codes.
   var runCodes = function(codes) {
-    var stream = new LISP.StrStream(codes)
+    var stream = LISP['make-string-input-stream'](codes)
     for (;;) {
       var s = LISP.read(stream)
       if (s == null)
