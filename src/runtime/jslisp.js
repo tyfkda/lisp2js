@@ -13,12 +13,13 @@ if (typeof __non_webpack_require__ === 'undefined') {
 
 const {LISP} = require('./runtime.js')
 
+const runtimeNode = require('./runtime_node.js')
 const basic = require('../../gen/basic.js')
 const backquote = require('../../gen/backquote.js')
 const parser = require('../../gen/parser.js')
 const compiler = require('../../gen/compiler.js')
 
-for (let f of [basic, backquote, parser, compiler])
+for (let f of [runtimeNode, basic, backquote, parser, compiler])
   f(LISP)
 
 // Run stream.
