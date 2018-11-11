@@ -8,8 +8,6 @@ import gutil from 'gulp-util'
 import eslint from 'gulp-eslint'
 
 import jslisp from './tools/gulp-jslisp'
-import embed from './tools/gulp-embed'
-import concat from 'gulp-concat'
 
 import webpack from 'webpack'
 import webpackStream from 'webpack-stream'
