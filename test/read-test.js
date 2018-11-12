@@ -1,7 +1,7 @@
 (() => {
   'use strict'
 
-  const LISP = require('../lisp2js')
+  const {LISP} = require('../src/runtime/jslisp')
   const U = require('./test-util')
 
   U.runTest(LISP['read-from-string'], (test, fail) => {
