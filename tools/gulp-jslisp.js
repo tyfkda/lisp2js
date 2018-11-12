@@ -5,7 +5,16 @@ import through from 'through2'
 const PLUGIN_NAME = 'gulp-jslisp'
 
 module.exports = (() => {
-  const LISP = require('../lisp2js')
+  let LISP
+  try {
+    const lisp2js = require('../src/runtime/jslisp.js')
+    LISP = lisp2js.LISP
+    console.error('gulp-jslisp: Use development version:')
+  } catch (e) {
+    console.error('gulp-jslisp: Failed to load development version, use dist version.')
+    const jslisp = require('../dist/jslisp')
+    LISP = jslisp.LISP
+  }
 
   const compile = (codes) => {
     const stream = LISP['make-string-input-stream'](codes)
@@ -36,7 +45,11 @@ module.exports = (() => {
         //return callback(null, file)
       } else if (file.isBuffer()) {
         const results = compile(file.contents.toString('utf8'))
-        file.contents = new Buffer(results.join('\n'))
+        file.contents = new Buffer(
+          'module.exports = function(LISP) {\n' +
+          '  \'use strict\'\n' +
+            results.map(s => '  ' + s).join('\n') + '\n' +
+          '}\n')
         return callback(null, file)
       }
     })

@@ -1,7 +1,7 @@
 module.exports = (() => {
   'use strict'
 
-  const LISP = require('../lisp2js')
+  const {LISP} = require('../src/runtime/jslisp')
 
   const print = (value) => {
     console.log(value)

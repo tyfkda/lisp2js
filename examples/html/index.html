@@ -29,7 +29,7 @@
       Also try <a href="repl/index.html">REPL</a>
     </p>
 
-    <script type="text/javascript" src="../../lisp2js.js"></script>
+    <script type="text/javascript" src="../../dist/lisp2js.js"></script>
     <script type="text/javascript">
       function print(str) {
         var terminalNode = document.getElementById('terminal')
@@ -48,14 +48,18 @@
       }
 
       function compileAndRun(code) {
-        var stream = new LISP.StrStream(code)
-        for (;;) {
-          var s = LISP.read(stream)
-          if (s == null)
-            break
-          var compiled = LISP.compile(s)
-          var result = eval(compiled)
-          print(compiled + ' ==> ' + result)
+        try {
+          var stream = LISP['make-string-input-stream'](code)
+          for (;;) {
+            var s = LISP.read(stream)
+            if (s === LISP.nil)
+              break
+            var compiled = LISP.compile(s)
+            var result = eval(compiled)
+            print(compiled + ' ==> ' + result)
+          }
+        } catch (e) {
+          console.error(e)
         }
       }
     </script>
