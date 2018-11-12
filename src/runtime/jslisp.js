@@ -7,6 +7,8 @@ const fs = __non_webpack_require__('fs')
 const readline = __non_webpack_require__('readline')
 const tty = __non_webpack_require__('tty')
 
+const getOpts = require('get-options')
+
 const {LISP} = require('./lisp2js.js')
 
 const runtimeNode = require('./runtime_node.js')
@@ -106,19 +108,19 @@ const replNoPrompt = () => {
 // Run script.
 
 // Main.
-function main() {
-  let index = 2
-  let compileOnly = false
-  for (; index < process.argv.length; ++index) {
-    const option = process.argv[index]
-    if (option == '-c') {
-      compileOnly = true
-      continue
-    }
-    break
+function main(argv) {
+  const result = getOpts(argv, {
+    '-c':            '',  // Compile only.
+    '-v, --version': '',  // Show version.
+  })
+  const compileOnly = result.options.c
+
+  if (result.options.v) {
+    console.log(`JsLisp: version ${LISP['*version*']}`)
+    return process.exit(0)
   }
 
-  if (index >= process.argv.length) {  // No input file name: read from stdin.
+  if (result.argv.length === 0) {  // No input file name: read from stdin.
     if (tty.isatty(0))
       return repl()
     if (!compileOnly)
@@ -136,21 +138,21 @@ function main() {
 
   // Process command line argument as a script file.
   try {
-    LISP['*argv*'] = LISP['vector->list'](process.argv.slice(index + 1))
+    LISP['*argv*'] = LISP['vector->list'](result.argv.slice(1))
     let status = 0
     if (compileOnly) {
       console.log('module.export = function(LISP) {')
       console.log('  \'use strict\'')
-      let text = fs.readFileSync(process.argv[index], 'utf-8')
+      let text = fs.readFileSync(result.argv[0], 'utf-8')
       const matchShebang = text.match(/^#!(.*)\n/)
       if (matchShebang)
         text = text.slice(matchShebang[0].length)
       runCodes(text, compileOnly)
       console.log('}')
     } else {
-      LISP.load(process.argv[index])
+      LISP.load(result.argv[0])
       if ('main' in LISP)
-        status = LISP.main(LISP.cons(process.argv[index], LISP['*argv*']))
+        status = LISP.main(LISP.cons(result.argv[0], LISP['*argv*']))
     }
     if (status)
       process.exit(status)
@@ -173,6 +175,6 @@ if (typeof __module !== 'undefined') {  // for dist/jslisp (Webpack-ed)
 
   if (typeof __non_webpack_require__ !== 'undefined' &&
       __non_webpack_require__.main === __module) {
-    main()
+    main(process.argv.slice(2))
   }
 }

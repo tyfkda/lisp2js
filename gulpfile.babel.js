@@ -26,6 +26,7 @@ const kSrcLispFiles = [
   'src/backquote.lisp',
   'src/parser.lisp',
   'src/compiler.lisp',
+  'src/version.lisp',
 ]
 const kRuntimeFiles = [
   'src/runtime/*.js',

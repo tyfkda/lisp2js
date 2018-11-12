@@ -42,5 +42,8 @@
     "gulp-util": "~3.0.7",
     "webpack": "~4.25.1",
     "webpack-stream": "~5.1.1"
+  },
+  "dependencies": {
+    "get-options": "~1.1.3"
   }
 }

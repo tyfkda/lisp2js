@@ -7,4 +7,4 @@
 // It refers to $/gen indirectly from $/src/runtime.
 // So it requires to run `npm run build` to transpile lisp code into JS.
 
-require('./src/runtime/jslisp.js').main()
+require('./src/runtime/jslisp.js').main(process.argv.slice(2))
