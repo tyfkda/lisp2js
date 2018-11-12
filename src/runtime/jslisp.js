@@ -1,26 +1,16 @@
 'use strict'
 
-let fs, readline, tty
-if (typeof __non_webpack_require__ === 'undefined') {
-  fs = require('fs')
-  readline = require('readline')
-  tty = require('tty')
-} else {
-  fs = __non_webpack_require__('fs')
-  readline = __non_webpack_require__('readline')
-  tty = __non_webpack_require__('tty')
-}
+if (typeof __non_webpack_require__ === 'undefined')
+  global.__non_webpack_require__ = require  // To hack for non-webpacked
 
-const {LISP} = require('./runtime.js')
+const fs = __non_webpack_require__('fs')
+const readline = __non_webpack_require__('readline')
+const tty = __non_webpack_require__('tty')
+
+const {LISP} = require('./lisp2js.js')
 
 const runtimeNode = require('./runtime_node.js')
-const basic = require('../../gen/basic.js')
-const backquote = require('../../gen/backquote.js')
-const parser = require('../../gen/parser.js')
-const compiler = require('../../gen/compiler.js')
-
-for (let f of [runtimeNode, basic, backquote, parser, compiler])
-  f(LISP)
+runtimeNode(LISP)
 
 // Run stream.
 const runStream = (stream, compile) => {
@@ -178,10 +168,11 @@ const objs = {
 if (typeof module !== 'undefined')  // for $/jslisp (development)
   module.exports = objs
 
-if (typeof __module !== 'undefined')  // for dist/jslisp (Webpack-ed)
+if (typeof __module !== 'undefined') {  // for dist/jslisp (Webpack-ed)
   __module.exports = objs
 
-if (typeof __non_webpack_require__ !== 'undefined' &&
-    __non_webpack_require__.main === __module) {
-  main()
+  if (typeof __non_webpack_require__ !== 'undefined' &&
+      __non_webpack_require__.main === __module) {
+    main()
+  }
 }

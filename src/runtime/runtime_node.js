@@ -2,11 +2,10 @@
 
 // For node JS.
 
-let fs
 if (typeof __non_webpack_require__ === 'undefined')
-  fs = require('fs')
-else
-  fs = __non_webpack_require__('fs')
+  global.__non_webpack_require__ = require  // To hack for non-webpacked
+
+const fs = __non_webpack_require__('fs')
 
 const {Stream} = require('./runtime.js')
 
@@ -114,5 +113,5 @@ module.exports = function(LISP) {
   // System
   LISP.exit = (code) => process.exit(code)
 
-  LISP.jsrequire = require
+  LISP.jsrequire = __non_webpack_require__
 }
