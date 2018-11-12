@@ -170,4 +170,18 @@ function main() {
   }
 }
 
-main()
+const objs = {
+  LISP,
+  main,
+}
+
+if (typeof module !== 'undefined')  // for $/jslisp (development)
+  module.exports = objs
+
+if (typeof __module !== 'undefined')  // for dist/jslisp (Webpack-ed)
+  __module.exports = objs
+
+if (typeof __non_webpack_require__ !== 'undefined' &&
+    __non_webpack_require__.main === __module) {
+  main()
+}

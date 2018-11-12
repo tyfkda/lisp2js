@@ -8,6 +8,8 @@ import gutil from 'gulp-util'
 import eslint from 'gulp-eslint'
 
 import jslisp from './tools/gulp-jslisp'
+import header from 'gulp-header'
+import chmod from 'gulp-chmod'
 
 import webpack from 'webpack'
 import webpackStream from 'webpack-stream'
@@ -36,16 +38,6 @@ gulp.task('build', () => {
     .pipe(gulp.dest(GEN_DIR))
 })
 
-gulp.task('release', gulp.series('build', () => {
-  return gulp.src('./lisp2js.js')
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(babel())
-    .pipe(uglify().on('error', gutil.log))
-    .pipe(rename('lisp2js.min.js'))
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(destDir))
-}))
-
 gulp.task('lint', () => {
   return gulp.src(['src/**/*.js',
                    'test/**/*.js',
@@ -71,6 +63,8 @@ gulp.task('pack-jslisp', () => {
   return gulp.src('./src/runtime/jslisp.js')
     .pipe(plumber())
     .pipe(webpackStream(config, webpack))
+    .pipe(header('#!/usr/bin/env node\nvar __module = module;'))  // Add shebang
+    .pipe(chmod(0o755))
     .pipe(rename('jslisp'))
     .pipe(gulp.dest(DIST_DIR))
 })
@@ -84,4 +78,4 @@ gulp.task('pack-lisp2js', () => {
     .pipe(gulp.dest(DIST_DIR))
 })
 
-gulp.task('pack', gulp.parallel('pack-jslisp', 'pack-lisp2js'))
+gulp.task('release', gulp.series('build', gulp.parallel('pack-jslisp', 'pack-lisp2js')))

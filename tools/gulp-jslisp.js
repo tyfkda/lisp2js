@@ -5,7 +5,7 @@ import through from 'through2'
 const PLUGIN_NAME = 'gulp-jslisp'
 
 module.exports = (() => {
-  const LISP = require('../lisp2js')
+  const {LISP} = require('../dist/jslisp')
 
   const compile = (codes) => {
     const stream = LISP['make-string-input-stream'](codes)
