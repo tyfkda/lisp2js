@@ -237,11 +237,6 @@
         (loop (cdr ls) (+ acc 1))
       acc)))
 
-(defun last-pair (ls)
-  (if (pair? (cdr ls))
-      (last-pair (cdr ls))
-    ls))
-
 (defun member (x ls)
   (cond ((null? ls) nil)
         ((eq? x (car ls)) ls)
