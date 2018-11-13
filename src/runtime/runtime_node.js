@@ -70,7 +70,7 @@ module.exports = function(LISP) {
   LISP['*stdout*'] = new FileStream(process.stdout.fd, '*stdout*')
   LISP['*stderr*'] = new FileStream(process.stderr.fd, '*stderr*')
 
-  LISP.open = (path, flag) => {
+  LISP.open = function open(path, flag) {
     try {
       const fd = fs.openSync(path, flag || 'r')
       return new FileStream(fd, path)
@@ -79,12 +79,12 @@ module.exports = function(LISP) {
     }
   }
 
-  LISP.close = (stream) => {
+  LISP.close = function close(stream) {
     stream.close()
     return stream
   }
 
-  LISP.load = (fileSpec) => {
+  LISP.load = function load(fileSpec) {
     let stream
     if (typeof fileSpec === 'string') {
       stream = LISP.open(fileSpec)
@@ -111,7 +111,7 @@ module.exports = function(LISP) {
   }
 
   // System
-  LISP.exit = (code) => process.exit(code)
+  LISP.exit = function exit(code) { process.exit(code) }
 
   LISP.jsrequire = __non_webpack_require__
 }

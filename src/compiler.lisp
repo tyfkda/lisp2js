@@ -192,7 +192,7 @@
                  " = "
                  (compile* val scope)))
 
-(defun compile-lambda (params bodies base-scope extended-scope)
+(defun compile-lambda (name params bodies base-scope extended-scope)
   (unless (or (null? params) (pair? params))
     (error "function parameters must be a list"))
   (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
@@ -200,7 +200,11 @@
                              (take rest-pos params)
                            params))
           (rest (and rest-pos (elt (+ rest-pos 1) params))))
-      (string-append "(function("
+      (string-append "(function "
+                     (if (null? name)
+                         ""
+                       (escape-param-name name))
+                     "("
                      (string-join (map (lambda (x) (escape-param-name x))
                                        proper-params)
                                   ", ")
@@ -219,7 +223,9 @@
 (defun compile-def (name value scope)
   (string-append (compile* name scope)
                  " = "
-                 (compile* value scope)))
+                 (if (eq? (vector-ref value 0) :LAMBDA)
+                     (compile-lambda-node value (vector-ref name 1))  ;; Assumes name is :REF
+                   (compile* value scope))))
 
 ;; If the given scope has quoted value, output them as local variable values,
 ;; and encapsulate with anonymous function.
@@ -237,6 +243,13 @@
                       "; })()")
     compiled-body))
 
+(defun compile-lambda-node (s name scope)
+  (let ((extended-scope (vector-ref s 1))
+        (params (vector-ref s 2))
+        (body (vector-ref s 3)))
+    (compile-new-scope (compile-lambda name params body scope extended-scope)
+                       extended-scope)))
+
 (defun compile* (s scope)
   (case (vector-ref s 0)
     ((:CONST)  (compile-quote (vector-ref s 1) scope))
@@ -247,11 +260,7 @@
                  (compile-if p thn els scope)))
     ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) scope))
     ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) scope))
-    ((:LAMBDA)  (let ((extended-scope (vector-ref s 1))
-                      (params (vector-ref s 2))
-                      (body (vector-ref s 3)))
-                  (compile-new-scope (compile-lambda params body scope extended-scope)
-                                     extended-scope)))
+    ((:LAMBDA)  (compile-lambda-node s nil scope))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
     (t  (compile-error "Unknown AST node:" s))))
 
