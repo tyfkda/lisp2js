@@ -24,29 +24,27 @@
   (regexp-replace-all #/[\\\t\n"]/ s  ;; "
                       (lambda (m) (escape-char (m)))))
 
-(defun escape-sym-char (c)
-  (string-append "$"
-                 (integer->hex-string (char->number c) "00")))
+(flet ((integer->hex-string (x padding)
+         (let* ((s (string-append padding
+                                  (number->string x 16)))
+                (sl (string-length s))
+                (pl (string-length padding)))
+           (substring s (- sl pl) sl))))
+  (defun escape-sym-char (c)
+    (string-append "$"
+                   (integer->hex-string (char->number c) "00"))))
 
-(defun integer->hex-string (x padding)
-  (let* ((s (string-append padding
-                           (number->string x 16)))
-         (sl (string-length s))
-         (pl (string-length padding)))
-    (substring s (- sl pl) sl)))
-
-(def JS-RESERVED-WORDS
+(let1 JS-RESERVED-WORDS
      ;; `this` can be used in local scope.
      '(null true false
        break case catch continue debugger default delete do else
        finally for function if in instanceof new return switch
-       throw try typeof var void while with))
-
-(defun escape-param-name (sym)
-  (if (member sym JS-RESERVED-WORDS)
-      (string-append "__" (symbol->string sym))
-    (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
-                        (lambda (m) (escape-sym-char (string-ref (m) 0))))))
+       throw try typeof var void while with)
+  (defun escape-param-name (sym)
+    (if (member sym JS-RESERVED-WORDS)
+        (string-append "__" (symbol->string sym))
+      (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
+                          (lambda (m) (escape-sym-char (string-ref (m) 0)))))))
 
 (defun compile-symbol (sym scope)
   (if (or (local-var? scope sym)
