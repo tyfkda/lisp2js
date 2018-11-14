@@ -4,8 +4,7 @@ import webpack from 'webpack'
 const webpackJsLispConfig = {
   context: __dirname + '/src/runtime',
   mode: "production",
-  //mode: "development",
-  //devtool: "inline-cheap-source-map",
+  devtool: "cheap-source-map",
   target: "node",
   entry: {
     jslisp: './jslisp.js',
@@ -28,11 +27,10 @@ const webpackJsLispConfig = {
 const webpackLisp2JsConfig = {
   context: __dirname + '/src/runtime',
   mode: "production",
-  //mode: "development",
-  //devtool: "inline-cheap-source-map",
+  devtool: "cheap-source-map",
   target: "web",
   entry: {
-    jslisp: './lisp2js.js',
+    lisp2js: './lisp2js.js',
   },
   output: {
     path: path.resolve(__dirname, 'bin'),

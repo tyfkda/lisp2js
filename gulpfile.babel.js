@@ -8,14 +8,17 @@ import gutil from 'gulp-util'
 import eslint from 'gulp-eslint'
 
 import jslisp from './tools/gulp-jslisp'
-import header from 'gulp-header'
-import chmod from 'gulp-chmod'
 
 import webpack from 'webpack'
 import webpackStream from 'webpack-stream'
 import {webpackJsLispConfig, webpackLisp2JsConfig} from './webpack.config.babel'
 
 import plumber from 'gulp-plumber'
+import gulpFunction from 'gulp-function'
+
+import fs from 'fs'
+import path from 'path'
+import util from 'util'
 
 const destDir = '.'
 const GEN_DIR = 'gen'
@@ -59,15 +62,29 @@ gulp.task('default', gulp.series('build', 'watch'))
 
 
 gulp.task('pack-jslisp', () => {
+  // It looks sourcemap isn't generated using rename, so do it by manually.
+
   const config = webpackJsLispConfig
-  //delete config.output.sourceMapFilename
   return gulp.src('./src/runtime/jslisp.js')
     .pipe(plumber())
+    //.pipe(rename('jslisp'))
     .pipe(webpackStream(config, webpack))
-    .pipe(header('#!/usr/bin/env node\nvar __module = module;'))  // Add shebang
-    .pipe(chmod(0o755))
-    .pipe(rename('jslisp'))
     .pipe(gulp.dest(DIST_DIR))
+    .pipe(gulpFunction(async (file, enc) => {
+      if (path.basename(file.path) === 'jslisp.js') {
+        const promisify = util.promisify
+        const content = await promisify(fs.readFile)('./dist/jslisp.js')
+        const fd = await promisify(fs.open)('dist/jslisp', 'w')
+        await promisify(fs.write)(fd, '#!/usr/bin/env node\n')
+        await promisify(fs.write)(fd, 'var __module = module;')
+        await promisify(fs.write)(fd, content)
+        const stat = await promisify(fs.fstat)(fd)
+        await promisify(fs.ftruncate)(fd, stat.size)
+        await promisify(fs.close)(fd)
+        await promisify(fs.chmod)('dist/jslisp', 0o755)
+        await promisify(fs.unlink)('dist/jslisp.js')
+      }
+    }))
 })
 
 gulp.task('pack-lisp2js', () => {
@@ -75,7 +92,6 @@ gulp.task('pack-lisp2js', () => {
   return gulp.src('./src/runtime/lisp2js.js')
     .pipe(plumber())
     .pipe(webpackStream(config, webpack))
-    .pipe(rename('lisp2js.js'))
     .pipe(gulp.dest(DIST_DIR))
 })
 
