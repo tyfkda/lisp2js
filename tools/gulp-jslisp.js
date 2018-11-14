@@ -45,7 +45,7 @@ module.exports = (() => {
         //return callback(null, file)
       } else if (file.isBuffer()) {
         const results = compile(file.contents.toString('utf8'))
-        file.contents = new Buffer(
+        file.contents = Buffer.from(
           'module.exports = function(LISP) {\n' +
           '  \'use strict\'\n' +
             results.map(s => '  ' + s).join('\n') + '\n' +

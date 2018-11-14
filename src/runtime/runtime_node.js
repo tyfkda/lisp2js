@@ -18,7 +18,7 @@ module.exports = function(LISP) {
       this.path = path
       this.lines = []
       this.index = 0
-      this.buffer = new Buffer(BUFFER_SIZE)
+      this.buffer = Buffer.alloc(BUFFER_SIZE)
     }
 
     close() {
