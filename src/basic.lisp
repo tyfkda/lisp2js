@@ -41,15 +41,15 @@
 ;; String literal
 (set-macro-character "\""
   (lambda (stream _)
-    (labels ((unescape (c)
-                       (case c
-                         (("x")
-                          (let* ((c1 (read-char stream))
-                                 (c2 (read-char stream)))
-                            (number->char (string->number (string-append c1 c2) 16))))
-                         (("t") "\t")
-                         (("n") "\n")
-                         (t c))))
+    (flet ((unescape (c)
+             (case c
+               (("x")
+                (let* ((c1 (read-char stream))
+                       (c2 (read-char stream)))
+                  (number->char (string->number (string-append c1 c2) 16))))
+               (("t") "\t")
+               (("n") "\n")
+               (t c))))
       (let loop ((acc '()))
            (let1 c (read-char stream)
              (cond ((null? c) (error "NoCloseQuoteException"))
@@ -365,6 +365,13 @@
             (when ,i
               ,@body
               (,loop (cdr ,ls)))))))
+
+(defmacro flet (lss &body body)
+  `(let ,(map (lambda (ls)
+                `(,(car ls)
+                  (lambda ,@(cdr ls))))
+              lss)
+     ,@body))
 
 (defmacro labels (lss &body body)
   `(let ,(map (lambda (ls) (car ls)) lss)

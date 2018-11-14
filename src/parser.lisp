@@ -73,42 +73,42 @@
                  (map parse-quoted-value (vector->list x))))
         (t (vector :CONST x))))
 
-(labels ((parse-args (args scope)
-                        (map (lambda (x)
-                               (parse* x scope))
-                             args))
-         (confirm-valid-params (params)
-                               (when params
-                                 (if (symbol? (car params))
-                                     (confirm-valid-params (cdr params))
-                                   (compile-error "function parameter must be symbol, but" (car params))))))
+(flet ((parse-args (args scope)
+         (map (lambda (x)
+                (parse* x scope))
+              args)))
+  (labels ((confirm-valid-params (params)
+             (when params
+               (if (symbol? (car params))
+                   (confirm-valid-params (cdr params))
+                 (compile-error "function parameter must be symbol, but" (car params))))))
 
-  (defun parse-list (s scope)
-    (record-case s
-                 ((quote x)   (if (or (pair? x) (vector? x))
-                                  (vector :REF (scope-add-var scope (parse-quoted-value x)))
-                                (vector :CONST x)))
-                 ((if p thn &body els)  (vector :IF
-                                                (parse* p scope)
-                                                (parse* thn scope)
-                                                (if (null? els)
-                                                    nil
-                                                  (parse* (car els) scope))))
-                 ((set! x v)  (vector :SET! (parse* x scope) (parse* v scope)))
-                 ((lambda params &body body)  (progn (confirm-valid-params params)
-                                                     (let ((new-scope (create-scope scope params)))
-                                                       (vector :LAMBDA
-                                                               new-scope
-                                                               params
-                                                               (parse-args body new-scope)))))
-                 ((def name value)  (vector :DEF
-                                            (parse* name scope)
-                                            (parse* value scope)))
-                 (t (if (or (null? s) (proper-list? s))
-                        (vector :FUNCALL
-                                (parse* (car s) scope)
-                                (parse-args (cdr s) scope))
-                      (compile-error "funcall must be proper list, but" s))))))
+    (defun parse-list (s scope)
+      (record-case s
+                   ((quote x)   (if (or (pair? x) (vector? x))
+                                    (vector :REF (scope-add-var scope (parse-quoted-value x)))
+                                  (vector :CONST x)))
+                   ((if p thn &body els)  (vector :IF
+                                                  (parse* p scope)
+                                                  (parse* thn scope)
+                                                  (if (null? els)
+                                                      nil
+                                                    (parse* (car els) scope))))
+                   ((set! x v)  (vector :SET! (parse* x scope) (parse* v scope)))
+                   ((lambda params &body body)  (progn (confirm-valid-params params)
+                                                       (let ((new-scope (create-scope scope params)))
+                                                         (vector :LAMBDA
+                                                                 new-scope
+                                                                 params
+                                                                 (parse-args body new-scope)))))
+                   ((def name value)  (vector :DEF
+                                              (parse* name scope)
+                                              (parse* value scope)))
+                   (t (if (or (null? s) (proper-list? s))
+                          (vector :FUNCALL
+                                  (parse* (car s) scope)
+                                  (parse-args (cdr s) scope))
+                        (compile-error "funcall must be proper list, but" s)))))))
 
 (defun parse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))
