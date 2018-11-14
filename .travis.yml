@@ -1,7 +1,8 @@
 sudo: false
 language: node_js
 node_js:
-  - 6
-before_script:
-    - touch src/compiler.lisp
-script: "npm run build && npm run test"
+  - 'stable'
+  - 'lts/*'
+#before_script:
+#    - touch src/compiler.lisp
+script: "npm run build && npm run test && npm run build && npm run release"

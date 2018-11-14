@@ -11,8 +11,7 @@ module.exports = (() => {
     LISP = lisp2js.LISP
     console.error('gulp-jslisp: Use development version:')
   } catch (e) {
-    console.error('gulp-jslisp: Failed to load development version, use dist version.')
-    console.error(e)
+    console.error('gulp-jslisp: Failed to compile using development version, use dist version.')
     const jslisp = require('../dist/jslisp')
     LISP = jslisp.LISP
   }
