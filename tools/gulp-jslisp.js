@@ -1,4 +1,4 @@
-import glutil from 'gulp-util'
+import PluginError from 'plugin-error'
 import through from 'through2'
 
 // consts
@@ -38,7 +38,7 @@ module.exports = (() => {
 
       if (file.isStream()) {
         // file.contents is a Stream - https://nodejs.org/api/stream.html
-        this.emit('error', new glutil.PluginError(PLUGIN_NAME, 'Streams not supported!'))
+        this.emit('error', new PluginError(PLUGIN_NAME, 'Streams not supported!'))
 
         // or, if you can handle Streams:
         //file.contents = file.contents.pipe(...

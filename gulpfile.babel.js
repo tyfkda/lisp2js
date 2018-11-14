@@ -1,10 +1,8 @@
 import gulp from 'gulp'
 
 import babel from 'gulp-babel'
-import uglify from 'gulp-uglify'
 import sourcemaps from 'gulp-sourcemaps'
 import rename from 'gulp-rename'
-import gutil from 'gulp-util'
 import eslint from 'gulp-eslint'
 
 import jslisp from './tools/gulp-jslisp'

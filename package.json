@@ -36,8 +36,7 @@
     "gulp-plumber": "~1.2.0",
     "gulp-rename": "~1.2.2",
     "gulp-sourcemaps": "~2.6.4",
-    "gulp-uglify": "~3.0.0",
-    "gulp-util": "~3.0.7",
+    "plugin-error": "~1.0.1",
     "webpack": "~4.25.1",
     "webpack-stream": "~5.1.1"
   },
