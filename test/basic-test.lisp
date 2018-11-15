@@ -79,6 +79,22 @@
  (test "vector->list" '(1 2 3) (vector->list #(1 2 3)))
  (test "empty vector->list" '() (vector->list #()))
 
+ ;; hash-table
+ (test "hash-table-put!-get" 123 (let1 h (make-hash-table)
+                                   (hash-table-put! h 'x 123)
+                                   (hash-table-get h 'x)))
+ (test "hash-table-exists?" t (let1 h (make-hash-table)
+                                (hash-table-put! h 'x 123)
+                                (hash-table-exists? h 'x)))
+ (test "hash-table-exists? not" nil (let1 h (make-hash-table)
+                                    (hash-table-exists? h 'x)))
+ (test "hash-table-put! dot" 123 (let1 h (make-hash-table)
+                                   (set! h.x 123)
+                                   (hash-table-get h 'x)))
+ (test "hash-table-get dot" 123 (let1 h (make-hash-table)
+                                  (hash-table-put! h 'x 123)
+                                  h.x))
+
  ;; arithmetic operations
  (test "+" 6 (+ 1 2 3))
  (test "overwrite-inlined-function" '(1 2 3) (let ((+ list)) (+ 1 2 3)))
