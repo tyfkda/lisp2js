@@ -466,6 +466,9 @@ const LISP = ((createLisp, installEval) => {
       return ''
     return list.toArray().join(separator)
   }
+  LISP['string-split'] = function string$2dsplit(str, separator) {
+    return arrayToList(str.split(separator))
+  }
   LISP['string-length'] = function string$2dlength(str) { return str.length }
   LISP['string-ref'] = function string$2dref(str, index) { return str[index] }
   LISP.substring = function substring(str, start, end) { return str.slice(start, end) }

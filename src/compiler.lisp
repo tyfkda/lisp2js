@@ -47,14 +47,19 @@
       (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
                           (lambda (m) (escape-sym-char (string-ref (m) 0)))))))
 
-(defun compile-gref (sym)
-  (let ((s (symbol->string sym)))
-    (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
-        (string-append "LISP."
-                       s)
-      (string-append "LISP[\""
-                     (escape-string s)
-                     "\"]"))))
+(def RE-JS-IDENT #/^[\w_][\w\d_]*$/)
+
+(defun compile-ref (sym global?)
+  (flet ((make-access (sub)
+           (if (rxmatch RE-JS-IDENT sub)
+               (string-append "." sub)
+             (string-append "[\""
+                            sub
+                            "\"]"))))
+    (let1 ss (string-split (symbol->string sym) ".")
+      (let1 ss (if global? (cons "LISP" ss) ss)
+        (string-append (escape-param-name (intern (car ss)))
+                       (string-join (map make-access (cdr ss)) ""))))))
 
 (defun compile-keyword (keyword)
   (string-append "LISP[\"make-keyword\"](\""
@@ -281,9 +286,7 @@
 (defun compile* (s scope)
   (record-case (vector->list s)
     ((:CONST x)          (compile-quote x scope))
-    ((:REF sym global?)  (if global?
-                             (compile-gref sym)
-                           (escape-param-name sym)))
+    ((:REF sym global?)  (compile-ref sym global?))
     ((:IF p thn els)     (compile-if p thn els scope))
     ((:FUNCALL fn args)  (compile-funcall fn args scope))
     ((:SET! sym val)     (compile-set! sym val scope))
