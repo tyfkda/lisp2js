@@ -106,7 +106,7 @@ class HashTable extends SObject {
         continue
       if (contents.length > 0)
         contents += ', '
-      contents += `${k}:${this[k]}`
+      contents += `${k}:${makeString(this[k], true)}`
     }
     return `#table<${contents}>`
   }
