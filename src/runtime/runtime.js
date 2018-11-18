@@ -627,37 +627,6 @@ const LISP = ((createLisp, installEval) => {
       return LISP.intern(str)
     }
 
-    static readList(stream) {
-      let result = LISP.nil
-      for (;;) {
-        Reader.skipWhitespaces(stream)
-        let c = stream.peek()
-        if (c === ')') {  // Close paren.
-          stream.getc()
-          return LISP['reverse!'](result)
-        }
-        if (stream.match(kReSingleDot)) {  // Dot.
-          const last = Reader.read(stream)
-          if (last != null) {
-            if (stream.match(/^\s*\)/)) {  // Close paren.
-              const reversed = LISP['reverse!'](result)
-              result.cdr = last
-              return reversed
-            }
-          }
-          break
-        }
-
-        const x = Reader.read(stream)
-        if (x == null)
-          break
-        result = new Cons(x, result, stream.lineNo, stream.path)
-      }
-
-      // Error
-      throw new LISP.NoCloseParenException()
-    }
-
     static setMacroCharacter(c, fn) {
       LISP['*readtable*'][c] = fn
     }
@@ -674,9 +643,6 @@ const LISP = ((createLisp, installEval) => {
 
   LISP['set-macro-character'] = Reader.setMacroCharacter
   LISP['set-dispatch-macro-character'] = Reader.setDispatchMacroCharacter
-
-  Reader.setMacroCharacter('(', (stream, _c) =>  // Left paren '('.
-                           Reader.readList(stream))
 
   LISP.read = function read(stream = LISP['*stdin*'], err, eofval) {
     const result = Reader.read(stream)
