@@ -608,10 +608,8 @@ const LISP = ((createLisp, installEval) => {
       if (c in table)
         return table[c](stream, stream.getc())
 
-      let m
-      if (stream.match(kReSingleDot, true))  // Single dot.
-        return undefined
-      if (m = stream.match(kReSymbolOrNumber))  // Symbol or number.
+      const m = stream.match(kReSymbolOrNumber)
+      if (m)  // Symbol or number.
         return Reader.readSymbolOrNumber(m[1])
 
       throw new LISP.UnexpectedCharacterException(stream.peek())
