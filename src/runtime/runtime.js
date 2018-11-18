@@ -576,15 +576,14 @@ const LISP = ((createLisp, installEval) => {
   const kReSingleDot = new RegExp(`^\\.(?=([${kDelimitors}]|$))`)
   const kReSymbolOrNumber = new RegExp(`^([^.${kDelimitors}][^${kDelimitors}]*)`)
 
-  const readTable = {
-    dispatchTable: {},
-  }
+  LISP['*readtable*'] = new HashTable()
+  LISP['*readtable*'].dispatchTable = new HashTable()
 
   const dispatchMacroCharacter = function(stream, c) {
-    const table = readTable.dispatchTable[c]
+    const dtable = LISP['*readtable*'].dispatchTable[c]
     const subc = stream.peek()
-    if (subc in table)
-      return table[subc](stream, c, stream.getc())
+    if (subc in dtable)
+      return dtable[subc](stream, c, stream.getc())
     // Throw
     throw new Error(`No dispatch macro character: ${c}${subc}`)
   }
@@ -605,8 +604,9 @@ const LISP = ((createLisp, installEval) => {
       const c = stream.peek()
       if (c == null)
         return null
-      if (c in readTable)
-        return readTable[c](stream, stream.getc())
+      const table = LISP['*readtable*']
+      if (c in table)
+        return table[c](stream, stream.getc())
 
       let m
       if (stream.match(kReSingleDot, true))  // Single dot.
@@ -661,15 +661,16 @@ const LISP = ((createLisp, installEval) => {
     }
 
     static setMacroCharacter(c, fn) {
-      readTable[c] = fn
+      LISP['*readtable*'][c] = fn
     }
 
     static setDispatchMacroCharacter(c, subc, fn) {
-      if (!(c in readTable.dispatchTable)) {
-        readTable.dispatchTable[c] = {}
+      const table = LISP['*readtable*']
+      if (!(c in table.dispatchTable)) {
+        table.dispatchTable[c] = new HashTable()
       }
-      readTable.dispatchTable[c][subc] = fn
-      readTable[c] = dispatchMacroCharacter
+      table.dispatchTable[c][subc] = fn
+      table[c] = dispatchMacroCharacter
     }
   }
 
