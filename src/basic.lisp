@@ -58,6 +58,11 @@
                     (loop (cons (unescape (read-char stream)) acc)))
                    (t (loop (cons c acc)))))))))
 
+;; List
+(set-macro-character "("
+  (lambda (stream _)
+    (read-delimited-list ")" stream t)))
+
 ;; Block comment.
 (set-dispatch-macro-character "#" "|"
   (lambda (stream _c1 _c2)
@@ -72,9 +77,7 @@
 ;; Vector literal.
 (set-dispatch-macro-character "#" "("
   (lambda (stream _c1 _c2)
-    (unread-char "(" stream)
-    (let1 args (read stream)
-      (apply vector args))))
+    (apply vector (read-delimited-list ")" stream nil))))
 
 ;; Regexp.
 (set-dispatch-macro-character "#" "/"
@@ -379,6 +382,37 @@
               `(set! ,(car ls) (lambda ,@(cdr ls))))
             lss)
      ,@body))
+
+(defun skip-whitespaces (stream)
+  (let loop ()
+       (let1 c (read-char stream)
+         (case c
+           ((nil)  nil)
+           ((" " "\t" "\n")  (loop))
+           (t (unread-char c stream)
+              c)))))
+
+(defun read-delimited-list (delim stream enable-dot?)
+  (let1 stream (or stream *stdin*)
+    (flet ((make-dotted (acc stream)
+             (read-char stream)  ;; Drop "."
+             (skip-whitespaces stream)
+             (let1 elem (read stream)
+               (if (not (eq? (skip-whitespaces stream) delim))
+                   (error "no close paren for dotted pair")
+                 (let1 result (reverse! acc)
+                   (set-cdr! acc elem)
+                   (read-char stream)  ;; Drop delimitor
+                   result)))))
+      (let loop ((acc '()))
+           (let1 c (skip-whitespaces stream)
+             (cond ((null? c)  (error "list not closed by delimitor" delim))
+                   ((eq? c delim)
+                    (read-char stream)  ;; Drop delimitor
+                    (reverse! acc))
+                   ((and enable-dot? (eq? c "."))  ;; Dotted list.
+                    (make-dotted acc stream))
+                   (t (loop (cons (read stream) acc)))))))))
 
 (defmacro deftype? (&rest types)
   `(progn
