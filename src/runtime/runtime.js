@@ -708,6 +708,9 @@ const LISP = ((createLisp, installEval) => {
   }
 
   LISP['unread-char'] = function unread$2dchar(c, stream = LISP['*stdin*']) {
+    if (typeof c !== 'string') {
+      throw InvalidArgumentException(`string expected, but ${makeString(c)}`)
+    }
     stream.ungetc(c)
     return LISP.nil
   }
