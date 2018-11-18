@@ -77,9 +77,7 @@
 ;; Vector literal.
 (set-dispatch-macro-character "#" "("
   (lambda (stream _c1 _c2)
-    (unread-char "(" stream)
-    (let1 args (read stream)
-      (apply vector args))))
+    (apply vector (read-delimited-list ")" stream nil))))
 
 ;; Regexp.
 (set-dispatch-macro-character "#" "/"
