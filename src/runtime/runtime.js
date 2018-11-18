@@ -558,9 +558,18 @@ const LISP = ((createLisp, installEval) => {
 
   // Reader.
   LISP.NoCloseParenException = function() {}
+  LISP.NoCloseParenException.prototype.toString = function() {
+    return 'No close paren'
+  }
   LISP.NoCloseQuoteException = function() {}
+  LISP.NoCloseQuoteException.prototype.toString = function() {
+    return 'No close quote'
+  }
   LISP.UnexpectedCharacterException = function(char) {
     this.char = char
+  }
+  LISP.UnexpectedCharacterException.prototype.toString = function() {
+    return `Unexpected character: ${this.char.toString()}`
   }
 
   const kDelimitors = '\\s(){}\\[\\]\'`,;#"'

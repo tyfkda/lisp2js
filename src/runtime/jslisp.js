@@ -35,15 +35,7 @@ const runStream = (stream, compile) => {
 const runCodes = (codes, compile = false) => runStream(LISP['make-string-input-stream'](codes), compile)
 
 const dumpException = (e) => {
-  if (e instanceof LISP.UnexpectedCharacterException) {
-    console.error(`Unexpected character: ${e.char.toString()}`)
-  } else if (e instanceof LISP.NoCloseParenException) {
-    console.error('No close paren')
-  } else if (e instanceof LISP.NoCloseQuoteException) {
-    console.error('No close quote')
-  } else {
-    console.error(e)
-  }
+  console.error(e.toString())
 }
 
 // Read-Eval-Print loop.
