@@ -184,7 +184,7 @@ class StrStream extends Stream {
 }
 
 const inspectString = (str) => {
-  const kEscapeCharTable = {'\\': '\\\\', '\t': '\\t', '\n': '\\n', '"': '\\"'}
+  const kEscapeCharTable = {'\\': '\\\\', '\t': '\\t', '\n': '\\n', '\r': '\\r', '"': '\\"'}
   const f = (m) => {
     if (m in kEscapeCharTable)
       return kEscapeCharTable[m]

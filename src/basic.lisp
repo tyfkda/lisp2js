@@ -83,6 +83,7 @@
                   (number->char (string->number (string-append c1 c2) 16))))
                (("t") "\t")
                (("n") "\n")
+               (("r") "\x0d")  ;;(("r") "\r")
                (t c))))
       (let loop ((acc '()))
            (let1 c (read-char stream)
@@ -422,7 +423,7 @@
        (let1 c (read-char stream)
          (case c
            ((nil)  nil)
-           ((" " "\t" "\n")  (loop))
+           ((" " "\t" "\n")  (loop))  ;; TODO: Add "\r"
            (t (unread-char c stream)
               c)))))
 

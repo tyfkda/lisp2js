@@ -15,13 +15,14 @@
   (hash-table-put! table "\\" "\\\\")
   (hash-table-put! table "\t" "\\t")
   (hash-table-put! table "\n" "\\n")
+  (hash-table-put! table "\r" "\\r")
   (hash-table-put! table "\"" "\\\"")
   (defun escape-char (c)
     (or (hash-table-get table c)
         c)))
 
 (defun escape-string (s)
-  (regexp-replace-all #/[\\\t\n"]/ s  ;; "
+  (regexp-replace-all #/[\\\t\n\r"]/ s  ;; "
                       (lambda (m) (escape-char (m)))))
 
 (flet ((integer->hex-string (x padding)
