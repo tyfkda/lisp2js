@@ -10,6 +10,29 @@
       (macroexpand expanded))))
 
 ;;;; Reader macros
+
+(def *readtable* (make-hash-table))
+(hash-table-put! *readtable* '_dispatch-table (make-hash-table))
+
+(defun set-macro-character (c fn)
+  (hash-table-put! *readtable* c fn)
+  t)
+
+(defun set-dispatch-macro-character (c c2 fn)
+  (flet ((dispatch-macro-character (stream cc)
+           (let ((cc2 (read-char stream))
+                 (table (hash-table-get (hash-table-get *readtable* '_dispatch-table) cc)))
+             (unless (hash-table-exists? table cc2)
+               (unread-char cc2 stream)
+               (error "No dispatch macro character" cc cc2))
+             ((hash-table-get table cc2) stream cc cc2))))
+    (let1 dtable (hash-table-get *readtable* '_dispatch-table)
+      (unless (hash-table-exists? dtable c)
+        (hash-table-put! dtable c (make-hash-table)))
+      (hash-table-put! (hash-table-get dtable c) c2 fn)
+      (hash-table-put! *readtable* c dispatch-macro-character)
+      t)))
+
 ;; Line comment
 (set-macro-character ";"
   (lambda (stream _)
