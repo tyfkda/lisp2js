@@ -1,3 +1,14 @@
+(let1 *macrotable* (make-hash-table)
+  (defun register-macro (name func)
+    (hash-table-put! *macrotable* name func)
+    name)
+
+  (defun macroexpand-1 (s)
+    (aif (and (pair? s)
+              (hash-table-get *macrotable* (car s)))
+         (apply it (cdr s))
+      s)))
+
 (register-macro 'defmacro
   (lambda (name params &body body)
     `(register-macro ',name

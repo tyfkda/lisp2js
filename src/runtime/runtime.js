@@ -255,20 +255,6 @@ const LISP = ((createLisp, installEval) => {
                     console.log(str)
                   })
 
-  {
-    const macroTable = {}
-    LISP['register-macro'] = function register$2dmacro(name, func) {
-      macroTable[name] = func
-      return name
-    }
-    LISP['macroexpand-1'] = function macroexpand$2d1(s) {
-      if (!LISP['pair?'](s) || !(s.car in macroTable))
-        return s
-      const macrofn = macroTable[s.car]
-      return LISP.apply(macrofn, s.cdr)
-    }
-  }
-
   LISP.error = function error() {
     throw new Error(Array.prototype.slice.call(arguments).join(', '))
   }
