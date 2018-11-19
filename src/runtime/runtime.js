@@ -344,16 +344,6 @@ const LISP = ((createLisp, installEval) => {
       result = LISP.cons(arguments[i], result)
     return result
   }
-  LISP['reverse!'] = function reverse$21(x) {
-    let rev = LISP.nil
-    for (let ls = x; LISP['pair?'](ls);) {
-      const d = ls.cdr
-      ls.cdr = rev
-      rev = ls
-      ls = d
-    }
-    return rev
-  }
 
   LISP['number->string'] = function number$2d$3estring(x, n) { return x.toString(n) }
   LISP['+'] = function $2b() {
@@ -624,8 +614,6 @@ const LISP = ((createLisp, installEval) => {
     }
     return eofval != null ? eofval : LISP.nil
   }
-
-  LISP['read-from-string'] = function read$2dfrom$2dstring(str) { return Reader.read(new StrStream(str)) }
 
   LISP['read-line'] = function read$2dline(stream = LISP['*stdin*']) {
     let line = stream.getLine()

@@ -445,3 +445,15 @@
             types)))
 
 (deftype? symbol pair number string keyword vector table regexp)
+
+(defun reverse! (x)
+  (let loop ((rev '())
+             (ls x))
+       (if (pair? ls)
+           (let1 d (cdr ls)
+             (set-cdr! ls rev)
+             (loop ls d))
+         rev)))
+
+(defun read-from-string (str)
+  (read (make-string-input-stream str)))
