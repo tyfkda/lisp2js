@@ -134,7 +134,7 @@ function main(argv) {
     let status = 0
     if (compileOnly) {
       console.log('module.export = function(LISP) {')
-      console.log('  \'use strict\'')
+      console.log('  \'use strict\';')
       let text = fs.readFileSync(result.argv[0], 'utf-8')
       const matchShebang = text.match(/^#!(.*)\n/)
       if (matchShebang)
