@@ -29,6 +29,9 @@
   (hash-table-put! *readtable* c fn)
   t)
 
+(defun get-macro-character (c)
+  (hash-table-get *readtable* c))
+
 (defun set-dispatch-macro-character (c c2 fn)
   (flet ((dispatch-macro-character (stream cc)
            (let ((cc2 (read-char stream))
@@ -43,6 +46,12 @@
       (hash-table-put! (hash-table-get dtable c) c2 fn)
       (hash-table-put! *readtable* c dispatch-macro-character)
       t)))
+
+(defun get-dispatch-macro-character (c c2)
+  (let* ((dtable (hash-table-get *readtable* '_dispatch-table))
+         (table (hash-table-get dtable c)))
+    (and table
+         (hash-table-get table c2))))
 
 ;; Line comment
 (set-macro-character ";"
