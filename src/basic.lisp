@@ -478,3 +478,38 @@
 
 (defun read-from-string (str)
   (read (make-string-input-stream str)))
+
+;;;; Reader
+
+(def *delimitors* #/^[\s(){}\[\]'`,;#"']/)
+(def *symbol-first* #/^[^.\s(){}\[\]'`,;#"']/)
+
+(labels ((read-symbol-or-number (stream)
+           (let loop ((acc '()))
+             (let1 c (read-char stream)
+               (cond ((null? c)  (convert acc))
+                     ((rxmatch *delimitors* c)
+                      (progn (unread-char c stream)
+                             (convert acc)))
+                     (t (loop (cons c acc)))))))
+         (convert (acc)
+           (let1 v (string-join (reverse! acc) "")
+             (cond ((eq? v "nil")  nil)
+                   ((eq? v "t")    t)
+                   ((eq? (string-ref v 0) ":")  (make-keyword (substring v 1)))
+                   ((rxmatch #/^([+\-]?[0-9]+(\.[0-9]*)?)$/ v)
+                    (string->number v))
+                   (t (intern v))))))
+  (defun read (stream err eofval)
+    (let ((stream (or stream *stdin*)))
+      (let1 c (skip-whitespaces stream)
+        (if (null? c)
+            (if err
+                (error "EOF")
+              (or eofval nil))
+          (aif (get-macro-character c)
+               (progn (read-char stream)
+                      (it stream c))
+            (if (rxmatch *symbol-first* c)
+                (read-symbol-or-number stream)
+              (error "Unexpected character: " c))))))))

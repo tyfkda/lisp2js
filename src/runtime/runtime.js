@@ -548,59 +548,6 @@ const LISP = ((createLisp, installEval) => {
     return `Unexpected character: ${this.char.toString()}`
   }
 
-  const kDelimitors = '\\s(){}\\[\\]\'`,;#"'
-  const kReSymbolOrNumber = new RegExp(`^([^.${kDelimitors}][^${kDelimitors}]*)`)
-
-  class Reader {
-    static skipWhitespaces(stream) {
-      do {
-        if (stream.eof())
-          return false
-      } while (stream.match(/^(\s+|$)/))
-      return true
-    }
-
-    static read(stream) {
-      if (!Reader.skipWhitespaces(stream))
-        return null
-
-      const c = stream.peek()
-      if (c == null)
-        return null
-      const table = LISP['*readtable*']
-      if (table && c in table)
-        return table[c](stream, stream.getc())
-
-      const m = stream.match(kReSymbolOrNumber)
-      if (m)  // Symbol or number.
-        return Reader.readSymbolOrNumber(m[1])
-
-      throw new LISP.UnexpectedCharacterException(stream.peek())
-    }
-
-    static readSymbolOrNumber(str) {
-      if (str === 'nil')
-        return LISP.nil
-      if (str === 't')
-        return LISP.t
-      if (str[0] === ':')
-        return LISP['make-keyword'](str.slice(1))
-      if (str.match(/^([+\-]?[0-9]+(\.[0-9]*)?)$/))  // Number.
-        return parseFloat(str)
-      return LISP.intern(str)
-    }
-  }
-
-  LISP.read = function read(stream = LISP['*stdin*'], err, eofval) {
-    const result = Reader.read(stream)
-    if (result != null)
-      return result
-    if (LISP.isTrue(err)) {
-      throw new Error('EOF')
-    }
-    return eofval != null ? eofval : LISP.nil
-  }
-
   LISP['read-line'] = function read$2dline(stream = LISP['*stdin*']) {
     let line = stream.getLine()
     if (line == null)
