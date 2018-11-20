@@ -214,8 +214,6 @@ const makeString = (x, inspect) => {
 }
 
 const LISP = ((createLisp, installEval) => {
-  'use strict'
-
   const g = ((typeof window !== 'undefined') ? window :
              (typeof global !== 'undefined') ? global : {})
 
@@ -224,8 +222,6 @@ const LISP = ((createLisp, installEval) => {
 
   return LISP
 })((global) => {
-  'use strict'
-
   const LISP = {}
 
   // Convert JS array into Lisp list.
