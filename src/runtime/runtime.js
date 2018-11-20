@@ -295,7 +295,7 @@ const LISP = ((createLisp, installEval) => {
       if (t === 'object') {
         if (x instanceof Array)
           t = 'vector'
-        if (x instanceof RegExp)
+        else if (x instanceof RegExp)
           t = 'regexp'
         else if (x instanceof SObject)
           t = x.constructor.getTypeName()
