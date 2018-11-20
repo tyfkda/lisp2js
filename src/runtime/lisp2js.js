@@ -12,7 +12,4 @@ for (let f of [basic, backquote, parser, compiler, version])
   f(LISP)
 
 if (typeof module !== 'undefined')
-  module.exports = {LISP}
-
-if (typeof window !== 'undefined')
-  window.LISP = LISP
+  module.exports = LISP

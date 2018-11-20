@@ -1,9 +1,12 @@
 'use strict'
 
-const {LISP} = require('./lisp2js.js')
+const LISP = (typeof window !== 'undefined') ? (  // Running on a browser
+  window.LISP = window.LISP || require('./lisp2js.js')
+) : require('./lisp2js.js')
 
-if (typeof __non_webpack_require__ === 'undefined')
+if (typeof __non_webpack_require__ === 'undefined') {  // Not webpacked: Directly imported.
   global.__non_webpack_require__ = require  // To hack for non-webpacked
+}
 
 // Run stream.
 const runStream = (stream, compile) => {
@@ -168,5 +171,16 @@ if (typeof __module !== 'undefined') {  // for dist/jslisp (Webpack-ed)
 
   if (__non_webpack_require__.main === __module) {  // not imported.
     main(process.argv.slice(2))
+  }
+}
+
+if (typeof window !== 'undefined') {
+  const scriptTags = document.getElementsByTagName('script')
+  const myScriptTag = scriptTags[scriptTags.length - 1]
+
+  try {
+    runCodes(myScriptTag.text)
+  } catch (e) {
+    dumpException(e)
   }
 }
