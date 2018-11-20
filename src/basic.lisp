@@ -9,10 +9,9 @@
          (apply it (cdr s))
       s)))
 
-(register-macro 'defmacro
-  (lambda (name params &body body)
-    `(register-macro ',name
-       (lambda ,params ,@body))))
+(defmacro defmacro (name params &body body)
+  `(register-macro ',name
+     (lambda ,params ,@body)))
 
 (defun macroexpand (exp)
   (let ((expanded (macroexpand-1 exp)))
