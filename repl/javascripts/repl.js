@@ -5,7 +5,7 @@ $(function() {
 
   var holder = $('#holder');
   var txt = $('#repl-txt');
-  txt.html(';; JsLisp<br>' + prompt);
+  txt.html(';; JsLisp version ' + escape(LISP['*version*']) + '<br>' + prompt);
 
   var cm = CodeMirror(holder[0], {
     value: '',
@@ -31,7 +31,7 @@ $(function() {
   function onenter(code) {
     var s;
     try {
-      var stream = new LISP.StrStream(code);
+      var stream = LISP['make-string-input-stream'](code);
       s = LISP.read(stream);
     } catch (e) {
       if (e instanceof LISP.NoCloseParenException) {
@@ -40,7 +40,7 @@ $(function() {
       }
     }
 
-    if (s === undefined)
+    if (s === LISP.nil)
       return undefined;
     var result;
     try {

@@ -21,7 +21,7 @@
     <script src="javascripts/mode/scheme/scheme.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-    <script src="../js/lisp2js.min.js"></script>
+    <script src="../js/jslisp.js"></script>
     <script src="javascripts/repl.js"></script>
   </head>
   <body>
@@ -47,25 +47,25 @@
       (x 0))
   (labels
    ((draw ()
-          ;; Fill background.
-          (set! context.fillStyle "rgb(0, 0, 255)")
-          (context.fillRect 0 0 canvas.width canvas.height)
+      ;; Fill background.
+      (set! context.fillStyle "rgb(0, 0, 255)")
+      (context.fillRect 0 0 canvas.width canvas.height)
 
-          ;; Draw line.
-          (context.beginPath)
-          (set! context.strokeStyle "#ff0000")
-          (context.moveTo 0 0)
-          (context.lineTo canvas.width canvas.height)
-          (context.closePath)
-          (context.stroke)
+      ;; Draw line.
+      (context.beginPath)
+      (set! context.strokeStyle "#ff0000")
+      (context.moveTo 0 0)
+      (context.lineTo canvas.width canvas.height)
+      (context.closePath)
+      (context.stroke)
 
-          (context.drawImage img x
-                             (* (- canvas.height img.height) 0.5))
+      (context.drawImage img x
+                         (* (- canvas.height img.height) 0.5))
 
-          (set! x (let ((nextx (+ x 1)))
-                    (if (> nextx canvas.width) 0 nextx)))
+      (set! x (let ((nextx (+ x 1)))
+                (if (> nextx canvas.width) 0 nextx)))
 
-          (JS.window.requestAnimationFrame draw)))
+      (JS.window.requestAnimationFrame draw)))
 
    (set! img.src "smile.png")
    (set! img.onload draw)))

@@ -1,6 +1,7 @@
-#terminal {
-  margin: 16px;
-  padding: 8px;
-  background-color: #eee;
-  font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+.fixedfont {
+  font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+}
+
+#terminal:focus {
+  outline: none;
 }

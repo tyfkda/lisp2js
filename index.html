@@ -10,7 +10,7 @@
     <h1>JsLisp test</h1>
 
     <form onsubmit="compileAndRun(this.exp.value); return false;">
-      <textarea id="exp" cols="80" rows="8" style="font-size:14px; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+      <textarea id="exp" cols="80" rows="8" class="fixedfont" wrap="off" style="font-size:14px">
 (defun fact (n)
   (if (&lt;= n 1)
       1
@@ -22,44 +22,54 @@
     </form>
 
     <h3>Output</h3>
-    <div id="terminal">
-    </div>
+    <textarea id="terminal" cols="80" rows="8" wrap="off" class="fixedfont" style="font-size:14px" readonly></textarea>
+    <button onclick="clearTerminal()">Clear</button>
 
     <p>
       Also try <a href="repl/index.html">REPL</a>
     </p>
 
-    <script type="text/javascript" src="js/lisp2js.min.js"></script>
+    <script type="text/javascript" src="js/jslisp.js"></script>
     <script type="text/javascript">
-      // Steal Lisp output.
       function print(str) {
-        var terminalNode = document.getElementById('terminal');
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        terminalNode.appendChild(div);
+        var terminalNode = document.getElementById('terminal')
+        terminalNode.value += str + '\n'
+
+        terminalNode.selectionStart = terminalNode.selectionEnd = terminalNode.value.length
+        terminalNode.blur()
+        terminalNode.focus()
       }
       // Intercept Lisp output.
-      LISP._output = print;
+      LISP._output = print
+
+      function clearTerminal() {
+        var terminalNode = document.getElementById('terminal')
+        terminalNode.value = ''
+      }
 
       function compileAndRun(code) {
-        var stream = new LISP.StrStream(code);
-        for (;;) {
-          var s = LISP.read(stream);
-          if (s === undefined)
-            break;
-          var compiled = LISP.compile(s);
-          var result = eval(compiled);
-          print(compiled + ' ==> ' + result);
+        try {
+          var stream = LISP['make-string-input-stream'](code)
+          for (;;) {
+            var s = LISP.read(stream)
+            if (s === LISP.nil)
+              break
+            var compiled = LISP.compile(s)
+            var result = eval(compiled)
+            print(compiled + ' ==> ' + result)
+          }
+        } catch (e) {
+          console.error(e)
         }
       }
     </script>
 
-    <script src="js/lisp2js.min.js">
+    <script src="js/jslisp.js">
 ;; Hello world
 (print "Hello, world!")
     </script>
 
-    <script src="js/lisp2js.min.js">
+    <script src="js/jslisp.js">
 ;; Call JavaScript function
 ;; `JS` is JavaScript global hash table.
 ;; Can access with 'dot'
