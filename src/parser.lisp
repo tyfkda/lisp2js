@@ -104,7 +104,7 @@
                    ((def name value)  (vector :DEF
                                               (parse* name scope)
                                               (parse* value scope)))
-                   (t (if (or (null? s) (proper-list? s))
+                   (t (if (proper-list? s)
                           (vector :FUNCALL
                                   (parse* (car s) scope)
                                   (parse-args (cdr s) scope))
