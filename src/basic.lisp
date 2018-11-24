@@ -95,7 +95,7 @@
                (t c))))
       (let loop ((acc '()))
            (let1 c (read-char stream)
-             (cond ((null? c) (error "NoCloseQuoteException"))
+             (cond ((null? c) (throw (new NoCloseQuoteException)))
                    ((eq? c "\"") (string-join (reverse! acc) ""))
                    ((eq? c "\\")
                     (loop (cons (unescape (read-char stream)) acc)))
@@ -442,14 +442,14 @@
              (skip-whitespaces stream)
              (let1 elem (read stream)
                (if (not (eq? (skip-whitespaces stream) delim))
-                   (error "no close paren for dotted pair")
+                   (throw (new NoCloseParenException))
                  (let1 result (reverse! acc)
                    (set-cdr! acc elem)
                    (read-char stream)  ;; Drop delimitor
                    result)))))
       (let loop ((acc '()))
            (let1 c (skip-whitespaces stream)
-             (cond ((null? c)  (error "list not closed by delimitor" delim))
+             (cond ((null? c)  (throw (new NoCloseParenException)))  ;; TODO: Not only paren.
                    ((eq? c delim)
                     (read-char stream)  ;; Drop delimitor
                     (reverse! acc))
@@ -511,4 +511,4 @@
                       (it stream c))
             (if (rxmatch *symbol-first* c)
                 (read-symbol-or-number stream)
-              (error "Unexpected character: " c))))))))
+              (throw (new UnexpectedCharacterException c)))))))))

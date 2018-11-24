@@ -48,10 +48,10 @@
 
     test('sharp-dot', 3, '#.(+ 1 2)')
 
-    fail('no close paren', null /*LISP.NoCloseParenException*/, '(1 2 3')
-    fail('no close paren2', null /*LISP.NoCloseParenException*/, '(1 2 .')
-    fail('no value after dot', null /*LISP.UnexpectedCharacterException*/, '(1 2 .)')
-    fail('no close quote', null /*LISP.NoCloseQuoteException*/, '"foo')
-    fail('no close paren for vector', null /*LISP.NoCloseParenException*/, '#(1 2 3')
+    fail('no close paren', LISP.NoCloseParenException, '(1 2 3')
+    fail('no close paren2', LISP.NoCloseParenException, '(1 2 .')
+    fail('no value after dot', LISP.UnexpectedCharacterException, '(1 2 .)')
+    fail('no close quote', LISP.NoCloseQuoteException, '"foo')
+    fail('no close paren for vector', LISP.NoCloseParenException, '#(1 2 3')
   })
 })()
