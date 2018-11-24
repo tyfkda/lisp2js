@@ -81,8 +81,18 @@
              (when params
                (if (symbol? (car params))
                    (confirm-valid-params (cdr params))
-                 (compile-error "function parameter must be symbol, but" (car params))))))
-
+                 (compile-error "function parameter must be symbol, but" (car params)))))
+           (parse-funcall (func args scope)
+             (vector :FUNCALL
+                     (parse* func scope)
+                     (parse-args args scope)))
+           (parse-new (klass args scope)
+             (vector :NEW
+                     (parse* klass scope)
+                     (parse-args args scope)))
+           (parse-throw (exp scope)
+             (vector :THROW
+                     (parse* exp scope))))
     (defun parse-list (s scope)
       (record-case s
                    ((quote x)   (if (or (pair? x) (vector? x))
@@ -104,11 +114,12 @@
                    ((def name value)  (vector :DEF
                                               (parse* name scope)
                                               (parse* value scope)))
-                   (t (if (proper-list? s)
-                          (vector :FUNCALL
-                                  (parse* (car s) scope)
-                                  (parse-args (cdr s) scope))
-                        (compile-error "funcall must be proper list, but" s)))))))
+                   (t (unless (proper-list? s)
+                        (compile-error "funcall must be proper list, but" s))
+                      (case (car s)
+                            ((new)    (parse-new (cadr s) (cddr s) scope))
+                            ((throw)  (parse-throw (cadr s) scope))
+                            (t        (parse-funcall (car s) (cdr s) scope))))))))
 
 (defun parse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))

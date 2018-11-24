@@ -123,6 +123,18 @@
                 (t (do-compile-funcall fn args scope))))
       (do-compile-funcall fn args scope))))
 
+(defun compile-new (klass args scope)
+  (string-append "(new "
+                 (compile* klass scope)
+                 "("
+                 (expand-args args scope)
+                 "))"))
+
+(defun compile-throw (exp scope)
+  (string-append "(function() { throw "
+                 (compile* exp scope)
+                 " })()"))
+
 (defun compile-quote (x scope)
   (cond ((pair? x)
          (compile* `(cons ',(car x)
@@ -262,6 +274,8 @@
     ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) scope))
     ((:LAMBDA)  (compile-lambda-node s nil scope))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
+    ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
+    ((:THROW)  (compile-throw (vector-ref s 1) scope))
     (t  (compile-error "Unknown AST node:" s))))
 
 (defun compile-error (&rest args)
