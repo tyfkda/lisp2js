@@ -204,39 +204,11 @@
                  " = "
                  (compile* val scope)))
 
-(defun compile-lambda (name params bodies base-scope extended-scope)
-  (unless (or (null? params) (pair? params))
-    (error "function parameters must be a list"))
-  (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
-    (let ((proper-params (if rest-pos
-                             (take rest-pos params)
-                           params))
-          (rest (and rest-pos (elt (+ rest-pos 1) params))))
-      (string-append "(function "
-                     (if (null? name)
-                         ""
-                       (escape-param-name name))
-                     "("
-                     (string-join (map (lambda (x) (escape-param-name x))
-                                       proper-params)
-                                  ", ")
-                     "){"
-                     (if (null? rest)
-                         ""
-                       (string-append "var "
-                                      (escape-param-name rest)
-                                      " = LISP._getRestArgs(arguments, "
-                                      (number->string (length proper-params))
-                                      "); "))
-                     "return ("
-                     (expand-body bodies extended-scope)
-                     ");})"))))
-
 (defun compile-def (name value scope)
   (string-append (compile* name scope)
                  " = "
                  (if (eq? (vector-ref value 0) :LAMBDA)
-                     (compile-lambda-node value (vector-ref name 1))  ;; Assumes name is :REF
+                     (compile-lambda value (vector-ref name 1))  ;; Assumes name is :REF
                    (compile* value scope))))
 
 ;; If the given scope has quoted value, output them as local variable values,
@@ -255,12 +227,39 @@
                       "; })()")
     compiled-body))
 
-(defun compile-lambda-node (s name scope)
-  (let ((extended-scope (vector-ref s 1))
-        (params (vector-ref s 2))
-        (body (vector-ref s 3)))
-    (compile-new-scope (compile-lambda name params body scope extended-scope)
-                       extended-scope)))
+(flet ((do-compile-lambda (name params bodies base-scope extended-scope)
+         (unless (or (null? params) (pair? params))
+           (error "function parameters must be a list"))
+         (let1 rest-pos (position-if (lambda (sym) (member sym '(&rest &body))) params)
+           (let ((proper-params (if rest-pos
+                                    (take rest-pos params)
+                                  params))
+                 (rest (and rest-pos (elt (+ rest-pos 1) params))))
+             (string-append "(function "
+                            (if (null? name)
+                                ""
+                              (escape-param-name name))
+                            "("
+                            (string-join (map (lambda (x) (escape-param-name x))
+                                              proper-params)
+                                         ", ")
+                            "){"
+                            (if (null? rest)
+                                ""
+                              (string-append "var "
+                                             (escape-param-name rest)
+                                             " = LISP._getRestArgs(arguments, "
+                                             (number->string (length proper-params))
+                                             "); "))
+                            "return ("
+                            (expand-body bodies extended-scope)
+                            ");})")))))
+  (defun compile-lambda (s name scope)
+    (let ((extended-scope (vector-ref s 1))
+          (params (vector-ref s 2))
+          (body (vector-ref s 3)))
+      (compile-new-scope (do-compile-lambda name params body scope extended-scope)
+                         extended-scope))))
 
 (defun compile* (s scope)
   (case (vector-ref s 0)
@@ -272,7 +271,7 @@
                  (compile-if p thn els scope)))
     ((:FUNCALL)  (compile-funcall (vector-ref s 1) (vector-ref s 2) scope))
     ((:SET!)  (compile-set! (vector-ref s 1) (vector-ref s 2) scope))
-    ((:LAMBDA)  (compile-lambda-node s nil scope))
+    ((:LAMBDA)  (compile-lambda s nil scope))
     ((:DEF)  (compile-def (vector-ref s 1) (vector-ref s 2) scope))
     ((:NEW)  (compile-new (vector-ref s 1) (vector-ref s 2) scope))
     ((:THROW)  (compile-throw (vector-ref s 1) scope))
