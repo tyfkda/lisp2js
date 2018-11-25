@@ -297,10 +297,12 @@
   (cons (cons key datum) alist))
 
 (defun map (f ls)
-  (if (null? ls)
-      ()
-    (cons (f (car ls))
-          (map f (cdr ls)))))
+  (let loop ((acc ())
+             (ls ls))
+    (if (null? ls)
+        (reverse! acc)
+      (loop (cons (f (car ls)) acc)
+            (cdr ls)))))
 
 (defun append (ls &rest rest)
   (cond ((null? rest) ls)
@@ -316,17 +318,24 @@
               (cons (car ls) acc))
       acc)))
 
+(defun reverse! (ls)
+  (let loop ((rev ())
+             (ls ls))
+    (if (pair? ls)
+        (let1 d (cdr ls)
+          (set-cdr! ls rev)
+          (loop ls d))
+      rev)))
+
 (defun list* (&rest args)
-  (if (null? args)
-      nil
-    (if (null? (cdr args))
-        (car args)
-      (let loop ((p args)
-                 (q (cdr args)))
-        (if (null? (cdr q))
-            (progn (set-cdr! p (car q))
-                   args)
-          (loop q (cdr q)))))))
+  (cond ((not (pair? args))  args)
+        ((null? (cdr args))  (car args))
+        (t (let loop ((p args)
+                      (q (cdr args)))
+             (if (null? (cdr q))
+                 (progn (set-cdr! p (car q))
+                        args)
+               (loop q (cdr q)))))))
 
 (defun last-pair (ls)
   (if (pair? (cdr ls))
@@ -351,26 +360,26 @@
 (defun vector->list (vect)
   (let loop ((i (- (vector-length vect) 1))
              (acc ()))
-       (if (< i 0)
-           acc
-         (loop (- i 1) (cons (vector-ref vect i) acc)))))
+    (if (< i 0)
+        acc
+      (loop (- i 1) (cons (vector-ref vect i) acc)))))
 
 (defun position-if (pred seq)
     (let loop ((p seq)
                (i 0))
-         (when p
-           (if (pred (car p))
-               i
-             (loop (cdr p) (+ i 1))))))
+      (when p
+        (if (pred (car p))
+            i
+          (loop (cdr p) (+ i 1))))))
 
 (defun take (n ls)
   (let loop ((n n)
              (ls ls)
              (acc nil))
-       (if (or (<= n 0)
-               (null? ls))
-           (reverse! acc)
-         (loop (- n 1) (cdr ls) (cons (car ls) acc)))))
+    (if (or (<= n 0)
+            (null? ls))
+        (reverse! acc)
+      (loop (- n 1) (cdr ls) (cons (car ls) acc)))))
 
 (defun drop (n ls)
   (if (or (<= n 0)
@@ -465,15 +474,6 @@
             types)))
 
 (deftype? symbol pair number string keyword vector table regexp)
-
-(defun reverse! (x)
-  (let loop ((rev '())
-             (ls x))
-       (if (pair? ls)
-           (let1 d (cdr ls)
-             (set-cdr! ls rev)
-             (loop ls d))
-         rev)))
 
 (defun read-from-string (str)
   (read (make-string-input-stream str)))
