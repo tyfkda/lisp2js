@@ -47,17 +47,14 @@
       (regexp-replace-all #/[^0-9A-Za-z_.]/ (symbol->string sym)
                           (lambda (m) (escape-sym-char (string-ref (m) 0)))))))
 
-(defun compile-symbol (sym scope)
-  (if (or (local-var? scope sym)
-          (special-var? scope sym))
-      (escape-param-name sym)
-    (let ((s (symbol->string sym)))
-      (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
-          (string-append "LISP."
-                         s)
-        (string-append "LISP[\""
-                       (escape-string s)
-                       "\"]")))))
+(defun compile-gref (sym)
+  (let ((s (symbol->string sym)))
+    (if (rxmatch #/^[0-9A-Za-z_.]*$/ s)
+        (string-append "LISP."
+                       s)
+      (string-append "LISP[\""
+                     (escape-string s)
+                     "\"]"))))
 
 (defun compile-keyword (keyword)
   (string-append "LISP[\"make-keyword\"](\""
@@ -78,14 +75,13 @@
 
 (defun compile-literal (s scope)
   (cond ((number? s)  (number->string s))
-        ((symbol? s)  (compile-symbol s scope))
         ((keyword? s) (compile-keyword s))
         ((string? s)  (x->string s t))
         ((vector? s)  (compile-vector s scope))
         ((regexp? s)  (compile-regexp s))
         ((null? s)    "LISP.nil")
         ((eq? s t)    "LISP.t")
-        (t (error (string-append "compile-literal: [" s "]")))))
+        (t (error (string-append "compile-literal: [" (x->string s) "]")))))
 
 (defun compile-unary-op (fn arg scope)
   (string-append "("
@@ -111,7 +107,7 @@
          (member sym '(+ - * / %))))
   (defun compile-funcall (fn args scope)
     (if (and (eq? (vector-ref fn 0) :REF)
-             (not (local-var? scope (vector-ref fn 1)))
+             (vector-ref fn 2)  ; not shadowed by local
              (not (null? args)))
         (let1 fnsym (vector-ref fn 1)
           (cond ((and (binop? fnsym)
@@ -144,8 +140,6 @@
          (string-append "LISP.intern(\""
                         (escape-string (symbol->string x))
                         "\")"))
-        ((keyword? x)
-         (compile-keyword x))
         (t (compile-literal x scope))))
 
 (flet ((ast? (type ast)
@@ -264,7 +258,10 @@
 (defun compile* (s scope)
   (case (vector-ref s 0)
     ((:CONST)    (compile-quote (vector-ref s 1) scope))
-    ((:REF)      (compile-symbol (vector-ref s 1) scope))
+    ((:REF)      (let1 global (vector-ref s 2)
+                   (if global
+                       (compile-gref (vector-ref s 1))
+                     (escape-param-name (vector-ref s 1)))))
     ((:IF)       (let ((p (vector-ref s 1))
                        (thn (vector-ref s 2))
                        (els (vector-ref s 3)))

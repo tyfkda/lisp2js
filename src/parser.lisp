@@ -64,12 +64,12 @@
 (defun parse-quoted-value (x)
   (cond ((pair? x)
          (if (proper-list? x)
-             (vector :FUNCALL (vector :REF 'list)
+             (vector :FUNCALL (vector :REF 'list t)
                      (map parse-quoted-value x))
-           (vector :FUNCALL (vector :REF (if (pair? (cdr x)) 'list* 'cons))
+           (vector :FUNCALL (vector :REF (if (pair? (cdr x)) 'list* 'cons) t)
                    (map parse-quoted-value (dotted->proper x)))))
         ((vector? x)
-         (vector :FUNCALL (vector :REF 'vector)
+         (vector :FUNCALL (vector :REF 'vector t)
                  (map parse-quoted-value (vector->list x))))
         (t (vector :CONST x))))
 
@@ -96,7 +96,7 @@
     (defun parse-list (s scope)
       (record-case s
                    ((quote x)   (if (or (pair? x) (vector? x))
-                                    (vector :REF (scope-add-var scope (parse-quoted-value x)))
+                                    (vector :REF (scope-add-var scope (parse-quoted-value x)) nil)
                                   (vector :CONST x)))
                    ((if p thn &body els)  (vector :IF
                                                   (parse* p scope)
@@ -121,6 +121,11 @@
                             ((throw)  (parse-throw (cadr s) scope))
                             (t        (parse-funcall (car s) (cdr s) scope))))))))
 
+(defun parse-symbol (sym scope)
+  (let1 global (not (or (local-var? scope sym)
+                        (special-var? scope sym)))
+    (vector :REF sym global)))
+
 (defun parse* (s scope)
   (cond ((pair? s)   (if (local-var? scope (car s))
                          ;; Symbol is defined in the scope, so it isn't handled as a macro.
@@ -129,7 +134,7 @@
                          (if (pair? expanded)
                              (parse-list expanded scope)
                            (parse* expanded scope)))))
-        ((symbol? s) (vector :REF s))
+        ((symbol? s) (parse-symbol s scope))
         (t           (parse-quoted-value s))))
 
 (defun parse (s)

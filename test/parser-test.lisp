@@ -18,11 +18,11 @@
 
  (let1 scope (create-scope nil '(lvar))
    (test "parse* const" #(:CONST 123) (parse* 123 scope))
-   (test "parse* g-ref" #(:REF x) (parse* 'x scope))
-   (test "parse* l-ref" #(:REF lvar) (parse* 'lvar scope))
-   (test "parse* if" #(:IF #(:REF x) #(:REF y) #(:CONST 3)) (parse* '(if x y 3) scope))
+   (test "parse* g-ref" #(:REF x t) (parse* 'x scope))
+   (test "parse* l-ref" #(:REF lvar nil) (parse* 'lvar scope))
+   (test "parse* if" #(:IF #(:REF x t) #(:REF y t) #(:CONST 3)) (parse* '(if x y 3) scope))
    (test "parse* vector"
-         #(:FUNCALL #(:REF vector) (#(:CONST 1) #(:FUNCALL #(:REF list) (#(:CONST quote) #(:CONST a)))))
+         #(:FUNCALL #(:REF vector t) (#(:CONST 1) #(:FUNCALL #(:REF list t) (#(:CONST quote) #(:CONST a)))))
          (parse* #(1 'a) scope))
    )
  )
