@@ -73,24 +73,16 @@ gulp.task('pack-jslisp', () => {
         const promisify = util.promisify
         const content = await promisify(fs.readFile)('./dist/jslisp.js')
         const fd = await promisify(fs.open)('dist/jslisp', 'w')
-        await promisify(fs.write)(fd, '#!/usr/bin/env node\n')
-        await promisify(fs.write)(fd, 'var __module = module;')
+        await promisify(fs.write)(fd,
+                                  '#!/usr/bin/env node\n' +
+                                  'var __module = module;\n')
         await promisify(fs.write)(fd, content)
         const stat = await promisify(fs.fstat)(fd)
         await promisify(fs.ftruncate)(fd, stat.size)
         await promisify(fs.close)(fd)
         await promisify(fs.chmod)('dist/jslisp', 0o755)
-        await promisify(fs.unlink)('dist/jslisp.js')
       }
     }))
 })
 
-gulp.task('pack-lisp2js', () => {
-  const config = webpackLisp2JsConfig
-  return gulp.src('./src/runtime/lisp2js.js')
-    .pipe(plumber())
-    .pipe(webpackStream(config, webpack))
-    .pipe(gulp.dest(DIST_DIR))
-})
-
-gulp.task('release', gulp.series('build', gulp.parallel('pack-jslisp', 'pack-lisp2js')))
+gulp.task('release', gulp.series('build', gulp.parallel('pack-jslisp')))

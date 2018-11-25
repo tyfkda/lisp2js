@@ -1,18 +1,12 @@
 'use strict'
 
-if (typeof __non_webpack_require__ === 'undefined')
+const LISP = (typeof window !== 'undefined') ? (  // Running on a browser
+  window.LISP = window.LISP || require('./lisp2js.js')
+) : require('./lisp2js.js')
+
+if (typeof __non_webpack_require__ === 'undefined') {  // Not webpacked: Directly imported.
   global.__non_webpack_require__ = require  // To hack for non-webpacked
-
-const fs = __non_webpack_require__('fs')
-const readline = __non_webpack_require__('readline')
-const tty = __non_webpack_require__('tty')
-
-const getOpts = require('get-options')
-
-const {LISP} = require('./lisp2js.js')
-
-const runtimeNode = require('./runtime_node.js')
-runtimeNode(LISP)
+}
 
 // Run stream.
 const runStream = (stream, compile) => {
@@ -38,69 +32,79 @@ const dumpException = (e) => {
   console.error(e.toString())
 }
 
-// Read-Eval-Print loop.
-const repl = () => {
-  const rl = readline.createInterface(process.stdin, process.stdout)
-
-  process.stdin.resume()
-  process.stdin.setEncoding('utf8')
-
-  const prompt = '> '
-  const prompt2 = '. '
-  const inputs = []
-
-  rl.setPrompt(prompt)
-  rl.prompt()
-  rl.on('line', (line) => {
-    inputs.push(line)
-    try {
-      const code = inputs.join('\n')
-      if (code.match(/^\s*$/)) {
-        inputs.length = 0
-      } else {
-        const result = runCodes(code)
-        // Otherwise input should be consumed.
-        inputs.length = 0
-        console.log(LISP['x->string'](result, 10))
-      }
-      rl.setPrompt(prompt)
-      rl.prompt()
-    } catch (e) {
-      if (e instanceof LISP.NoCloseParenException) {
-        // In REPL, if NoCloseParenException occurs,
-        // a user keep typing so inputs should be kept.
-        rl.setPrompt(prompt2)
-      } else {
-        dumpException(e)
-        inputs.length = 0
-        rl.setPrompt(prompt)
-      }
-      rl.prompt()
-    }
-  }).on('close', () => {
-    if (inputs.length > 0) {
-      console.error('Input not terminated: [' + inputs + ']')
-      process.exit(1)
-      return
-    }
-    process.exit(0)
-  })
-}
-const replNoPrompt = () => {
-  process.stdin.resume()
-  process.stdin.setEncoding('utf8')
-  try {
-    return LISP.load(LISP['*stdin*'])
-  } catch (e) {
-    dumpException(e)
-    process.exit(1)
-  }
-}
-
-// Run script.
-
 // Main.
-function main(argv) {
+const main = function main(argv) {
+  const fs = __non_webpack_require__('fs')
+  const readline = __non_webpack_require__('readline')
+  const tty = __non_webpack_require__('tty')
+
+  const getOpts = require('get-options')
+
+  const runtimeNode = require('./runtime_node.js')
+  runtimeNode(LISP)
+
+  // Read-Eval-Print loop.
+  const repl = () => {
+    const rl = readline.createInterface(process.stdin, process.stdout)
+
+    process.stdin.resume()
+    process.stdin.setEncoding('utf8')
+
+    const prompt = '> '
+    const prompt2 = '. '
+    const inputs = []
+
+    rl.setPrompt(prompt)
+    rl.prompt()
+    rl.on('line', (line) => {
+      inputs.push(line)
+      try {
+        const code = inputs.join('\n')
+        if (code.match(/^\s*$/)) {
+          inputs.length = 0
+        } else {
+          const result = runCodes(code)
+          // Otherwise input should be consumed.
+          inputs.length = 0
+          console.log(LISP['x->string'](result, 10))
+        }
+        rl.setPrompt(prompt)
+        rl.prompt()
+      } catch (e) {
+        if (e instanceof LISP.NoCloseParenException) {
+          // In REPL, if NoCloseParenException occurs,
+          // a user keep typing so inputs should be kept.
+          rl.setPrompt(prompt2)
+        } else {
+          dumpException(e)
+          inputs.length = 0
+          rl.setPrompt(prompt)
+        }
+        rl.prompt()
+      }
+    }).on('close', () => {
+      if (inputs.length > 0) {
+        console.error('Input not terminated: [' + inputs + ']')
+        process.exit(1)
+        return
+      }
+      process.exit(0)
+    })
+  }
+  const replNoPrompt = () => {
+    process.stdin.resume()
+    process.stdin.setEncoding('utf8')
+    try {
+      return LISP.load(LISP['*stdin*'])
+    } catch (e) {
+      dumpException(e)
+      process.exit(1)
+    }
+  }
+
+  // ================================================
+  // Start
+
   const result = getOpts(argv, {
     '-c':            '',  // Compile only.
     '-v, --version': '',  // Show version.
@@ -165,8 +169,18 @@ if (typeof module !== 'undefined')  // for $/jslisp (development)
 if (typeof __module !== 'undefined') {  // for dist/jslisp (Webpack-ed)
   __module.exports = objs
 
-  if (typeof __non_webpack_require__ !== 'undefined' &&
-      __non_webpack_require__.main === __module) {
+  if (__non_webpack_require__.main === __module) {  // not imported.
     main(process.argv.slice(2))
+  }
+}
+
+if (typeof window !== 'undefined') {
+  const scriptTags = document.getElementsByTagName('script')
+  const myScriptTag = scriptTags[scriptTags.length - 1]
+
+  try {
+    runCodes(myScriptTag.text)
+  } catch (e) {
+    dumpException(e)
   }
 }
