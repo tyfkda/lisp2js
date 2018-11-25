@@ -1,4 +1,5 @@
 $(function() {
+  'use strict'
 
   var prompt = '<div class="prompt">jsl&gt;</div>';
 
@@ -13,6 +14,19 @@ $(function() {
     matchBrackets: true,
     keyMap: 'emacs'
   });
+
+  function escape(string) {
+    return string.replace(/[&'`"<>]/g, function(match) {
+      return {
+        '&': '&amp;',
+        "'": '&#x27;',
+        '`': '&#x60;',
+        '"': '&quot;',
+        '<': '&lt;',
+        '>': '&gt;',
+      }[match]
+    });
+  }
 
   function onenter(code) {
     var s;
@@ -38,9 +52,9 @@ $(function() {
     cm.setValue('');
 
     var org = txt.html();
-    var _new = ('<div class="float: left"><pre class="code" style="float: left">' + code + '</pre></div>' +
+    var _new = ('<div class="float: left"><pre class="code" style="float: left">' + escape(code) + '</pre></div>' +
                 '<div style="clear: both"></div>' +
-                LISP['x->string'](result, 10) + '<br>');
+                escape(LISP['x->string'](result, 10)) + '<br>');
 
     var nss = '';
     txt.html(org + _new + prompt);
