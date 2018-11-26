@@ -1,7 +1,5 @@
 import gulp from 'gulp'
 
-import babel from 'gulp-babel'
-import sourcemaps from 'gulp-sourcemaps'
 import rename from 'gulp-rename'
 import eslint from 'gulp-eslint'
 
@@ -18,7 +16,6 @@ import fs from 'fs'
 import path from 'path'
 import util from 'util'
 
-const destDir = '.'
 const GEN_DIR = 'gen'
 const DIST_DIR = 'dist'
 
