@@ -83,28 +83,34 @@
         ((eq? s t)    "LISP.t")
         (t (error (string-append "compile-literal: [" (x->string s) "]")))))
 
-(defun compile-unary-op (fn arg scope)
-  (string-append "("
-                 (symbol->string fn)
-                 (compile* arg scope)
-                 ")"))
-
-(defun compile-binop (fn args scope)
-  (string-append "("
-                 (string-join (map (lambda (x) (compile* x scope))
-                                   args)
-                              (string-append " " (symbol->string fn) " "))
-                 ")"))
-
-(flet ((do-compile-funcall (fn args scope)
+(flet ((binop? (sym)
+         (member sym '(+ - * / %)))
+       (unary-op? (sym)
+         (member sym '(+ - ! ~)))
+       (comp-op? (sym)
+         (member sym '(< > <= >=)))
+       (do-compile-funcall (fn args scope)
          (string-append (compile* fn scope)
                         "("
                         (expand-args args scope)
                         ")"))
-       (unary-op? (sym)
-         (member sym '(+ - ! ~)))
-       (binop? (sym)
-         (member sym '(+ - * / %))))
+       (compile-binop (fn args scope)
+         (string-append "("
+                        (string-join (map (lambda (x) (compile* x scope))
+                                          args)
+                                     (string-append " " (symbol->string fn) " "))
+                        ")"))
+       (compile-unary-op (fn arg scope)
+         (string-append "("
+                        (symbol->string fn)
+                        (compile* arg scope)
+                        ")"))
+       (compile-comp-op (fn lhs rhs scope)
+         (string-append "("
+                        (compile* lhs scope)
+                        (symbol->string fn)
+                        (compile* rhs scope)
+                        ")")))
   (defun compile-funcall (fn args scope)
     (if (and (eq? (vector-ref fn 0) :REF)
              (vector-ref fn 2)  ; not shadowed by local
@@ -116,6 +122,10 @@
                 ((and (unary-op? fnsym)
                       (null? (cdr args)))
                  (compile-unary-op fnsym (car args) scope))
+                ((and (comp-op? fnsym)
+                      (not (null? (cdr args)))
+                      (null? (cddr args)))
+                 (compile-comp-op fnsym (car args) (cadr args) scope))
                 (t (do-compile-funcall fn args scope))))
       (do-compile-funcall fn args scope))))
 
