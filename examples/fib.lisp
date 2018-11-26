@@ -4,4 +4,6 @@
     (+ (fib (- n 1))
        (fib (- n 2)))))
 
-(print (fib 20))
+(let1 n (string->number (or (car *argv*)
+                            "20"))
+  (puts (fib n)))

@@ -32,7 +32,7 @@ function run() {
 # Test cases.
 
 run 'hello' 'Hello, world!' ../examples/hello.lisp
-run 'fib' 6765 ../examples/fib.lisp
+run 'fib' 55 '../examples/fib.lisp 10'
 run 'echo' 'foo bar baz' ../examples/echo.lisp foo bar baz
 
 content=`cat ../examples/fib.lisp`
