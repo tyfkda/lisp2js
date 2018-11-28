@@ -98,7 +98,7 @@ module.exports = function(LISP) {
     if (stream.match(/^#!/, true))
       stream.getLine()  // Skip Shebang.
 
-    let result
+    let result = LISP.nil
     for (;;) {
       const s = LISP.read(stream)
       if (s === LISP.nil)

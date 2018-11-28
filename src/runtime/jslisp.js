@@ -9,8 +9,11 @@ if (typeof __non_webpack_require__ === 'undefined') {  // Not webpacked: Directl
 }
 
 // Run stream.
-const runStream = (stream, compile) => {
-  let result
+function runStream(stream, compile) {
+  if (!compile)
+    return LISP.load(stream)
+
+  let result = LISP.nil
   for (;;) {
     const s = LISP.read(stream)
     if (s === LISP.nil)
@@ -26,14 +29,16 @@ const runStream = (stream, compile) => {
 }
 
 // Run codes.
-const runCodes = (codes, compile = false) => runStream(LISP['make-string-input-stream'](codes), compile)
+function runCodes(codes, compile = false) {
+  return runStream(LISP['make-string-input-stream'](codes), compile)
+}
 
-const dumpException = (e) => {
+function dumpException(e) {
   console.error(e.toString())
 }
 
 // Main.
-const main = function main(argv) {
+function main(argv) {
   const fs = __non_webpack_require__('fs')
   const readline = __non_webpack_require__('readline')
   const tty = __non_webpack_require__('tty')
@@ -47,14 +52,11 @@ const main = function main(argv) {
   const repl = () => {
     const rl = readline.createInterface(process.stdin, process.stdout)
 
-    process.stdin.resume()
-    process.stdin.setEncoding('utf8')
-
-    const prompt = '> '
-    const prompt2 = '. '
+    const kNormalPrompt = '> '
+    const kContinuePrompt = '. '
     const inputs = []
 
-    rl.setPrompt(prompt)
+    rl.setPrompt(kNormalPrompt)
     rl.prompt()
     rl.on('line', (line) => {
       inputs.push(line)
@@ -68,17 +70,17 @@ const main = function main(argv) {
           inputs.length = 0
           console.log(LISP['x->string'](result, 10))
         }
-        rl.setPrompt(prompt)
+        rl.setPrompt(kNormalPrompt)
         rl.prompt()
       } catch (e) {
         if (e instanceof LISP.NoCloseParenException) {
           // In REPL, if NoCloseParenException occurs,
           // a user keep typing so inputs should be kept.
-          rl.setPrompt(prompt2)
+          rl.setPrompt(kContinuePrompt)
         } else {
           dumpException(e)
           inputs.length = 0
-          rl.setPrompt(prompt)
+          rl.setPrompt(kNormalPrompt)
         }
         rl.prompt()
       }
@@ -90,16 +92,6 @@ const main = function main(argv) {
       }
       process.exit(0)
     })
-  }
-  const replNoPrompt = () => {
-    process.stdin.resume()
-    process.stdin.setEncoding('utf8')
-    try {
-      return LISP.load(LISP['*stdin*'])
-    } catch (e) {
-      dumpException(e)
-      process.exit(1)
-    }
   }
 
   // ================================================
@@ -117,13 +109,13 @@ const main = function main(argv) {
   }
 
   if (result.argv.length === 0) {  // No input file name: read from stdin.
-    if (tty.isatty(0))
-      return repl()
-    if (!compileOnly)
-      return replNoPrompt()
-
     process.stdin.resume()
     process.stdin.setEncoding('utf8')
+
+    if (tty.isatty(0))
+      return repl()
+
+    // Redirect
     try {
       return runStream(LISP['*stdin*'], compileOnly)
     } catch (e) {
