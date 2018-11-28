@@ -289,7 +289,7 @@
 
 (defun compile (s)
   (let* ((top-scope (create-scope nil ()))
-         (tree (parse* s top-scope)))
+         (tree (parse s top-scope)))
     ;;(write tree)
     (compile-new-scope (compile* tree top-scope)
                        top-scope)))

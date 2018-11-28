@@ -137,5 +137,6 @@
         ((symbol? s) (parse-symbol s scope))
         (t           (parse-quoted-value s))))
 
-(defun parse (s)
-  (parse* s (create-scope nil ())))
+(defun parse (s scope)
+  (let1 scope (or scope (create-scope nil ()))
+    (parse* s scope)))
