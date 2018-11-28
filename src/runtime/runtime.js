@@ -422,6 +422,39 @@ const LISP = ((createLisp, installEval) => {
     }
     return LISP.t
   }
+  LISP.logand = function bitand() {
+    if (arguments.length === 0)
+      return 0
+    let result = arguments[0] | 0
+    for (let i = 1; i < arguments.length; ++i)
+      result = result & arguments[i]
+    return result
+  }
+  LISP.logior = function bitand() {
+    let result = 0
+    for (let i = 0; i < arguments.length; ++i)
+      result = result | arguments[i]
+    return result
+  }
+  LISP.logxor = function bitand() {
+    let result = 0
+    for (let i = 0; i < arguments.length; ++i)
+      result = result ^ arguments[i]
+    return result
+  }
+  LISP.ash = function() {
+    if (arguments.length === 0)
+      return 0
+    let result = arguments[0]
+    for (let i = 1; i < arguments.length; ++i) {
+      const s = arguments[i]
+      if (s >= 0)
+        result <<= s
+      else
+        result >>= -s
+    }
+    return result
+  }
 
   // String.
   LISP['string=?'] = function string$3d$3f(x, y) { return /*jsBoolToS*/(x === y) }
