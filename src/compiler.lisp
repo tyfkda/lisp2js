@@ -155,43 +155,56 @@
 (flet ((ast? (type ast)
          (eq? (vector-ref ast 0) type)))
   (labels ((compile-pred (pnode scope)
-             (cond ((and (ast? :IF pnode)  ;; and
-                         (let1 enode (vector-ref pnode 3)
-                           (or (not enode)
-                               (and (ast? :CONST enode)
-                                    (eq? (vector-ref enode 1) nil)))))
-                    (string-append "("
-                                   (compile-pred (vector-ref pnode 1) scope)
-                                   " && "
-                                   (compile-pred (vector-ref pnode 2) scope)
-                                   ")"))
-                   ((and (ast? :FUNCALL pnode)  ;; or
-                         (ast? :LAMBDA (vector-ref pnode 1))  ;; Direct lambda invocation.
-                         (eq? (length (scope-param (vector-ref (vector-ref pnode 1) 1))) 1)  ;; Only 1 parameter.
-                         (eq? (length (vector-ref pnode 2)) 1)  ;; Only 1 argument.
-                         (eq? (length (vector-ref (vector-ref pnode 1) 3)) 1)  ;; Lambda body is single expression.
-                         (let1 ifnode (car (vector-ref (vector-ref pnode 1) 3))
-                           (ast? :IF ifnode)  ;; If expression.
-                           (ast? :REF (vector-ref ifnode 1))
-                           (eq? (vector-ref (vector-ref ifnode 1) 1)
-                                (car (scope-param (vector-ref (vector-ref pnode 1) 1))))
-                           (equal? (vector-ref ifnode 1)
-                                   (vector-ref ifnode 2))))
+             (cond
+              ;; and
+              ((and (ast? :IF pnode)
+                    (let1 enode (vector-ref pnode 3)
+                      (or (not enode)
+                          (and (ast? :CONST enode)
+                               (eq? (vector-ref enode 1) nil)))))
+               (string-append "("
+                              (compile-pred (vector-ref pnode 1) scope)
+                              " && "
+                              (compile-pred (vector-ref pnode 2) scope)
+                              ")"))
+              ;; or
+              ((and (ast? :FUNCALL pnode)
+                    (ast? :LAMBDA (vector-ref pnode 1))  ;; Direct lambda invocation.
+                    (eq? (length (scope-param (vector-ref (vector-ref pnode 1) 1))) 1)  ;; Only 1 parameter.
+                    (eq? (length (vector-ref pnode 2)) 1)  ;; Only 1 argument.
+                    (eq? (length (vector-ref (vector-ref pnode 1) 3)) 1)  ;; Lambda body is single expression.
                     (let1 ifnode (car (vector-ref (vector-ref pnode 1) 3))
-                      (let ((pre (car (vector-ref pnode 2)))
-                            (els (vector-ref ifnode 3)))
-                        (if (or (null? els)
-                                (and (eq? (vector-ref els 0) :CONST)
-                                     (eq? (vector-ref els 1) nil)))
-                            (compile-pred pre scope)
-                          (string-append "("
-                                         (compile-pred pre scope)
-                                         " || "
-                                         (compile-pred els scope)
-                                         ")")))))
-                   (t (string-append "LISP.isTrue("
-                                     (compile* pnode scope)
-                                     ")")))))
+                      (ast? :IF ifnode)  ;; If expression.
+                      (ast? :REF (vector-ref ifnode 1))
+                      (eq? (vector-ref (vector-ref ifnode 1) 1)
+                           (car (scope-param (vector-ref (vector-ref pnode 1) 1))))
+                      (equal? (vector-ref ifnode 1)
+                              (vector-ref ifnode 2))))
+               (let1 ifnode (car (vector-ref (vector-ref pnode 1) 3))
+                 (let ((pre (car (vector-ref pnode 2)))
+                       (els (vector-ref ifnode 3)))
+                   (if (or (null? els)
+                           (and (eq? (vector-ref els 0) :CONST)
+                                (eq? (vector-ref els 1) nil)))
+                       (compile-pred pre scope)
+                     (string-append "("
+                                    (compile-pred pre scope)
+                                    " || "
+                                    (compile-pred els scope)
+                                    ")")))))
+              ;; Compare operators (the result is `t` or `nil`, and they are same meaning as underlying JS boolean value).
+              ((and (ast? :FUNCALL pnode)
+                    (let1 fnode (vector-ref pnode 1)
+                      (ast? :REF fnode)
+                      (vector-ref fnode 2)  ; Global.
+                      (member (vector-ref fnode 1) '(< > <= >= eq?))))  ; Compare operator.
+               (string-append "("
+                              (compile* pnode scope)
+                              ")"))
+              ;; Other.
+              (t (string-append "LISP.isTrue("
+                                (compile* pnode scope)
+                                ")")))))
     (defun compile-if (pred-node then-node else-node scope)
       (string-append "("
                      (compile-pred pred-node scope)

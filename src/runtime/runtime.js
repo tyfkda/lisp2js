@@ -304,7 +304,7 @@ const LISP = ((createLisp, installEval) => {
     return LISP.intern(t)
   }
 
-  LISP['eq?'] = function eq$3f(x, y) { return jsBoolToS(x === y) }
+  LISP['eq?'] = function eq$3f(x, y) { return /*jsBoolToS*/(x === y) }
 
   LISP.cons = function cons(car, cdr) { return new Cons(car, cdr) }
   LISP.car = function car(s) {
@@ -424,7 +424,7 @@ const LISP = ((createLisp, installEval) => {
   }
 
   // String.
-  LISP['string=?'] = function string$3d$3f(x, y) { return jsBoolToS(x === y) }
+  LISP['string=?'] = function string$3d$3f(x, y) { return /*jsBoolToS*/(x === y) }
   LISP['string-append'] = function string_append() {
     return Array.prototype.slice.call(arguments).join('')
   }
