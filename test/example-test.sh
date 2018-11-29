@@ -17,7 +17,7 @@ function error_exit() {
 
 function run() {
   echo -n "Testing $1 ... "
-  result=$($LISP_RUNNER ${@:3})
+  result=$($LISP_RUNNER "${@:3}")
   code=$?
   if [ $code -ne 0 ]; then
     error_exit "exit status is not 0 [$code]"
@@ -32,12 +32,13 @@ function run() {
 # Test cases.
 
 run 'hello' 'Hello, world!' ../examples/hello.lisp
-run 'fib' 55 '../examples/fib.lisp 10'
+run 'fib' 55 ../examples/fib.lisp 10
 run 'echo' 'foo bar baz' ../examples/echo.lisp foo bar baz
 
 content=`cat ../examples/fib.lisp`
 run 'cat' "$content" '../examples/cat.lisp' ../examples/fib.lisp
 
+run 'expression' 'Hello, world' -e "(print \"Hello, \") (puts \"world\")"
 
 ################################################################
 # All tests succeeded.

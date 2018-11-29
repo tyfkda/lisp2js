@@ -8,8 +8,10 @@ if (typeof __non_webpack_require__ === 'undefined') {  // Not webpacked: Directl
   global.__non_webpack_require__ = require  // To hack for non-webpacked
 }
 
-// Run stream.
-function runStream(stream, compile) {
+// Run codes.
+function runCodes(streamOrText, compile = false) {
+  const stream = (typeof streamOrText === 'string') ? LISP['make-string-input-stream'](streamOrText) : streamOrText
+
   if (!compile)
     return LISP.load(stream)
 
@@ -28,9 +30,14 @@ function runStream(stream, compile) {
   }
 }
 
-// Run codes.
-function runCodes(codes, compile = false) {
-  return runStream(LISP['make-string-input-stream'](codes), compile)
+function runCodesWithErrorHandling(stream, compile) {
+  // Redirect
+  try {
+    return runCodes(stream, compile)
+  } catch (e) {
+    dumpException(e)
+    process.exit(1)
+  }
 }
 
 function dumpException(e) {
@@ -99,14 +106,28 @@ function main(argv) {
 
   const result = getOpts(argv, {
     '-c':            '',  // Compile only.
+    '-e':            '<expressions>',  // Evaluate.
+    '-h, --help':    '',  // Show help.
     '-v, --version': '',  // Show version.
   })
+
   const compileOnly = result.options.c
 
   if (result.options.v) {
     console.log(`JsLisp: version ${LISP['*version*']}`)
-    return process.exit(0)
+    return
   }
+  if (result.options.h) {
+    console.log('Usage:\n' +
+                '\t-h, --help     Show help\n' +
+                '\t-v, --version  Show version\n' +
+                '\t-c             Compile only\n' +
+                '\t-e             Evaluate argument as an expression\n')
+    return
+  }
+
+  if (result.options.e != null)
+    return runCodesWithErrorHandling(result.options.e, compileOnly)
 
   if (result.argv.length === 0) {  // No input file name: read from stdin.
     process.stdin.resume()
@@ -116,12 +137,7 @@ function main(argv) {
       return repl()
 
     // Redirect
-    try {
-      return runStream(LISP['*stdin*'], compileOnly)
-    } catch (e) {
-      dumpException(e)
-      process.exit(1)
-    }
+    return runCodesWithErrorHandling(LISP['*stdin*'], compileOnly)
   }
 
   // Process command line argument as a script file.
