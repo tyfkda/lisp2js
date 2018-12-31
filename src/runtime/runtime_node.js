@@ -62,7 +62,7 @@ module.exports = function(LISP) {
       }
     }
     write(s) {
-      fs.write(this.fd, s)
+      fs.writeSync(this.fd, s)
     }
   }
 
